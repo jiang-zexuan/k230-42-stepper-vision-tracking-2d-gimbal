@@ -1,0 +1,36 @@
+# Operating system and editor state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.metadata/
+
+# STM32CubeIDE generated build artefacts
+Debug/
+Release/
+build/
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.d
+
+# Python and K230 local output
+__pycache__/
+*.py[cod]
+.venv/
+*.kmodel
+*.onnx
+*.tflite
+
+# Local captures and generated media
+evidence/videos/*
+!evidence/videos/.gitkeep
+evidence/serial-logs/raw/
+*.raw.log
+
+# Local worktrees and temporary files
+.worktrees/
+*.tmp
+*.bak
