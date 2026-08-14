@@ -15,6 +15,7 @@ K230 摄像头检测结果经 UART 发送给 F407；F407 以 STEP/DIR 控制两�
 - [项目章程](docs/00-project/project-charter.md)
 - [16 周路线图](docs/00-project/roadmap.md)
 - [项目化学习规划书](docs/00-project/project-based-learning-plan.md)
+- [GitHub 协作与同步](docs/00-project/github-collaboration.md)
 - [系统架构](docs/02-architecture/system-architecture.md)
 - [K230-F407 UART 接口](docs/03-interfaces/k230-f407-uart.md)
 - [物料清单](hardware/bom/bom.md)
