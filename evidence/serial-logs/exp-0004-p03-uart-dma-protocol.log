@@ -1,0 +1,748 @@
+t=3000 dt=500 heartbeat=6 scans=300 status=30
+t=3500 dt=500 heartbeat=7 scans=350 status=35
+t=4000 dt=500 heartbeat=8 scans=400 status=40
+t=4500 dt=500 heartbeat=9 scans=450 status=45
+t=5000 dt=500 heartbeat=10 scans=500 status=50
+t=5500 dt=500 heartbeat=11 scans=550 status=55
+t=6000 dt=500 heartbeat=12 scans=600 status=60
+t=6500 dt=500 heartbeat=13 scans=650 status=65
+t=7000 dt=500 heartbeat=14 scans=700 status=70
+UART RX size=46 data=正点原子技术论坛：开源电子网:www.openedv.com
+ count=1 drop=0
+t=7500 dt=500 heartbeat=15 scans=749 status=75
+t=8000 dt=500 heartbeat=16 scans=799 status=80
+t=8500 dt=500 heartbeat=17 scans=849 status=85
+t=9000 dt=500 heartbeat=18 scans=899 status=90
+t=9500 dt=500 heartbeat=19 scans=949 status=95
+t=10000 dt=500 heartbeat=20 scans=999 status=100
+t=10500 dt=500 heartbeat=21 scans=1049 status=105
+t=11000 dt=500 heartbeat=22 scans=1099 status=110
+t=11500 dt=500 heartbeat=23 scans=1149 status=115
+t=12000 dt=500 heartbeat=24 scans=1199 status=120
+t=12500 dt=500 heartbeat=25 scans=1249 status=125
+t=13000 dt=500 heartbeat=26 scans=1299 status=130
+t=13500 dt=500 heartbeat=27 scans=1349 status=135
+t=14000 dt=500 heartbeat=28 scans=1399 status=140
+t=14500 dt=500 heartbeat=29 scans=1449 status=145
+t=15000 dt=500 heartbeat=30 scans=1499 status=150
+UART RX size=11 data=hallo
+
+
+ count=2 drop=0
+t=15500 dt=500 heartbeat=31 scans=1549 status=155
+t=16000 dt=500 heartbeat=32 scans=1599 status=160
+t=16500 dt=500 heartbeat=33 scans=1649 status=165
+UART RX size=11 data=hallo
+
+
+ count=3 drop=0
+t=17000 dt=500 heartbeat=34 scans=1699 status=170
+t=17500 dt=500 heartbeat=35 scans=1749 status=175
+t=18000 dt=500 heartbeat=36 scans=1799 status=180
+t=18500 dt=500 heartbeat=37 scans=1849 status=185
+UART RX size=11 data=hallo
+
+
+ count=4 drop=0
+t=19000 dt=500 heartbeat=38 scans=1899 status=190
+UART RX size=11 data=hallo
+
+
+ count=5 drop=0
+t=19500 dt=500 heartbeat=39 scans=1949 status=195
+t=20000 dt=500 heartbeat=40 scans=1999 status=200
+UART RX size=11 data=hallo
+
+
+ count=6 drop=0
+t=20500 dt=500 heartbeat=41 scans=2049 status=205
+UART RX size=11 data=hallo
+
+
+ count=7 drop=0
+t=21000 dt=500 heartbeat=42 scans=2099 status=210
+UART RX size=11 data=hallo
+
+
+ count=8 drop=0
+UART RX size=11 data=hallo
+
+
+ count=9 drop=0
+t=21500 dt=500 heartbeat=43 scans=2149 status=215
+t=22000 dt=500 heartbeat=44 scans=2199 status=220
+t=22500 dt=500 heartbeat=45 scans=2249 status=225
+t=23000 dt=500 heartbeat=46 scans=2299 status=230
+t=23500 dt=500 heartbeat=47 scans=2349 status=235
+t=24000 dt=500 heartbeat=48 scans=2399 status=240
+t=24500 dt=500 heartbeat=49 scans=2449 status=245
+UART RX size=11 data=hallo
+
+
+ count=10 drop=0
+t=25000 dt=500 heartbeat=50 scans=2499 status=250
+t=25500 dt=500 heartbeat=51 scans=2549 status=255
+t=26000 dt=500 heartbeat=52 scans=2599 status=260
+t=26500 dt=500 heartbeat=53 scans=2649 status=265
+t=27000 dt=500 heartbeat=54 scans=2699 status=270
+t=27500 dt=500 heartbeat=55 scans=2749 status=275
+t=28000 dt=500 heartbeat=56 scans=2799 status=280
+t=28500 dt=500 heartbeat=57 scans=2849 status=285
+t=29000 dt=500 heartbeat=58 scans=2899 status=290
+t=29500 dt=500 heartbeat=59 scans=2949 status=295
+t=30000 dt=500 heartbeat=60 scans=2999 status=300
+UART RX size=9 data=hallo
+
+ count=11 drop=0
+t=30500 dt=500 heartbeat=61 scans=3049 status=305
+t=31000 dt=500 heartbeat=62 scans=3099 status=310
+t=31500 dt=500 heartbeat=63 scans=3149 status=315
+t=32000 dt=500 heartbeat=64 scans=3199 status=320
+t=32500 dt=500 heartbeat=65 scans=3249 status=325
+t=33000 dt=500 heartbeat=66 scans=3299 status=330
+t=33500 dt=500 heartbeat=67 scans=3349 status=335
+t=34000 dt=500 heartbeat=68 scans=3399 status=340
+t=34500 dt=500 heartbeat=69 scans=3449 status=345
+t=35000 dt=500 heartbeat=70 scans=3499 status=350
+t=35500 dt=500 heartbeat=71 scans=3549 status=355
+t=36000 dt=500 heartbeat=72 scans=3599 status=360
+t=36500 dt=500 heartbeat=73 scans=3649 status=365
+t=37000 dt=500 heartbeat=74 scans=3699 status=370
+t=37500 dt=500 heartbeat=75 scans=3749 status=375
+t=38000 dt=500 heartbeat=76 scans=3799 status=380
+t=38500 dt=500 heartbeat=77 scans=3849 status=385
+t=39000 dt=500 heartbeat=78 scans=3899 status=390
+t=39500 dt=500 heartbeat=79 scans=3949 status=395
+t=40000 dt=500 heartbeat=80 scans=3999 status=400
+t=40500 dt=500 heartbeat=81 scans=4049 status=405
+t=41000 dt=500 heartbeat=82 scans=4099 status=410
+t=41500 dt=500 heartbeat=83 scans=4149 status=415
+t=42000 dt=500 heartbeat=84 scans=4199 status=420
+t=42500 dt=500 heartbeat=85 scans=4249 status=425
+t=43000 dt=500 heartbeat=86 scans=4299 status=430
+t=43500 dt=500 heartbeat=87 scans=4349 status=435
+t=44000 dt=500 heartbeat=88 scans=4399 status=440
+t=44500 dt=500 heartbeat=89 scans=4449 status=445
+UART RX size=11 data=HELLO
+
+
+ count=12 drop=0
+t=45000 dt=500 heartbeat=90 scans=4499 status=450
+t=45500 dt=500 heartbeat=91 scans=4549 status=455
+UART RX size=11 data=HELLO
+
+
+ count=13 drop=0
+t=46000 dt=500 heartbeat=92 scans=4599 status=460
+UART RX size=11 data=HELLO
+
+
+ count=14 drop=0
+UART RX size=11 data=HELLO
+
+
+ count=15 drop=0
+t=46500 dt=500 heartbeat=93 scans=4649 status=465
+UART RX size=11 data=HELLO
+
+
+ count=16 drop=0
+UART RX size=11 data=HELLO
+
+
+ count=17 drop=0
+t=47000 dt=500 heartbeat=94 scans=4698 status=470
+UART RX size=11 data=HELLO
+
+
+ count=18 drop=0
+t=47500 dt=500 heartbeat=95 scans=4748 status=475
+UART RX size=11 data=HELLO
+
+
+ count=19 drop=0
+UART RX size=11 data=HELLO
+
+
+ count=20 drop=0
+t=48000 dt=500 heartbeat=96 scans=4797 status=480
+UART RX size=11 data=HELLO
+
+
+ count=21 drop=0
+t=48500 dt=500 heartbeat=97 scans=4847 status=485
+UART RX size=11 data=HELLO
+
+
+ count=22 drop=0
+UART RX size=11 data=HELLO
+
+
+ count=23 drop=0
+UART RX size=11 data=HELLO
+
+
+ count=24 drop=0
+t=49000 dt=500 heartbeat=98 scans=4897 status=490
+UART RX size=11 data=HELLO
+
+
+ count=25 drop=0
+t=49500 dt=500 heartbeat=99 scans=4946 status=495
+UART RX size=11 data=HELLO
+
+
+ count=26 drop=0
+t=50000 dt=500 heartbeat=100 scans=4996 status=500
+t=50500 dt=500 heartbeat=101 scans=5046 status=505
+t=51000 dt=500 heartbeat=102 scans=5096 status=510
+t=51500 dt=500 heartbeat=103 scans=5146 status=515
+t=52000 dt=500 heartbeat=104 scans=5196 status=520
+t=52500 dt=500 heartbeat=105 scans=5246 status=525
+t=53000 dt=500 heartbeat=106 scans=5296 status=530
+t=53500 dt=500 heartbeat=107 scans=5346 status=535
+UART RX size=19 data=HELLO31243123
+
+
+ count=27 drop=0
+t=54000 dt=500 heartbeat=108 scans=5396 status=540
+UART RX size=19 data=HELLO31243123
+
+
+ count=28 drop=0
+t=54500 dt=500 heartbeat=109 scans=5446 status=545
+t=55000 dt=500 heartbeat=110 scans=5496 status=550
+t=55500 dt=500 heartbeat=111 scans=5546 status=555
+t=56000 dt=500 heartbeat=112 scans=5596 status=560
+t=56500 dt=500 heartbeat=113 scans=5646 status=565
+t=57000 dt=500 heartbeat=114 scans=5696 status=570
+t=57500 dt=500 heartbeat=115 scans=5746 status=575
+t=58000 dt=500 heartbeat=116 scans=5796 status=580
+t=58500 dt=500 heartbeat=117 scans=5846 status=585
+t=59000 dt=500 heartbeat=118 scans=5896 status=590
+t=59500 dt=500 heartbeat=119 scans=5946 status=595
+t=60000 dt=500 heartbeat=120 scans=5996 status=600
+t=60500 dt=500 heartbeat=121 scans=6046 status=605
+t=61000 dt=500 heartbeat=122 scans=6096 status=610
+t=61500 dt=500 heartbeat=123 scans=6146 status=615
+t=62000 dt=500 heartbeat=124 scans=6196 status=620
+t=62500 dt=500 heartbeat=125 scans=6246 status=625
+t=63000 dt=500 heartbeat=126 scans=6296 status=630
+t=63500 dt=500 heartbeat=127 scans=6346 status=635
+t=64000 dt=500 heartbeat=128 scans=6396 status=640
+t=64500 dt=500 heartbeat=129 scans=6446 status=645
+t=65000 dt=500 heartbeat=130 scans=6496 status=650
+t=65500 dt=500 heartbeat=131 scans=6546 status=655
+t=66000 dt=500 heartbeat=132 scans=6596 status=660
+t=126500 dt=500 heartbeat=253 scans=12650 status=1265
+t=127000 dt=500 heartbeat=254 scans=12700 status=1270
+t=127500 dt=500 heartbeat=255 scans=12750 status=1275
+t=128000 dt=500 heartbeat=256 scans=12800 status=1280
+t=128500 dt=500 heartbeat=257 scans=12850 status=1285
+t=129000 dt=500 heartbeat=258 scans=12900 status=1290
+t=129500 dt=500 heartbeat=259 scans=12950 status=1295
+t=130000 dt=500 heartbeat=260 scans=13000 status=1300
+t=130500 dt=500 heartbeat=261 scans=13050 status=1305
+t=131000 dt=500 heartbeat=262 scans=13100 status=1310
+t=131500 dt=500 heartbeat=263 scans=13150 status=1315
+t=132000 dt=500 heartbeat=264 scans=13200 status=1320
+t=132500 dt=500 heartbeat=265 scans=13250 status=1325
+t=133000 dt=500 heartbeat=266 scans=13300 status=1330
+t=133500 dt=500 heartbeat=267 scans=13350 status=1335
+t=134000 dt=500 heartbeat=268 scans=13400 status=1340
+t=134500 dt=500 heartbeat=269 scans=13450 status=1345
+t=135000 dt=500 heartbeat=270 scans=13500 status=1350
+t=135500 dt=500 heartbeat=271 scans=13550 status=1355
+t=136000 dt=500 heartbeat=272 scans=13600 status=1360
+t=136500 dt=500 heartbeat=273 scans=13650 status=1365
+t=137000 dt=500 heartbeat=274 scans=13700 status=1370
+t=137500 dt=500 heartbeat=275 scans=13750 status=1375
+t=138000 dt=500 heartbeat=276 scans=13800 status=1380
+t=138500 dt=500 heartbeat=277 scans=13850 status=1385
+t=139000 dt=500 heartbeat=278 scans=13900 status=1390
+PONG
+t=139500 dt=500 heartbeat=279 scans=13950 status=1395
+t=140000 dt=500 heartbeat=280 scans=14000 status=1400
+t=140500 dt=500 heartbeat=281 scans=14050 status=1405
+t=141000 dt=500 heartbeat=282 scans=14100 status=1410
+t=141500 dt=500 heartbeat=283 scans=14150 status=1415
+t=142000 dt=500 heartbeat=284 scans=14200 status=1420
+t=142500 dt=500 heartbeat=285 scans=14250 status=1425
+t=143000 dt=500 heartbeat=286 scans=14300 status=1430
+t=143500 dt=500 heartbeat=287 scans=14350 status=1435
+t=144000 dt=500 heartbeat=288 scans=14400 status=1440
+t=144500 dt=500 heartbeat=289 scans=14450 status=1445
+t=145000 dt=500 heartbeat=290 scans=14500 status=1450
+t=145500 dt=500 heartbeat=291 scans=14550 status=1455
+t=146000 dt=500 heartbeat=292 scans=14600 status=1460
+t=146500 dt=500 heartbeat=293 scans=14650 status=1465
+t=147000 dt=500 heartbeat=294 scans=14700 status=1470
+t=147500 dt=500 heartbeat=295 scans=14750 status=1475
+t=148000 dt=500 heartbeat=296 scans=14800 status=1480
+t=148500 dt=500 heartbeat=297 scans=14850 status=1485
+t=149000 dt=500 heartbeat=298 scans=14900 status=1490
+t=149500 dt=500 heartbeat=299 scans=14950 status=1495
+STATUS size=16 count=2 drop=0
+t=150000 dt=500 heartbeat=300 scans=15000 status=1500
+t=150500 dt=500 heartbeat=301 scans=15050 status=1505
+t=151000 dt=500 heartbeat=302 scans=15100 status=1510
+t=151500 dt=500 heartbeat=303 scans=15150 status=1515
+t=152000 dt=500 heartbeat=304 scans=15200 status=1520
+t=152500 dt=500 heartbeat=305 scans=15250 status=1525
+t=153000 dt=500 heartbeat=306 scans=15300 status=1530
+t=153500 dt=500 heartbeat=307 scans=15350 status=1535
+t=154000 dt=500 heartbeat=308 scans=15400 status=1540
+t=154500 dt=500 heartbeat=309 scans=15450 status=1545
+t=155000 dt=500 heartbeat=310 scans=15500 status=1550
+t=155500 dt=500 heartbeat=311 scans=15550 status=1555
+t=156000 dt=500 heartbeat=312 scans=15600 status=1560
+t=156500 dt=500 heartbeat=313 scans=15650 status=1565
+t=157000 dt=500 heartbeat=314 scans=15700 status=1570
+t=157500 dt=500 heartbeat=315 scans=15750 status=1575
+t=158000 dt=500 heartbeat=316 scans=15800 status=1580
+t=158500 dt=500 heartbeat=317 scans=15850 status=1585
+t=159000 dt=500 heartbeat=318 scans=15900 status=1590
+t=159500 dt=500 heartbeat=319 scans=15950 status=1595
+t=160000 dt=500 heartbeat=320 scans=16000 status=1600
+ERR unknown command
+t=160500 dt=500 heartbeat=321 scans=16050 status=1605
+t=161000 dt=500 heartbeat=322 scans=16100 status=1610
+t=161500 dt=500 heartbeat=323 scans=16150 status=1615
+t=162000 dt=500 heartbeat=324 scans=16200 status=1620
+t=162500 dt=500 heartbeat=325 scans=16250 status=1625
+t=163000 dt=500 heartbeat=326 scans=16300 status=1630
+t=163500 dt=500 heartbeat=327 scans=16350 status=1635
+t=164000 dt=500 heartbeat=328 scans=16400 status=1640
+t=164500 dt=500 heartbeat=329 scans=16450 status=1645
+t=165000 dt=500 heartbeat=330 scans=16500 status=1650
+t=165500 dt=500 heartbeat=331 scans=16550 status=1655
+t=166000 dt=500 heartbeat=332 scans=16600 status=1660
+t=166500 dt=500 heartbeat=333 scans=16650 status=1665
+t=167000 dt=500 heartbeat=334 scans=16700 status=1670
+ERR unknown command
+t=167500 dt=500 heartbeat=335 scans=16750 status=1675
+t=168000 dt=500 heartbeat=336 scans=16800 status=1680
+t=168500 dt=500 heartbeat=337 scans=16850 status=1685
+t=169000 dt=500 heartbeat=338 scans=16900 status=1690
+t=169500 dt=500 heartbeat=339 scans=16950 status=1695
+t=1952500 dt=500 heartbeat=3905 scans=195250 status=19525
+t=1953000 dt=500 heartbeat=3906 scans=195300 status=19530
+t=1953500 dt=500 heartbeat=3907 scans=195350 status=19535
+t=1954000 dt=500 heartbeat=3908 scans=195400 status=19540
+t=1954500 dt=500 heartbeat=3909 scans=195450 status=19545
+t=1955000 dt=500 heartbeat=3910 scans=195500 status=19550
+t=1955500 dt=500 heartbeat=3911 scans=195550 status=19555
+t=1956000 dt=500 heartbeat=3912 scans=195600 status=19560
+t=1956500 dt=500 heartbeat=3913 scans=195650 status=19565
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5
+t=1000 dt=500 heartbeat=2 scans=100 status=10
+t=1500 dt=500 heartbeat=3 scans=150 status=15
+t=2000 dt=500 heartbeat=4 scans=200 status=20
+t=2500 dt=500 heartbeat=5 scans=250 status=25
+t=3000 dt=500 heartbeat=6 scans=300 status=30
+t=3500 dt=500 heartbeat=7 scans=350 status=35
+t=4000 dt=500 heartbeat=8 scans=400 status=40
+t=4500 dt=500 heartbeat=9 scans=450 status=45
+t=5000 dt=500 heartbeat=10 scans=500 status=50
+t=5500 dt=500 heartbeat=11 scans=550 status=55
+t=6000 dt=500 heartbeat=12 scans=600 status=60
+t=6500 dt=500 heartbeat=13 scans=650 status=65
+t=7000 dt=500 heartbeat=14 scans=700 status=70
+t=7500 dt=500 heartbeat=15 scans=750 status=75
+t=8000 dt=500 heartbeat=16 scans=800 status=80
+t=8500 dt=500 heartbeat=17 scans=850 status=85
+t=9000 dt=500 heartbeat=18 scans=900 status=90
+t=9500 dt=500 heartbeat=19 scans=950 status=95
+t=10000 dt=500 heartbeat=20 scans=1000 status=100
+t=10500 dt=500 heartbeat=21 scans=1050 status=105
+t=11000 dt=500 heartbeat=22 scans=1100 status=110
+t=11500 dt=500 heartbeat=23 scans=1150 status=115
+t=12000 dt=500 heartbeat=24 scans=1200 status=120
+t=12500 dt=500 heartbeat=25 scans=1250 status=125
+t=13000 dt=500 heartbeat=26 scans=1300 status=130
+t=13500 dt=500 heartbeat=27 scans=1350 status=135
+t=14000 dt=500 heartbeat=28 scans=1400 status=140
+t=14500 dt=500 heartbeat=29 scans=1450 status=145
+t=15000 dt=500 heartbeat=30 scans=1500 status=150
+t=15500 dt=500 heartbeat=31 scans=1550 status=155
+t=16000 dt=500 heartbeat=32 scans=1600 status=160
+ERR unknown command
+t=16500 dt=500 heartbeat=33 scans=1650 status=165
+t=17000 dt=500 heartbeat=34 scans=1700 status=170
+t=17500 dt=500 heartbeat=35 scans=1750 status=175
+t=18000 dt=500 heartbeat=36 scans=1800 status=180
+t=18500 dt=500 heartbeat=37 scans=1850 status=185
+t=19000 dt=500 heartbeat=38 scans=1900 status=190
+t=19500 dt=500 heartbeat=39 scans=1950 status=195
+t=20000 dt=500 heartbeat=40 scans=2000 status=200
+t=20500 dt=500 heartbeat=41 scans=2050 status=205
+t=21000 dt=500 heartbeat=42 scans=2100 status=210
+t=21500 dt=500 heartbeat=43 scans=2150 status=215
+t=22000 dt=500 heartbeat=44 scans=2200 status=220
+t=22500 dt=500 heartbeat=45 scans=2250 status=225
+t=23000 dt=500 heartbeat=46 scans=2300 status=230
+t=23500 dt=500 heartbeat=47 scans=2350 status=235
+t=24000 dt=500 heartbeat=48 scans=2400 status=240
+t=24500 dt=500 heartbeat=49 scans=2450 status=245
+t=25000 dt=500 heartbeat=50 scans=2500 status=250
+t=25500 dt=500 heartbeat=51 scans=2550 status=255
+t=26000 dt=500 heartbeat=52 scans=2600 status=260
+t=26500 dt=500 heartbeat=53 scans=2650 status=265
+t=27000 dt=500 heartbeat=54 scans=2700 status=270
+t=27500 dt=500 heartbeat=55 scans=2750 status=275
+t=28000 dt=500 heartbeat=56 scans=2800 status=280
+t=28500 dt=500 heartbeat=57 scans=2850 status=285
+t=29000 dt=500 heartbeat=58 scans=2900 status=290
+t=29500 dt=500 heartbeat=59 scans=2950 status=295
+t=30000 dt=500 heartbeat=60 scans=3000 status=300
+t=30500 dt=500 heartbeat=61 scans=3050 status=305
+t=31000 dt=500 heartbeat=62 scans=3100 status=310
+t=31500 dt=500 heartbeat=63 scans=3150 status=315
+t=32000 dt=500 heartbeat=64 scans=3200 status=320
+t=32500 dt=500 heartbeat=65 scans=3250 status=325
+t=33000 dt=500 heartbeat=66 scans=3300 status=330
+t=33500 dt=500 heartbeat=67 scans=3350 status=335
+t=34000 dt=500 heartbeat=68 scans=3400 status=340
+t=34500 dt=500 heartbeat=69 scans=3450 status=345
+t=35000 dt=500 heartbeat=70 scans=3500 status=350
+t=35500 dt=500 heartbeat=71 scans=3550 status=355
+t=36000 dt=500 heartbeat=72 scans=3600 status=360
+t=36500 dt=500 heartbeat=73 scans=3650 status=365
+t=37000 dt=500 heartbeat=74 scans=3700 status=370
+t=37500 dt=500 heartbeat=75 scans=3750 status=375
+t=38000 dt=500 heartbeat=76 scans=3800 status=380
+t=38500 dt=500 heartbeat=77 scans=3850 status=385
+t=39000 dt=500 heartbeat=78 scans=3900 status=390
+t=39500 dt=500 heartbeat=79 scans=3950 status=395
+t=40000 dt=500 heartbeat=80 scans=4000 status=400
+t=40500 dt=500 heartbeat=81 scans=4050 status=405
+ERR unknown command
+t=41000 dt=500 heartbeat=82 scans=4100 status=410
+t=41500 dt=500 heartbeat=83 scans=4150 status=415
+t=42000 dt=500 heartbeat=84 scans=4200 status=420
+t=42500 dt=500 heartbeat=85 scans=4250 status=425
+t=43000 dt=500 heartbeat=86 scans=4300 status=430
+t=43500 dt=500 heartbeat=87 scans=4350 status=435
+t=44000 dt=500 heartbeat=88 scans=4400 status=440
+t=44500 dt=500 heartbeat=89 scans=4450 status=445
+t=45000 dt=500 heartbeat=90 scans=4500 status=450
+t=45500 dt=500 heartbeat=91 scans=4550 status=455
+t=46000 dt=500 heartbeat=92 scans=4600 status=460
+t=46500 dt=500 heartbeat=93 scans=4650 status=465
+t=47000 dt=500 heartbeat=94 scans=4700 status=470
+t=47500 dt=500 heartbeat=95 scans=4750 status=475
+PanView P01 boot
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5
+t=1000 dt=500 heartbeat=2 scans=100 status=10
+t=1500 dt=500 heartbeat=3 scans=150 status=15
+t=2000 dt=500 heartbeat=4 scans=200 status=20
+t=2500 dt=500 heartbeat=5 scans=250 status=25
+t=3000 dt=500 heartbeat=6 scans=300 status=30
+ERR unknown command
+t=3500 dt=500 heartbeat=7 scans=350 status=35
+t=4000 dt=500 heartbeat=8 scans=400 status=40
+t=4500 dt=500 heartbeat=9 scans=450 status=45
+t=5000 dt=500 heartbeat=10 scans=500 status=50
+t=94500 dt=500 heartbeat=189 scans=9450 status=945
+t=95000 dt=500 heartbeat=190 scans=9500 status=950
+ERR unknown command
+t=95500 dt=500 heartbeat=191 scans=9550 status=955
+t=96000 dt=500 heartbeat=192 scans=9600 status=960
+t=96500 dt=500 heartbeat=193 scans=9650 status=965
+t=97000 dt=500 heartbeat=194 scans=9700 status=970
+ERR unknown command
+t=97500 dt=500 heartbeat=195 scans=9750 status=975
+t=98000 dt=500 heartbeat=196 scans=9800 status=980
+t=98500 dt=500 heartbeat=197 scans=9850 status=985
+t=99000 dt=500 heartbeat=198 scans=9900 status=990
+t=99500 dt=500 heartbeat=199 scans=9950 status=995
+t=100000 dt=500 heartbeat=200 scans=10000 status=1000
+t=100500 dt=500 heartbeat=201 scans=10050 status=1005
+t=101000 dt=500 heartbeat=202 scans=10100 status=1010
+t=101500 dt=500 heartbeat=203 scans=10150 status=1015
+t=102000 dt=500 heartbeat=204 scans=10200 status=1020
+t=102500 dt=500 heartbeat=205 scans=10250 status=1025
+t=103000 dt=500 heartbeat=206 scans=10300 status=1030
+t=103500 dt=500 heartbeat=207 scans=10350 status=1035
+t=104000 dt=500 heartbeat=208 scans=10400 status=1040
+t=104500 dt=500 heartbeat=209 scans=10450 status=1045
+t=105000 dt=500 heartbeat=210 scans=10500 status=1050
+t=105500 dt=500 heartbeat=211 scans=10550 status=1055
+t=106000 dt=500 heartbeat=212 scans=10600 status=1060
+t=106500 dt=500 heartbeat=213 scans=10650 status=1065
+t=107000 dt=500 heartbeat=214 scans=10700 status=1070
+t=107500 dt=500 heartbeat=215 scans=10750 status=1075
+t=108000 dt=500 heartbeat=216 scans=10800 status=1080
+t=108500 dt=500 heartbeat=217 scans=10850 status=1085
+t=109000 dt=500 heartbeat=218 scans=10900 status=1090
+t=109500 dt=500 heartbeat=219 scans=10950 status=1095
+t=110000 dt=500 heartbeat=220 scans=11000 status=1100
+t=110500 dt=500 heartbeat=221 scans=11050 status=1105
+0500 dt=500 heartbeat=281 scans=14050 status=1405
+t=141000 dt=500 heartbeat=282 scans=14100 status=1410
+ERR unknown command
+t=141500 dt=500 heartbeat=283 scans=14150 status=1415
+ERR unknown command
+t=142000 dt=500 heartbeat=284 scans=14200 status=1420
+t=142500 dt=500 heartbeat=285 scans=14250 status=1425
+ERR unknown command
+t=143000 dt=500 heartbeat=286 scans=14300 status=1430
+t=143500 dt=500 heartbeat=287 scans=14350 status=1435
+t=144000 dt=500 heartbeat=288 scans=14400 status=1440
+t=144500 dt=500 heartbeat=289 scans=14450 status=1445
+t=145000 dt=500 heartbeat=290 scans=14500 status=1450
+t=145500 dt=500 heartbeat=291 scans=14550 status=1455
+t=146000 dt=500 heartbeat=292 scans=14600 status=1460
+t=146500 dt=500 heartbeat=293 scans=14650 status=1465
+t=147000 dt=500 heartbeat=294 scans=14700 status=1470
+t=147500 dt=500 heartbeat=295 scans=14750 status=1475
+t=148000 dt=500 heartbeat=296 scans=14800 status=1480
+t=148500 dt=500 heartbeat=297 scans=14850 status=1485
+t=149000 dt=500 heartbeat=298 scans=14900 status=1490
+t=149500 dt=500 heartbeat=299 scans=14950 status=1495
+t=150000 dt=500 heartbeat=300 scans=15000 status=1500
+t=150500 dt=500 heartbeat=301 scans=15050 status=1505
+t=151000 dt=500 heartbeat=302 scans=15100 status=1510
+t=151500 dt=500 heartbeat=303 scans=15150 status=1515
+t=152000 dt=500 heartbeat=304 scans=15200 status=1520
+t=152500 dt=500 heartbeat=305 scans=15250 status=1525
+t=153000 dt=500 heartbeat=306 scans=15300 status=1530
+t=153500 dt=500 heartbeat=307 scans=15350 status=1535
+t=154000 dt=500 heartbeat=308 scans=15400 status=1540
+t=154500 dt=500 heartbeat=309 scans=15450 status=1545
+t=155000 dt=500 heartbeat=310 scans=15500 status=1550
+t=155500 dt=500 heartbeat=311 scans=15550 status=1555
+t=156000 dt=500 heartbeat=312 scans=15600 status=1560
+t=156500 dt=500 heartbeat=313 scans=15650 status=1565
+t=157000 dt=500 heartbeat=314 scans=15700 status=1570
+FRAME OK seq=1 len=1 valid=1 err=0
+t=157500 dt=500 heartbeat=315 scans=15750 status=1575
+t=158000 dt=500 heartbeat=316 scans=15800 status=1580
+t=158500 dt=500 heartbeat=317 scans=15850 status=1585
+t=183500 dt=500 heartbeat=367 scans=18350 status=1835
+t=184000 dt=500 heartbeat=368 scans=18400 status=1840
+FRAME ERR valid=1 err=1
+t=184500 dt=500 heartbeat=369 scans=18450 status=1845
+t=185000 dt=500 heartbeat=370 scans=18500 status=1850
+t=150500 dt=500 heartbeat=301 scans=15050 status=1505
+t=151000 dt=500 heartbeat=302 scans=15100 status=1510
+t=151500 dt=500 heartbeat=303 scans=15150 status=1515
+t=152000 dt=500 heartbeat=304 scans=15200 status=1520
+t=152500 dt=500 heartbeat=305 scans=15250 status=1525
+t=153000 dt=500 heartbeat=306 scans=15300 status=1530
+FRAME OK seq=3 len=1 valid=2 err=0
+t=153500 dt=500 heartbeat=307 scans=15350 status=1535
+t=154000 dt=500 heartbeat=308 scans=15400 status=1540
+t=154500 dt=500 heartbeat=309 scans=15450 status=1545
+t=155000 dt=500 heartbeat=310 scans=15500 status=1550
+t=181000 dt=500 heartbeat=362 scans=18100 status=1810
+t=181500 dt=500 heartbeat=363 scans=18150 status=1815
+STATUS size=8 rx=2 drop=0 frame_ok=2 frame_err=0 last=3
+t=182000 dt=500 heartbeat=364 scans=18200 status=1820
+t=182500 dt=500 heartbeat=365 scans=18250 status=1825
+t=183000 dt=500 heartbeat=366 scans=18300 status=1830
+t=792000 dt=500 heartbeat=1584 scans=79200 status=7920
+t=792500 dt=500 heartbeat=1585 scans=79250 status=7925
+t=793000 dt=500 heartbeat=1586 scans=79300 status=7930
+t=793500 dt=500 heartbeat=1587 scans=79350 status=7935
+t=794000 dt=500 heartbeat=1588 scans=79400 status=7940
+t=794500 dt=500 heartbeat=1589 scans=79450 status=7945
+ERR unknown command
+t=795000 dt=500 heartbeat=1590 scans=79500 status=7950
+t=795500 dt=500 heartbeat=1591 scans=79550 status=7955
+t=796000 dt=500 heartbeat=1592 scans=79600 status=7960
+t=796500 dt=500 heartbeat=1593 scans=79650 status=7965
+t=797000 dt=500 heartbeat=1594 scans=79700 status=7970
+t=797500 dt=500 heartbeat=1595 scans=79750 status=7975
+t=798000 dt=500 heartbeat=1596 scans=79800 status=7980
+t=798500 dt=500 heartbeat=1597 scans=79850 status=7985
+t=810500 dt=500 heartbeat=1621 scans=81050 status=8105
+t=811000 dt=500 heartbeat=1622 scans=81100 status=8110
+t=811500 dt=500 heartbeat=1623 scans=81150 status=8115
+FRAME OK seq=4 len=1 valid=3 err=0
+t=812000 dt=500 heartbeat=1624 scans=81199 status=8120
+t=812500 dt=500 heartbeat=1625 scans=81249 status=8125
+t=1058500 dt=500 heartbeat=2117 scans=105849 status=10585
+t=1059000 dt=500 heartbeat=2118 scans=105899 status=10590
+t=1059500 dt=500 heartbeat=2119 scans=105949 status=10595
+FRAME ERR valid=3 err=1
+t=1060000 dt=500 heartbeat=2120 scans=105999 status=10600
+t=1068500 dt=500 heartbeat=2137 scans=106849 status=10685
+FRAME OK seq=4 len=1 valid=4 err=1
+t=1069000 dt=500 heartbeat=2138 scans=106899 status=10690
+t=1069500 dt=500 heartbeat=2139 t=22500 dt=500 heartbeat=45 scans=2250 status=225 link=waiting
+t=23000 dt=500 heartbeat=46 scans=2300 status=230 link=waiting
+t=23500 dt=500 heartbeat=47 scans=2350 status=235 link=waiting
+t=24000 dt=500 heartbeat=48 scans=2400 status=240 link=waiting
+t=24500 dt=500 heartbeat=49 scans=2450 status=245 link=waiting
+t=25000 dt=500 heartbeat=50 scans=2500 status=250 link=waiting
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=100 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=150 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=200 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=250 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=300 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=350 status=35 link=waiting
+t=4000 dt=500 heartbeat=8 scans=400 status=40 link=waiting
+t=4500 dt=500 heartbeat=9 scans=450 status=45 link=waiting
+t=5000 dt=500 heartbeat=10 scans=500 status=50 link=waiting
+t=5500 dt=500 heartbeat=11 scans=550 status=55 link=waiting
+t=6000 dt=500 heartbeat=12 scans=600 status=60 link=waiting
+t=6500 dt=500 heartbeat=13 scans=650 status=65 link=waiting
+t=7000 dt=500 heartbeat=14 scans=700 status=70 link=waiting
+t=7500 dt=500 heartbeat=15 scans=750 status=75 link=waiting
+t=8000 dt=500 heartbeat=16 scans=800 status=80 link=waiting
+t=8500 dt=500 heartbeat=17 scans=850 status=85 link=waiting
+t=9000 dt=500 heartbeat=18 scans=900 status=90 link=waiting
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=100 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=150 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=200 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=250 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=300 status=30 link=waiting
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=100 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=150 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=200 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=250 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=300 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=350 status=35 link=waiting
+t=4000 dt=500 heartbeat=8 scans=400 status=40 link=waiting
+t=4500 dt=500 heartbeat=9 scans=450 status=45 link=waiting
+t=24500 dt=500 heartbeat=49 scans=2450 status=245 link=waiting
+t=25000 dt=500 heartbeat=50 scans=2500 status=250 link=waiting
+t=25500 dt=500 heartbeat=51 scans=2550 status=255 link=waiting
+t=26000 dt=500 heartbeat=52 scans=2600 status=260 link=waiting
+t=26500 dt=500 heartbeat=53 scans=2650 status=265 link=waiting
+t=27000 dt=500 heartbeat=54 scans=2700 status=270 link=waiting
+t=27500 dt=500 heartbeat=55 scans=2750 status=275 link=waiting
+t=28000 dt=500 heartbeat=56 scans=2800 status=280 link=waiting
+t=28500 dt=500 heartbeat=57 scans=2850 status=285 link=waiting
+t=29000 dt=500 heartbeat=58 scans=2900 status=290 link=waiting
+t=29500 dt=500 heartbeat=59 scans=2950 status=295 link=waiting
+PanView P01 boot
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=100 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=150 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=200 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=250 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=300 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=350 status=35 link=waiting
+t=4000 dt=500 heartbeat=8 scans=400 status=40 link=waiting
+t=4500 dt=500 heartbeat=9 scans=450 status=45 link=waiting
+t=5000 dt=500 heartbeat=10 scans=500 status=50 link=waiting
+t=5500 dt=500 heartbeat=11 scans=550 status=55 link=waiting
+t=6000 dt=500 heartbeat=12 scans=600 status=60 link=waiting
+t=6500 dt=500 heartbeat=13 scans=650 status=65 link=waiting
+t=7000 dt=500 heartbeat=14 scans=700 status=70 link=waiting
+t=7500 dt=500 heartbeat=15 scans=750 status=75 link=waiting
+t=8000 dt=500 heartbeat=16 scans=800 status=80 link=waiting
+t=8500 dt=500 heartbeat=17 scans=850 status=85 link=waiting
+t=9000 dt=500 heartbeat=18 scans=900 status=90 link=waiting
+t=9500 dt=500 heartbeat=19 scans=950 status=95 link=waiting
+t=10000 dt=500 heartbeat=20 scans=1000 status=100 link=waiting
+t=10500 dt=500 heartbeat=21 scans=1050 status=105 link=waiting
+t=11000 dt=500 heartbeat=22 scans=1100 status=110 link=waiting
+t=11500 dt=500 heartbeat=23 scans=1150 status=115 link=waiting
+t=12000 dt=500 heartbeat=24 scans=1200 status=120 link=waiting
+t=12500 dt=500 heartbeat=25 scans=1250 status=125 link=waiting
+t=13000 dt=500 heartbeat=26 scans=1300 status=130 link=waiting
+t=13500 dt=500 heartbeat=27 scans=1350 status=135 link=waiting
+t=14000 dt=500 heartbeat=28 scans=1400 status=140 link=waiting
+t=14500 dt=500 heartbeat=29 scans=1450 status=145 link=waiting
+t=21500 dt=500 heartbeat=43 scans=2150 status=215 link=waiting
+FRAME OK seq=4 len=1 valid=1 err=0
+t=22000 dt=500 heartbeat=44 scans=2200 status=220 link=active
+t=22500 dt=500 heartbeat=45 scans=2250 status=225 link=active
+t=23000 dt=500 heartbeat=46 scans=2300 status=230 link=timeout
+t=23500 dt=500 heartbeat=47 scans=2350 status=235 link=timeout
+t=24000 dt=500 heartbeat=48 scans=2400 status=240 link=timeout
+t=24500 dt=500 heartbeat=49 scans=2450 status=245 link=timeout
+t=25000 dt=500 heartbeat=50 scans=2500 status=250 link=timeout
+t=30500 dt=500 heartbeat=61 scans=3050 status=305 link=timeout
+t=31000 dt=500 heartbeat=62 scans=3100 status=310 link=timeout
+FRAME OK seq=4 len=1 valid=2 err=0
+t=31500 dt=500 heartbeat=63 scans=3149 status=315 link=active
+t=32000 dt=500 heartbeat=64 scans=3199 status=320 link=active
+t=32500 dt=500 heartbeat=65 scans=3249 status=325 link=timeout
+FRAME OK seq=4 len=1 valid=3 err=0
+t=33000 dt=500 heartbeat=66 scans=3299 status=330 link=active
+FRAME OK seq=4 len=1 valid=4 err=0
+t=33500 dt=500 heartbeat=67 scans=3349 status=335 link=active
+FRAME OK seq=4 len=1 valid=5 err=0
+t=34000 dt=500 heartbeat=68 scans=3399 status=340 link=active
+t=34500 dt=500 heartbeat=69 scans=3449 status=345 link=active
+FRAME OK seq=4 len=1 valid=6 err=0
+t=35000 dt=500 heartbeat=70 scans=3498 status=350 link=active
+FRAME OK seq=4 len=1 valid=7 err=0
+t=35500 dt=500 heartbeat=71 scans=3548 status=355 link=active
+FRAME OK seq=4 len=1 valid=8 err=0
+t=36000 dt=500 heartbeat=72 scans=3598 status=360 link=active
+FRAME OK seq=4 len=1 valid=9 err=0
+t=36500 dt=500 heartbeat=73 scans=3648 status=365 link=active
+FRAME OK seq=4 len=1 valid=10 err=0
+t=37000 dt=500 heartbeat=74 scans=3698 status=370 link=active
+FRAME OK seq=4 len=1 valid=11 err=0
+t=37500 dt=500 heartbeat=75 scans=3748 status=375 link=active
+FRAME OK seq=4 len=1 valid=12 err=0
+t=38000 dt=500 heartbeat=76 scans=3798 status=380 link=active
+t=38500 dt=500 heartbeat=77 scans=3848 status=385 link=active
+t=39000 dt=500 heartbeat=78 scans=3898 status=390 link=timeout
+FRAME OK seq=4 len=1 valid=13 err=0
+t=39500 dt=500 heartbeat=79 scans=3948 status=395 link=active
+t=40000 dt=500 heartbeat=80 scans=3998 status=400 link=active
+t=40500 dt=500 heartbeat=81 scans=4048 status=405 link=timeout
+FRAME OK seq=4 len=1 valid=14 err=0
+t=41000 dt=500 heartbeat=82 scans=4098 status=410 link=active
+t=41500 dt=500 heartbeat=83 scans=4148 status=415 link=active
+t=42000 dt=500 heartbeat=84 scans=4198 status=420 link=timeout
+t=326000 dt=500 heartbeat=652 scans=32598 status=3260 link=timeout
+t=326500 dt=500 heartbeat=653 scans=32648 status=3265 link=timeout
+t=327000 dt=500 heartbeat=654 scans=32698 status=3270 link=timeout
+t=327500 dt=500 heartbeat=655 scans=32748 status=3275 link=timeout
+FRAME OK seq=1 len=1 valid=15 err=0
+t=328000 dt=500 heartbeat=656 scans=32798 status=3280 link=active
+t=328500 dt=500 heartbeat=657 scans=32848 status=3285 link=active
+t=329000 dt=500 heartbeat=658 scans=32898 status=3290 link=timeout
+t=344000 dt=500 heartbeat=688 scans=34398 status=3440 link=timeout
+t=344500 dt=500 heartbeat=689 scans=34448 status=3445 link=timeout
+t=345000 dt=500 heartbeat=690 scans=34498 status=3450 link=timeout
+t=345500 dt=500 heartbeat=691 scans=34548 status=3455 link=timeout
+t=346000 dt=500 heartbeat=692 scans=34598 status=3460 link=timeout
+t=346500 dt=500 heartbeat=693 scans=34648 status=3465 link=timeout
+t=347000 dt=500 heartbeat=694 scans=34698 status=3470 link=timeout
+t=347500 dt=500 heartbeat=695 scans=34748 status=3475 link=timeout
+t=348000 dt=500 heartbeat=696 scans=34798 status=3480 link=timeout
+PanView P01 boot
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=50 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=100 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=150 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=200 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=250 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=300 status=30 link=waiting
+FRAME OK seq=1 len=1 order=first valid=1 err=0 miss=0
+t=3500 dt=500 heartbeat=7 scans=350 status=35 link=active
+t=4000 dt=500 heartbeat=8 scans=400 status=40 link=active
+t=4500 dt=500 heartbeat=9 scans=450 status=45 link=timeout
+t=13500 dt=500 heartbeat=27 scans=1350 status=135 link=timeout
+FRAME OK seq=3 len=1 order=gap valid=2 err=0 miss=1
+t=14000 dt=500 heartbeat=28 scans=1400 status=140 link=active
+t=14500 dt=500 heartbeat=29 scans=1450 status=145 link=active
+t=15000 dt=500 heartbeat=30 scans=1500 status=150 link=timeout
+t=98500 dt=500 heartbeat=197 scans=9850 status=985 link=timeout
+t=99000 dt=500 heartbeat=198 scans=9900 status=990 link=timeout
+FRAME OK seq=2 len=1 order=out_of_order valid=3 err=0 miss=1
+t=99500 dt=500 heartbeat=199 scans=9949 status=995 link=active
+t=119500 dt=500 heartbeat=239 scans=11949 status=1195 link=timeout
+STATUS size=8 rx=4 drop=0 frame_ok=3 frame_err=0 last=3 miss=1 dup=0 old=1 link=timeout
+t=120000 dt=500 heartbeat=240 scans=11999 status=1200 link=timeout
+t=120500 dt=500 heartbeat=241 scans=12049 status=1205 link=timeout
