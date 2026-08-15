@@ -24,6 +24,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "debounced_button.h"
+#include "periodic_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,11 +64,15 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 enum {
+  KEY_SCAN_PERIOD_MS = 10U,
+  KEY_DEBOUNCE_MS = 20U,
+  STATUS_PERIOD_MS = 100U,
   HEARTBEAT_PERIOD_MS = 500U
 };
+/* 单位：ms；P02 轮询与消抖设计参数，仅适用于当前 KEY0 诊断任务。 */
 
 static uint8_t key0_pressed_message[] = "KEY0 pressed\r\n";
-static char heartbeat_message[32];
+static char heartbeat_message[96];
 /* USER CODE END 0 */
 
 /**
@@ -100,8 +106,20 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint32_t last_heartbeat_tick = HAL_GetTick();
+  DebouncedButton key0_button;
+  PeriodicTask key_scan_task;
+  PeriodicTask status_task;
+  PeriodicTask heartbeat_task;
+  uint32_t last_heartbeat_log_ms = HAL_GetTick();
+  uint32_t key_scan_count = 0U;
+  uint32_t status_task_count = 0U;
   uint32_t heartbeat_count = 0U;
+
+  DebouncedButton_Init(&key0_button,
+                       HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET);
+  PeriodicTask_Init(&key_scan_task, KEY_SCAN_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&status_task, STATUS_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
   if (HAL_UART_Transmit(&huart1, boot_message,
                         sizeof(boot_message) - 1U,
                         BOOT_LOG_TIMEOUT_MS) != HAL_OK)
@@ -112,22 +130,19 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  GPIO_PinState previous_key0_state =
-      HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
   while (1)
   {
     /* USER CODE END WHILE */
 	  uint32_t current_tick = HAL_GetTick();
-	  GPIO_PinState key0_state;
-
-	  key0_state = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
-
-	  if ((key0_state == GPIO_PIN_RESET) &&
-	      (previous_key0_state == GPIO_PIN_SET))
+	  if (PeriodicTask_IsDue(&key_scan_task, current_tick))
 	  {
-	    HAL_Delay(20);
+	    bool key0_pressed;
 
-	    if (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET)
+	    key_scan_count++;
+	    key0_pressed = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET;
+
+	    if (DebouncedButton_Update(&key0_button, key0_pressed, current_tick,
+	                               KEY_DEBOUNCE_MS))
 	    {
 	      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
 
@@ -139,15 +154,23 @@ int main(void)
 	      }
 	    }
 	  }
-	  previous_key0_state = key0_state;
-	  if ((current_tick - last_heartbeat_tick) >= HEARTBEAT_PERIOD_MS)
+	  if (PeriodicTask_IsDue(&status_task, current_tick))
+	  {
+	    status_task_count++;
+	  }
+	  if (PeriodicTask_IsDue(&heartbeat_task, current_tick))
 	   {
-	     last_heartbeat_tick = current_tick;
+	     uint32_t heartbeat_interval_ms = current_tick - last_heartbeat_log_ms;
 
-	     int heartbeat_length = snprintf(
+	     last_heartbeat_log_ms = current_tick;
+     int heartbeat_length = snprintf(
 	         heartbeat_message, sizeof(heartbeat_message),
-	         "heartbeat: %lu\r\n",
-	         (unsigned long)++heartbeat_count);
+	         "t=%lu dt=%lu heartbeat=%lu scans=%lu status=%lu\r\n",
+	         (unsigned long)current_tick,
+	         (unsigned long)heartbeat_interval_ms,
+	         (unsigned long)++heartbeat_count,
+	         (unsigned long)key_scan_count,
+	         (unsigned long)status_task_count);
 
 	     if ((heartbeat_length <= 0) ||
 	         (heartbeat_length >= (int)sizeof(heartbeat_message)) ||
