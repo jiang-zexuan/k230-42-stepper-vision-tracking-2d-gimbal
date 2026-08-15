@@ -1,0 +1,7 @@
+# STM32CubeMX/ST 生成模板包含上游行尾空格；保留原样，不将其作为提交错误。
+firmware/stm32f407/PanViewF407/Drivers/** whitespace=-trailing-space,-blank-at-eof
+firmware/stm32f407/PanViewF407/Core/Src/system_stm32f4xx.c whitespace=-trailing-space,-blank-at-eof
+firmware/stm32f407/PanViewF407/Core/Startup/startup_stm32f407zgtx.s whitespace=-trailing-space,-blank-at-eof
+firmware/stm32f407/PanViewF407/.mxproject whitespace=-blank-at-eof
+firmware/stm32f407/PanViewF407/Core/Inc/gpio.h whitespace=-blank-at-eof
+firmware/stm32f407/PanViewF407/Core/Inc/usart.h whitespace=-blank-at-eof
