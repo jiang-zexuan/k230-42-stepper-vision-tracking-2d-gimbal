@@ -46,9 +46,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+/* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
 static uint8_t boot_message[] = "PanView P01 boot\r\n";
 
 enum {
+  /* 单位：ms；串口发送阻塞等待上限，仅用于当前诊断日志。 */
   BOOT_LOG_TIMEOUT_MS = 100U
 };
 
@@ -64,13 +66,14 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 enum {
+  /* 单位：ms；P02 轮询与消抖设计参数，仅适用于当前 KEY0 诊断任务。 */
   KEY_SCAN_PERIOD_MS = 10U,
   KEY_DEBOUNCE_MS = 20U,
   STATUS_PERIOD_MS = 100U,
   HEARTBEAT_PERIOD_MS = 500U
 };
-/* 单位：ms；P02 轮询与消抖设计参数，仅适用于当前 KEY0 诊断任务。 */
 
+/* KEY0 事件与心跳日志共用 USART1；心跳缓冲区避免逐字符发送。 */
 static uint8_t key0_pressed_message[] = "KEY0 pressed\r\n";
 static char heartbeat_message[96];
 /* USER CODE END 0 */
@@ -106,6 +109,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
   DebouncedButton key0_button;
   PeriodicTask key_scan_task;
   PeriodicTask status_task;
@@ -115,11 +119,13 @@ int main(void)
   uint32_t status_task_count = 0U;
   uint32_t heartbeat_count = 0U;
 
+  /* KEY0 为低有效：读到 RESET 表示已按下。 */
   DebouncedButton_Init(&key0_button,
                        HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET);
   PeriodicTask_Init(&key_scan_task, KEY_SCAN_PERIOD_MS, HAL_GetTick());
   PeriodicTask_Init(&status_task, STATUS_PERIOD_MS, HAL_GetTick());
   PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
+  /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
   if (HAL_UART_Transmit(&huart1, boot_message,
                         sizeof(boot_message) - 1U,
                         BOOT_LOG_TIMEOUT_MS) != HAL_OK)
@@ -134,6 +140,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  uint32_t current_tick = HAL_GetTick();
+	  /* 10 ms：采样 KEY0，并将抖动过滤与主循环其他工作解耦。 */
 	  if (PeriodicTask_IsDue(&key_scan_task, current_tick))
 	  {
 	    bool key0_pressed;
@@ -154,10 +161,12 @@ int main(void)
 	      }
 	    }
 	  }
+	  /* 100 ms：预留的状态任务；当前只计数，用于验证其独立运行。 */
 	  if (PeriodicTask_IsDue(&status_task, current_tick))
 	  {
 	    status_task_count++;
 	  }
+	  /* 500 ms：输出心跳、实际间隔和其他任务计数，作为非阻塞调度证据。 */
 	  if (PeriodicTask_IsDue(&heartbeat_task, current_tick))
 	   {
 	     uint32_t heartbeat_interval_ms = current_tick - last_heartbeat_log_ms;
