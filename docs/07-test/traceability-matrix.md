@@ -3,7 +3,7 @@
 | 需求 | 设计/代码 | 测试 | 证据 | 当前状态 |
 | --- | --- | --- | --- | --- |
 | REQ-001 | 待建 | 待建 | 待建 | 设计基线 |
-| REQ-002 | 待建 | 待建 | 待建 | 设计基线 |
+| REQ-002 | `motion_limits.c`、`main.c`、`ADR-0002-horizontal-axis-cable-limit.md` | `docs/07-test/TEST-0006-p06-horizontal-motion-limits.md` | `evidence/serial-logs/exp-0007-motion-limits-unit-tests.log`；板上 XCOM 待补 | 软件边界测试通过；板上待验证 |
 | REQ-003 | 待建 | 待建 | 待建 | 设计基线 |
 | REQ-004 | 待建 | 待建 | 待建 | 设计基线 |
 | REQ-005 | 待建 | 待建 | 待建 | 设计基线 |

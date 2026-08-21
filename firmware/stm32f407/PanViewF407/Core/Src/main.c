@@ -30,6 +30,7 @@
 #include "debounced_button.h"
 #include "frame_sequence_tracker.h"
 #include "motor_pulse_lab.h"
+#include "motion_limits.h"
 #include "periodic_task.h"
 #include "relative_position_tracker.h"
 #include "uart_rx_frame.h"
@@ -137,6 +138,12 @@ static uint8_t motor_profile_move_cw_message[] =
     "MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800\r\n";
 static uint8_t motor_profile_move_ignored_message[] =
     "MOTOR profile move ignored: running\r\n";
+static uint8_t motor_profile_move_position_invalid_message[] =
+    "MOTOR profile move rejected: position_invalid; press KEY_UP to zero\r\n";
+static uint8_t motor_profile_move_limit_message[] =
+    "MOTOR profile move rejected: horizontal_limit\r\n";
+static uint8_t motor_profile_move_invalid_argument_message[] =
+    "MOTOR profile move rejected: invalid_limit_config\r\n";
 static uint8_t motor_profile_move_complete_message[] =
     "MOTOR state=stopped reason=profile_complete target_pulses=800\r\n";
 static uint8_t relative_position_zero_ignored_message[] =
@@ -147,6 +154,7 @@ static bool latest_vision_frame_valid;
 static CommunicationWatchdog communication_watchdog;
 static FrameSequenceTracker frame_sequence_tracker;
 static MotorPulseLab motor_pulse_lab;
+static MotionLimits horizontal_motion_limits;
 static RelativePositionTracker relative_position_tracker;
 static volatile bool motor_profile_move_complete_pending;
 
@@ -342,6 +350,35 @@ static void PublishRelativePosition(const char *reason)
   }
 }
 
+static void PublishMotionLimitRejection(MotionLimitsResult result)
+{
+  uint8_t *message;
+  uint16_t message_size;
+
+  switch (result)
+  {
+    case MOTION_LIMITS_REJECT_POSITION_INVALID:
+      message = motor_profile_move_position_invalid_message;
+      message_size = sizeof(motor_profile_move_position_invalid_message) - 1U;
+      break;
+    case MOTION_LIMITS_REJECT_OUT_OF_RANGE:
+      message = motor_profile_move_limit_message;
+      message_size = sizeof(motor_profile_move_limit_message) - 1U;
+      break;
+    case MOTION_LIMITS_REJECT_INVALID_ARGUMENT:
+    default:
+      message = motor_profile_move_invalid_argument_message;
+      message_size = sizeof(motor_profile_move_invalid_argument_message) - 1U;
+      break;
+  }
+
+  if (HAL_UART_Transmit(&huart1, message, message_size,
+                        BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim4)
@@ -454,6 +491,7 @@ int main(void)
   CommunicationWatchdog_Init(&communication_watchdog, COMMUNICATION_TIMEOUT_MS);
   FrameSequenceTracker_Init(&frame_sequence_tracker);
   MotorPulseLab_Init(&motor_pulse_lab);
+  horizontal_motion_limits = MotionLimits_HorizontalDefault();
   RelativePositionTracker_Init(&relative_position_tracker);
   MotorPulseLab_StopHardware();
   StartUartRxDma();
@@ -572,8 +610,7 @@ int main(void)
                                                   BOARD_KEY2_Pin) == GPIO_PIN_RESET,
                                  current_tick, KEY_DEBOUNCE_MS))
       {
-        uint8_t *fixed_move_message;
-        uint16_t fixed_move_message_size;
+        MotionLimitsResult limit_result = MOTION_LIMITS_ACCEPTED;
 
         if (HAL_UART_Transmit(&huart1, key2_pressed_message,
                               sizeof(key2_pressed_message) - 1U,
@@ -582,31 +619,69 @@ int main(void)
           Error_Handler();
         }
 
-        if (MotorPulseLab_StartProfileMove(&motor_pulse_lab))
+        if (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED)
         {
-          MotorPulseLabDirection direction =
-              MotorPulseLab_GetDirection(&motor_pulse_lab);
-
-          MotorPulseLab_StartFixedHardware(direction);
-          fixed_move_message = direction == MOTOR_PULSE_LAB_DIRECTION_HIGH
-                                   ? motor_profile_move_cw_message
-                                   : motor_profile_move_ccw_message;
-          fixed_move_message_size = direction == MOTOR_PULSE_LAB_DIRECTION_HIGH
-                                        ? sizeof(motor_profile_move_cw_message) - 1U
-                                        : sizeof(motor_profile_move_ccw_message) - 1U;
+          if (HAL_UART_Transmit(&huart1, motor_profile_move_ignored_message,
+                                sizeof(motor_profile_move_ignored_message) - 1U,
+                                BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+          {
+            Error_Handler();
+          }
         }
         else
         {
-          fixed_move_message = motor_profile_move_ignored_message;
-          fixed_move_message_size = sizeof(motor_profile_move_ignored_message) - 1U;
+          int32_t current_pulses =
+              RelativePositionTracker_GetPositionPulses(
+                  &relative_position_tracker);
+          int32_t move_delta_pulses =
+              MotorPulseLab_GetDirection(&motor_pulse_lab) ==
+                      MOTOR_PULSE_LAB_DIRECTION_LOW
+                  ? MOTOR_FIXED_MOVE_PULSES
+                  : -MOTOR_FIXED_MOVE_PULSES;
+          int32_t target_pulses = 0;
+
+          limit_result = MotionLimits_CheckRelativeMove(
+              &horizontal_motion_limits,
+              RelativePositionTracker_IsValid(&relative_position_tracker),
+              current_pulses, move_delta_pulses, &target_pulses);
+          (void)target_pulses;
+
+          if (limit_result != MOTION_LIMITS_ACCEPTED)
+          {
+            PublishMotionLimitRejection(limit_result);
+          }
+          else if (MotorPulseLab_StartProfileMove(&motor_pulse_lab))
+          {
+            MotorPulseLabDirection direction =
+                MotorPulseLab_GetDirection(&motor_pulse_lab);
+            uint8_t *fixed_move_message =
+                direction == MOTOR_PULSE_LAB_DIRECTION_HIGH
+                    ? motor_profile_move_cw_message
+                    : motor_profile_move_ccw_message;
+            uint16_t fixed_move_message_size =
+                direction == MOTOR_PULSE_LAB_DIRECTION_HIGH
+                    ? sizeof(motor_profile_move_cw_message) - 1U
+                    : sizeof(motor_profile_move_ccw_message) - 1U;
+
+            MotorPulseLab_StartFixedHardware(direction);
+            if (HAL_UART_Transmit(&huart1, fixed_move_message,
+                                  fixed_move_message_size,
+                                  BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+            {
+              Error_Handler();
+            }
+          }
+          else
+          {
+            if (HAL_UART_Transmit(&huart1, motor_profile_move_ignored_message,
+                                  sizeof(motor_profile_move_ignored_message) - 1U,
+                                  BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+            {
+              Error_Handler();
+            }
+          }
         }
 
-        if (HAL_UART_Transmit(&huart1, fixed_move_message,
-                              fixed_move_message_size,
-                              BOOT_LOG_TIMEOUT_MS) != HAL_OK)
-        {
-          Error_Handler();
-        }
       }
 
       if (DebouncedButton_Update(&key_up_button,
