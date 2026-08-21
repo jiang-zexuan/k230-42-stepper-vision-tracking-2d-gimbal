@@ -59,8 +59,18 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BOARD_KEY0_Pin GPIO_PIN_4
 #define BOARD_KEY0_GPIO_Port GPIOE
+#define BOARD_KEY1_Pin GPIO_PIN_3
+#define BOARD_KEY1_GPIO_Port GPIOE
+#define BOARD_KEY2_Pin GPIO_PIN_2
+#define BOARD_KEY2_GPIO_Port GPIOE
+#define BOARD_KEY_UP_Pin GPIO_PIN_0
+#define BOARD_KEY_UP_GPIO_Port GPIOA
 #define BOARD_STATUS_LED_Pin GPIO_PIN_9
 #define BOARD_STATUS_LED_GPIO_Port GPIOF
+#define MOTOR_EN_Pin GPIO_PIN_15
+#define MOTOR_EN_GPIO_Port GPIOG
+#define MOTOR_DIR_Pin GPIO_PIN_7
+#define MOTOR_DIR_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
