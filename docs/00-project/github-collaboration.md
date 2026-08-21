@@ -4,9 +4,9 @@
 
 | 项目 | 值 |
 | --- | --- |
-| GitHub 仓库 | https://github.com/jiang-zexuan/panview-tracker |
+| GitHub 仓库 | https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal |
 | Git 远端名 | origin |
-| Git URL | https://github.com/jiang-zexuan/panview-tracker.git |
+| Git URL | https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal.git |
 | 默认分支 | main |
 | 当前开发分支 | feature/f407-board-bringup |
 | 提交身份 | Jiang Zexuan <314187437+jiang-zexuan@users.noreply.github.com> |
