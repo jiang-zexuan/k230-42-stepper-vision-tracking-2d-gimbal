@@ -87,7 +87,7 @@ enum {
   STATUS_PERIOD_MS = 100U,
   /* 单位：ms；运动期间读取一次 X42S 状态，观察真实速度和跟随误差。 */
   MOTOR_FEEDBACK_PERIOD_MS = 100U,
-  HEARTBEAT_PERIOD_MS = 500U,
+  HEARTBEAT_PERIOD_MS = 5000U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -100,6 +100,15 @@ enum {
   MOTOR_FIXED_MOVE_PULSES = 800U,
   /* 单位：脉冲/圈；X42S 当前 16 细分设置。 */
   MOTOR_PULSES_PER_REVOLUTION = 3200U
+};
+
+enum {
+  /* P07 第一阶段只验证俯仰链路，100 脉冲约 11.25 度（16 细分）。 */
+  PITCH_TEST_PULSES = 100U,
+  PITCH_TEST_PRESCALER = 3199U,
+  /* 当前 MStep=16：3200 脉冲/圈，±45°对应 ±400 脉冲。 */
+  PITCH_LIMIT_PULSES = 400U,
+  DUAL_TEST_PULSES = 100U
 };
 
 /* KEY0 事件与心跳日志共用 USART1；心跳缓冲区避免逐字符发送。 */
@@ -116,6 +125,24 @@ static UartRxFrame uart_rx_frame;
 static char uart_rx_log_message[128];
 static uint8_t uart_pong_message[] = "PONG\r\n";
 static uint8_t uart_unknown_command_message[] = "ERR unknown command\r\n";
+static uint8_t pitch_up_message[] = "PITCH state=running dir=up pulses=100\r\n";
+static uint8_t pitch_down_message[] = "PITCH state=running dir=down pulses=100\r\n";
+static uint8_t pitch_stop_message[] = "PITCH state=stopped\r\n";
+static uint8_t pitch_busy_message[] = "PITCH command ignored: running\r\n";
+static uint8_t pitch_not_zeroed_message[] =
+    "PITCH command rejected: press KEY_UP at mechanical center\r\n";
+static uint8_t pitch_zero_message[] =
+    "PITCH zero=accepted position=0 limit=plus_or_minus_45deg\r\n";
+static uint8_t pitch_limit_message[] =
+    "PITCH command rejected: soft_limit_plus_or_minus_45deg\r\n";
+static uint8_t pitch_rezero_message[] =
+    "PITCH stop interrupted move: press KEY_UP to re-zero\r\n";
+static uint8_t dual_test_message[] =
+    "DUAL state=running pan_pulses=100 pitch_pulses=100\r\n";
+static uint8_t dual_test_neg_message[] =
+    "DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100\r\n";
+static uint8_t dual_test_rejected_message[] =
+    "DUAL command rejected: zero_or_limit_or_busy\r\n";
 static uint8_t motor_running_ccw_message[] =
     "MOTOR state=running dir=ccw step_hz=500\r\n";
 static uint8_t motor_running_cw_message[] =
@@ -150,6 +177,15 @@ static MotorPulseLab motor_pulse_lab;
 static MotionLimits horizontal_motion_limits;
 static RelativePositionTracker relative_position_tracker;
 static volatile bool motor_profile_move_complete_pending;
+static volatile uint16_t pitch_remaining_pulses;
+static volatile bool pitch_running;
+static volatile bool pitch_zeroed;
+static volatile bool control_takeover_active;
+static volatile int32_t pitch_position_pulses;
+static volatile int32_t pitch_active_delta_pulses;
+static volatile bool dual_test_running;
+static volatile uint16_t dual_test_remaining_pulses;
+static volatile int32_t dual_test_direction_sign;
 
 /*
  * 只读探测 X42S TTL 链路。依据电机手册 5.6.30：发送 00 15 6B，
@@ -533,6 +569,115 @@ static void MotorPulseLab_SetTimerPrescaler(uint16_t prescaler)
   __HAL_TIM_SET_PRESCALER(&htim4, prescaler);
 }
 
+static void Pitch_StopPulses(void)
+{
+  (void)HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_4);
+  (void)HAL_TIM_Base_Stop_IT(&htim3);
+  pitch_running = false;
+  pitch_remaining_pulses = 0U;
+}
+
+static void Pitch_DisableHardware(void)
+{
+  Pitch_StopPulses();
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
+}
+
+static void Pitch_EnableHold(void)
+{
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_SET);
+}
+
+static bool Pitch_StartTestMove(GPIO_PinState direction,
+                                int32_t delta_pulses)
+{
+  if (pitch_running || dual_test_running)
+  {
+    return false;
+  }
+
+  __HAL_TIM_SET_PRESCALER(&htim3, PITCH_TEST_PRESCALER);
+  __HAL_TIM_SET_COUNTER(&htim3, 0U);
+  HAL_GPIO_WritePin(PITCH_DIR_GPIO_Port, PITCH_DIR_Pin, direction);
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_SET);
+  pitch_active_delta_pulses = delta_pulses;
+  pitch_remaining_pulses = PITCH_TEST_PULSES;
+  pitch_running = true;
+  if ((HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4) != HAL_OK) ||
+      (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK))
+  {
+    Pitch_DisableHardware();
+    Error_Handler();
+  }
+  return true;
+}
+
+static void Dual_StopHardware(void)
+{
+  (void)HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_4);
+  (void)HAL_TIM_Base_Stop_IT(&htim3);
+  (void)HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+  (void)HAL_TIM_Base_Stop_IT(&htim4);
+  dual_test_running = false;
+  dual_test_remaining_pulses = 0U;
+}
+
+static bool Dual_StartTestMove(int32_t direction_sign)
+{
+  int32_t pan_delta_pulses = direction_sign * (int32_t)DUAL_TEST_PULSES;
+  int32_t pitch_delta_pulses = direction_sign * (int32_t)DUAL_TEST_PULSES;
+  int32_t pan_target_pulses = 0;
+
+  if (dual_test_running || pitch_running ||
+      (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED) ||
+      !pitch_zeroed || !control_takeover_active)
+  {
+    return false;
+  }
+
+  if (MotionLimits_CheckRelativeMove(
+          &horizontal_motion_limits,
+          RelativePositionTracker_IsValid(&relative_position_tracker),
+          RelativePositionTracker_GetPositionPulses(&relative_position_tracker),
+          pan_delta_pulses, &pan_target_pulses) != MOTION_LIMITS_ACCEPTED)
+  {
+    return false;
+  }
+
+  if ((pitch_position_pulses + pitch_delta_pulses) >
+          (int32_t)PITCH_LIMIT_PULSES ||
+      (pitch_position_pulses + pitch_delta_pulses) <
+          -(int32_t)PITCH_LIMIT_PULSES)
+  {
+    return false;
+  }
+
+  HAL_GPIO_WritePin(MOTOR_DIR_GPIO_Port, MOTOR_DIR_Pin,
+                    direction_sign > 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+  HAL_GPIO_WritePin(PITCH_DIR_GPIO_Port, PITCH_DIR_Pin,
+                    direction_sign > 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+  __HAL_TIM_SET_PRESCALER(&htim4, MOTOR_CONTINUOUS_PRESCALER);
+  __HAL_TIM_SET_PRESCALER(&htim3, PITCH_TEST_PRESCALER);
+  __HAL_TIM_SET_COUNTER(&htim4, 0U);
+  __HAL_TIM_SET_COUNTER(&htim3, 0U);
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_SET);
+  dual_test_remaining_pulses = DUAL_TEST_PULSES;
+  dual_test_direction_sign = direction_sign;
+  dual_test_running = true;
+
+  if ((HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) ||
+      (HAL_TIM_Base_Start_IT(&htim4) != HAL_OK) ||
+      (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4) != HAL_OK) ||
+      (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK))
+  {
+    Dual_StopHardware();
+    Error_Handler();
+  }
+
+  return true;
+}
+
 static void MotorPulseLab_SetTimerFrequency(uint16_t frequency_hz)
 {
   enum
@@ -706,6 +851,44 @@ static void PublishMotionLimitRejection(MotionLimitsResult result)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  if (dual_test_running && ((htim == &htim3) || (htim == &htim4)))
+  {
+    /* 以 TIM3 更新事件作为双轴联动的公共脉冲计数时基。 */
+    if (htim == &htim3)
+    {
+      if (dual_test_remaining_pulses > 0U)
+      {
+        dual_test_remaining_pulses--;
+      }
+
+      if (dual_test_remaining_pulses == 0U)
+      {
+        (void)RelativePositionTracker_ApplyCompletedPulseDelta(
+            &relative_position_tracker,
+            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES);
+        pitch_position_pulses +=
+            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES;
+        Dual_StopHardware();
+      }
+    }
+    return;
+  }
+
+  if (htim == &htim3)
+  {
+    if (pitch_running && (pitch_remaining_pulses > 0U))
+    {
+      pitch_remaining_pulses--;
+      if (pitch_remaining_pulses == 0U)
+      {
+        pitch_position_pulses += pitch_active_delta_pulses;
+        pitch_active_delta_pulses = 0;
+        Pitch_StopPulses();
+      }
+    }
+    return;
+  }
+
   if (htim == &htim4)
   {
     if (MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
@@ -720,7 +903,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         Error_Handler();
       }
 
-      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin,
+                        control_takeover_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
       motor_profile_move_complete_pending = true;
     }
     else if (MotorPulseLab_GetState(&motor_pulse_lab) ==
@@ -767,6 +951,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
   DebouncedButton key0_button;
@@ -807,6 +992,7 @@ int main(void)
   horizontal_motion_limits = MotionLimits_HorizontalDefault();
   RelativePositionTracker_Init(&relative_position_tracker);
   MotorPulseLab_StopHardware();
+  Pitch_DisableHardware();
   if (MotorTtlProbe())
   {
     MotorTtlReadOption();
@@ -1026,10 +1212,23 @@ int main(void)
           Error_Handler();
         }
 
-        if (MotorPulseLab_GetState(&motor_pulse_lab) == MOTOR_PULSE_LAB_STOPPED)
+        if ((MotorPulseLab_GetState(&motor_pulse_lab) == MOTOR_PULSE_LAB_STOPPED) &&
+            !pitch_running && !dual_test_running)
         {
           RelativePositionTracker_SetManualZero(&relative_position_tracker);
+          pitch_zeroed = true;
+          pitch_position_pulses = 0;
+          pitch_active_delta_pulses = 0;
+          control_takeover_active = true;
+          HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
+          Pitch_EnableHold();
           PublishRelativePosition("manual_zero");
+          if (HAL_UART_Transmit(&huart1, pitch_zero_message,
+                                sizeof(pitch_zero_message) - 1U,
+                                BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+          {
+            Error_Handler();
+          }
         }
         else if (HAL_UART_Transmit(&huart1, relative_position_zero_ignored_message,
                                    sizeof(relative_position_zero_ignored_message) - 1U,
@@ -1046,7 +1245,7 @@ int main(void)
       status_task_count++;
     }
 
-    /* 500 ms：输出心跳、实际间隔和其他任务计数，作为非阻塞调度证据。 */
+    /* 5 s：输出心跳、实际间隔和其他任务计数，作为非阻塞调度证据。 */
     if (PeriodicTask_IsDue(&heartbeat_task, current_tick))
     {
       uint32_t heartbeat_interval_ms = current_tick - last_heartbeat_log_ms;
@@ -1117,6 +1316,93 @@ int main(void)
 
         response = (uint8_t *)uart_rx_log_message;
         response_size = (uint16_t)uart_rx_log_length;
+      }
+      else if ((command == UART_TEXT_COMMAND_PITCH_UP) ||
+               (command == UART_TEXT_COMMAND_PITCH_DOWN))
+      {
+        if (!pitch_zeroed)
+        {
+          response = pitch_not_zeroed_message;
+          response_size = sizeof(pitch_not_zeroed_message) - 1U;
+        }
+        else
+        {
+          /* 已实测：DIR=Low 为俯仰向上，DIR=High 为俯仰向下。 */
+          GPIO_PinState direction = command == UART_TEXT_COMMAND_PITCH_UP
+                                         ? GPIO_PIN_RESET
+                                         : GPIO_PIN_SET;
+          int32_t delta_pulses = command == UART_TEXT_COMMAND_PITCH_UP
+                                     ? (int32_t)PITCH_TEST_PULSES
+                                     : -(int32_t)PITCH_TEST_PULSES;
+          int32_t target_pulses = pitch_position_pulses + delta_pulses;
+
+          if ((target_pulses > (int32_t)PITCH_LIMIT_PULSES) ||
+              (target_pulses < -(int32_t)PITCH_LIMIT_PULSES))
+          {
+            response = pitch_limit_message;
+            response_size = sizeof(pitch_limit_message) - 1U;
+          }
+          else if (Pitch_StartTestMove(direction, delta_pulses))
+          {
+            response = command == UART_TEXT_COMMAND_PITCH_UP
+                           ? pitch_up_message
+                           : pitch_down_message;
+            response_size = command == UART_TEXT_COMMAND_PITCH_UP
+                                ? sizeof(pitch_up_message) - 1U
+                                : sizeof(pitch_down_message) - 1U;
+          }
+          else
+          {
+            response = pitch_busy_message;
+            response_size = sizeof(pitch_busy_message) - 1U;
+          }
+        }
+      }
+      else if (command == UART_TEXT_COMMAND_PITCH_STOP)
+      {
+        bool interrupted = pitch_running || dual_test_running;
+        if (dual_test_running)
+        {
+          Dual_StopHardware();
+        }
+        else
+        {
+          Pitch_StopPulses();
+        }
+        pitch_active_delta_pulses = 0;
+        if (interrupted)
+        {
+          pitch_zeroed = false;
+          RelativePositionTracker_Invalidate(&relative_position_tracker);
+          response = pitch_rezero_message;
+          response_size = sizeof(pitch_rezero_message) - 1U;
+        }
+        else
+        {
+          response = pitch_stop_message;
+          response_size = sizeof(pitch_stop_message) - 1U;
+        }
+      }
+      else if ((command == UART_TEXT_COMMAND_DUAL_TEST) ||
+               (command == UART_TEXT_COMMAND_DUAL_TEST_NEG))
+      {
+        int32_t direction_sign = command == UART_TEXT_COMMAND_DUAL_TEST
+                                     ? 1
+                                     : -1;
+        if (Dual_StartTestMove(direction_sign))
+        {
+          response = command == UART_TEXT_COMMAND_DUAL_TEST
+                         ? dual_test_message
+                         : dual_test_neg_message;
+          response_size = command == UART_TEXT_COMMAND_DUAL_TEST
+                              ? sizeof(dual_test_message) - 1U
+                              : sizeof(dual_test_neg_message) - 1U;
+        }
+        else
+        {
+          response = dual_test_rejected_message;
+          response_size = sizeof(dual_test_rejected_message) - 1U;
+        }
       }
       else
       {
