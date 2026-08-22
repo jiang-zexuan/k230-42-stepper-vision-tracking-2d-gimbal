@@ -2,8 +2,8 @@
 
 | 需求 | 设计/代码 | 测试 | 证据 | 当前状态 |
 | --- | --- | --- | --- | --- |
-| REQ-001 | 待建 | 待建 | 待建 | 设计基线 |
-| REQ-002 | `motion_limits.c`、`main.c`、`ADR-0002-horizontal-axis-cable-limit.md` | `docs/07-test/TEST-0006-p06-horizontal-motion-limits.md` | `evidence/serial-logs/exp-0007-motion-limits-unit-tests.log`；板上 XCOM 待补 | 软件边界测试通过；板上待验证 |
+| REQ-001 | `relative_position_tracker.c`、`main.c` | `docs/07-test/TEST-0006-p06-horizontal-motion-limits.md` | `evidence/serial-logs/exp-0007-p06-board-feedback.log` | 水平轴人工回中和累计位置已实测；俯仰轴待 P07 |
+| REQ-002 | `motion_limits.c`、`main.c`、`ADR-0002-horizontal-axis-cable-limit.md` | `docs/07-test/TEST-0006-p06-horizontal-motion-limits.md` | `evidence/serial-logs/exp-0007-motion-limits-unit-tests.log`、`evidence/serial-logs/exp-0007-p06-board-feedback.log` | 水平 ±90° 越界拒绝和反向返回已实测；机械余量、俯仰范围待核验 |
 | REQ-003 | 待建 | 待建 | 待建 | 设计基线 |
 | REQ-004 | 待建 | 待建 | 待建 | 设计基线 |
 | REQ-005 | 待建 | 待建 | 待建 | 设计基线 |
