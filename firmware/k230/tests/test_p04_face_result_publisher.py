@@ -80,10 +80,10 @@ class FaceResultPublisherTests(unittest.TestCase):
         self.assertEqual(23, send_uart_payload(uart, "PV04 t_ms=42 target=0\r\n"))
         self.assertEqual([b"PV04 t_ms=42 target=0\r\n"], uart.payloads)
 
-    def test_uart3_output_is_mapped_to_12pin_io32(self):
+    def test_uart1_output_is_mapped_to_dedicated_io9_io10(self):
         class FakeFpioa:
-            UART3_RXD = "uart3_rxd"
-            UART3_TXD = "uart3_txd"
+            UART1_RXD = "uart1_rxd"
+            UART1_TXD = "uart1_txd"
 
             def __init__(self):
                 self.calls = []
@@ -92,7 +92,7 @@ class FaceResultPublisherTests(unittest.TestCase):
                 self.calls.append((pin, function, options))
 
         class FakeUart:
-            UART3 = 3
+            UART1 = 1
 
             def __init__(self, port, baudrate):
                 self.port = port
@@ -109,12 +109,12 @@ class FaceResultPublisherTests(unittest.TestCase):
 
         self.assertEqual(
             [
-                (32, FakeFpioa.UART3_TXD, {"ie": 0, "oe": 1}),
-                (33, FakeFpioa.UART3_RXD, {"ie": 1, "oe": 0}),
+                (9, FakeFpioa.UART1_TXD, {"ie": 0, "oe": 1}),
+                (10, FakeFpioa.UART1_RXD, {"ie": 1, "oe": 0}),
             ],
             fpioa_instances[0].calls,
         )
-        self.assertEqual(FakeUart.UART3, uart.port)
+        self.assertEqual(FakeUart.UART1, uart.port)
         self.assertEqual(115200, uart.baudrate)
 
 

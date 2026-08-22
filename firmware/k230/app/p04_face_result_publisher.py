@@ -90,11 +90,11 @@ def send_uart_payload(uart, payload):
 
 
 def create_k230_uart(fpioa_factory, uart_type):
-    """Map 12Pin IO32 to UART3 TX and return the configured transmitter."""
+    """Map the dedicated EXPORT port IO9/IO10 to UART1."""
     fpioa = fpioa_factory()
-    fpioa.set_function(32, fpioa.UART3_TXD, ie=0, oe=1)
-    fpioa.set_function(33, fpioa.UART3_RXD, ie=1, oe=0)
-    return uart_type(uart_type.UART3, baudrate=K230_UART_BAUDRATE)
+    fpioa.set_function(9, fpioa.UART1_TXD, ie=0, oe=1)
+    fpioa.set_function(10, fpioa.UART1_RXD, ie=1, oe=0)
+    return uart_type(uart_type.UART1, baudrate=K230_UART_BAUDRATE)
 
 
 # Keeping vendor imports behind this guard lets the pure functions above be

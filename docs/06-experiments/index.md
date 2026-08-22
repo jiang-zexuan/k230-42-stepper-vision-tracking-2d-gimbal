@@ -10,5 +10,6 @@
 | EXP-0006 | P05 单轴闭环电机验收台 | 2026-08-21 | 板上实测通过；波形和温度数值待补测 | `docs/06-experiments/EXP-0006-p05-single-axis-pulse-lab.md` |
 | EXP-0007 | P06 水平轴软件限位 | 2026-08-21 | 软件测试和 ARM 编译通过；板上行为待验证 | `docs/06-experiments/EXP-0007-p06-horizontal-motion-limits.md` |
 | EXP-0008 | P07 双轴云台基础控制器 | 2026-08-22 | 双轴板上实测通过 | `docs/06-experiments/EXP-0008-p07-dual-axis-controller.md` |
+| EXP-0009 | P08 K230-F407 视觉通信链路 | 2026-08-23 | 文本过渡链路和误差计算已实测；二进制协议待完成 | `docs/06-experiments/EXP-0009-p08-k230-f407-link.md` |
 
 新增实验后在此登记，并创建独立实验记录文件。

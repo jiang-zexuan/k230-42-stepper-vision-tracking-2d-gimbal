@@ -34,8 +34,12 @@
 #include "periodic_task.h"
 #include "relative_position_tracker.h"
 #include "uart_rx_frame.h"
+#include "uart_text_line_accumulator.h"
 #include "uart_text_command.h"
 #include "vision_frame_parser.h"
+#include "vision_error.h"
+#include "vision_text_result_parser.h"
+#include "visual_track_controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +61,7 @@
 
 /* USER CODE BEGIN PV */
 /* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
-static uint8_t boot_message[] = "PanView P01 boot\r\n";
+static uint8_t boot_message[] = "PanView P08 boot\r\n";
 static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
 static uint8_t motor_ttl_option_request[] = {0x01U, 0x1AU, 0x6BU};
 static uint8_t motor_ttl_system_status_request[] = {0x01U, 0x43U, 0x7AU, 0x6BU};
@@ -88,6 +92,8 @@ enum {
   /* 单位：ms；运动期间读取一次 X42S 状态，观察真实速度和跟随误差。 */
   MOTOR_FEEDBACK_PERIOD_MS = 100U,
   HEARTBEAT_PERIOD_MS = 5000U,
+  /* 单位：ms；P08 只汇总 K230 接收统计，避免逐帧刷屏。 */
+  K230_UART_LOG_PERIOD_MS = 1000U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -122,7 +128,20 @@ static char relative_position_message[128];
 /* DMA 先写入此缓冲区；回调复制到 uart_rx_frame 后立即重启下一次接收。 */
 static uint8_t uart_rx_dma_buffer[UART_RX_FRAME_CAPACITY];
 static UartRxFrame uart_rx_frame;
+static uint8_t k230_uart_rx_dma_buffer[UART_RX_FRAME_CAPACITY];
+static UartRxFrame k230_uart_rx_frame;
+static UartTextLineAccumulator k230_uart_line_accumulator;
 static char uart_rx_log_message[128];
+static char k230_uart_log_message[192];
+static uint16_t k230_uart_last_frame_size;
+static VisionTextResult latest_k230_result;
+static VisionError latest_k230_error;
+/* P09 设计初值，单位分别为 px、脉冲/px、脉冲/s；均待实测调参。 */
+static VisualTrackControllerConfig visual_track_config = {40, 2, 800};
+static int32_t latest_pan_speed_target;
+static bool latest_k230_result_valid;
+static uint32_t k230_text_valid_count;
+static uint32_t k230_text_error_count;
 static uint8_t uart_pong_message[] = "PONG\r\n";
 static uint8_t uart_unknown_command_message[] = "ERR unknown command\r\n";
 static uint8_t pitch_up_message[] = "PITCH state=running dir=up pulses=100\r\n";
@@ -548,19 +567,36 @@ static void StartUartRxDma(void)
   __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
 }
 
+static void StartK230UartRxDma(void)
+{
+  if (HAL_UARTEx_ReceiveToIdle_DMA(&huart2, k230_uart_rx_dma_buffer,
+                                   sizeof(k230_uart_rx_dma_buffer)) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* K230 由 IDLE 标记一段发送结束，不需要半满中断。 */
+  __HAL_DMA_DISABLE_IT(huart2.hdmarx, DMA_IT_HT);
+}
+
 /*
  * HAL 在 UART 空闲或 DMA 缓冲区写满时调用此函数。
  * 这里只做短时间的数据保存与 DMA 重启；字符串格式化和串口输出留给主循环。
  */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
 {
-  if (huart != &huart1)
+  if (huart == &huart1)
   {
-    return;
+    (void)UartRxFrame_Store(&uart_rx_frame, uart_rx_dma_buffer, size);
+    StartUartRxDma();
   }
-
-  (void)UartRxFrame_Store(&uart_rx_frame, uart_rx_dma_buffer, size);
-  StartUartRxDma();
+  else if (huart == &huart2)
+  {
+    (void)UartTextLineAccumulator_Consume(
+        &k230_uart_line_accumulator, &k230_uart_rx_frame,
+        k230_uart_rx_dma_buffer, size);
+    StartK230UartRxDma();
+  }
 }
 
 /* P05 只把状态机结果映射到硬件动作，不在这里实现速度规划或视觉跟踪。 */
@@ -952,6 +988,7 @@ int main(void)
   MX_TIM4_Init();
   MX_USART3_UART_Init();
   MX_TIM3_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
   DebouncedButton key0_button;
@@ -962,6 +999,7 @@ int main(void)
   PeriodicTask status_task;
   PeriodicTask motor_feedback_task;
   PeriodicTask heartbeat_task;
+  PeriodicTask k230_uart_log_task;
   uint32_t last_heartbeat_log_ms = HAL_GetTick();
   uint32_t key_scan_count = 0U;
   uint32_t status_task_count = 0U;
@@ -984,7 +1022,11 @@ int main(void)
   PeriodicTask_Init(&motor_feedback_task, MOTOR_FEEDBACK_PERIOD_MS,
                     HAL_GetTick());
   PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&k230_uart_log_task, K230_UART_LOG_PERIOD_MS,
+                    HAL_GetTick());
   UartRxFrame_Init(&uart_rx_frame);
+  UartRxFrame_Init(&k230_uart_rx_frame);
+  UartTextLineAccumulator_Init(&k230_uart_line_accumulator);
   VisionFrameParser_Init(&vision_frame_parser);
   CommunicationWatchdog_Init(&communication_watchdog, COMMUNICATION_TIMEOUT_MS);
   FrameSequenceTracker_Init(&frame_sequence_tracker);
@@ -1000,6 +1042,7 @@ int main(void)
     MotorTtlReadSystemStatus();
   }
   StartUartRxDma();
+  StartK230UartRxDma();
   /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
   if (HAL_UART_Transmit(&huart1, boot_message,
                         sizeof(boot_message) - 1U,
@@ -1017,6 +1060,61 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     uint32_t current_tick = HAL_GetTick();
+
+    /* P08 第一阶段只验证 K230 数据是否到达，不将其映射为运动。 */
+    if (k230_uart_rx_frame.pending)
+    {
+      k230_uart_last_frame_size = k230_uart_rx_frame.size;
+      if (VisionTextResult_Parse(k230_uart_rx_frame.data,
+                                 k230_uart_rx_frame.size,
+                                 &latest_k230_result))
+      {
+        latest_k230_result_valid = true;
+        latest_k230_error = VisionError_FromTarget(
+            1920U, 1080U, latest_k230_result.target_present,
+            latest_k230_result.center_x, latest_k230_result.center_y);
+        latest_pan_speed_target = VisualTrackController_HorizontalSpeed(
+            &visual_track_config, latest_k230_error.target_present,
+            latest_k230_error.error_x);
+        k230_text_valid_count++;
+      }
+      else
+      {
+        k230_text_error_count++;
+      }
+      UartRxFrame_Release(&k230_uart_rx_frame);
+    }
+
+    if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
+    {
+      int k230_log_length = snprintf(
+          k230_uart_log_message, sizeof(k230_uart_log_message),
+          "K230 RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld\r\n",
+          (unsigned long)k230_uart_rx_frame.received_count,
+          (unsigned long)k230_uart_rx_frame.dropped_count,
+          (unsigned long)k230_text_valid_count,
+          (unsigned long)k230_text_error_count,
+          (unsigned int)k230_uart_last_frame_size,
+          (unsigned int)(latest_k230_result_valid &&
+                                 latest_k230_result.target_present),
+          (unsigned int)(latest_k230_result_valid
+                             ? latest_k230_result.target_count
+                             : 0U),
+          latest_k230_result_valid ? latest_k230_result.center_x : 0,
+          latest_k230_result_valid ? latest_k230_result.center_y : 0,
+          latest_k230_result_valid ? latest_k230_error.error_x : 0,
+          latest_k230_result_valid ? latest_k230_error.error_y : 0,
+          (long)(latest_k230_result_valid ? latest_pan_speed_target : 0));
+
+      if ((k230_log_length <= 0) ||
+          (k230_log_length >= (int)sizeof(k230_uart_log_message)) ||
+          (HAL_UART_Transmit(&huart1, (uint8_t *)k230_uart_log_message,
+                             (uint16_t)k230_log_length,
+                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+      {
+        Error_Handler();
+      }
+    }
 
     if (motor_profile_move_complete_pending)
     {
