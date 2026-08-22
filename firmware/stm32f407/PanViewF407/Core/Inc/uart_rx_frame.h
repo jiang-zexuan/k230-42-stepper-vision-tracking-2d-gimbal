@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 enum {
-    /* 单位：byte；P03 首次 DMA 接收实验的单段最大长度。 */
-    UART_RX_FRAME_CAPACITY = 64U
+    /* 单位：byte；兼容 P03 命令和 P08 K230 文本诊断帧的单段最大长度。 */
+    UART_RX_FRAME_CAPACITY = 256U
 };
 
 /*
