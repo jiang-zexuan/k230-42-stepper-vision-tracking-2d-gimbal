@@ -33,8 +33,7 @@ typedef struct
   MotorPulseLabState state;
   MotorPulseLabDirection direction;
   uint16_t remaining_pulses;
-  uint16_t stage_remaining_pulses;
-  uint8_t profile_stage_index;
+  uint16_t step_frequency_hz;
   MotorPulseLabMotionPhase motion_phase;
 } MotorPulseLab;
 
@@ -46,7 +45,7 @@ MotorPulseLabDirection MotorPulseLab_GetDirection(const MotorPulseLab *lab);
 bool MotorPulseLab_StartProfileMove(MotorPulseLab *lab);
 bool MotorPulseLab_OnPulsePeriod(MotorPulseLab *lab);
 uint16_t MotorPulseLab_GetRemainingPulses(const MotorPulseLab *lab);
+uint16_t MotorPulseLab_GetStepFrequencyHz(const MotorPulseLab *lab);
 MotorPulseLabMotionPhase MotorPulseLab_GetMotionPhase(const MotorPulseLab *lab);
-uint8_t MotorPulseLab_GetProfileStageIndex(const MotorPulseLab *lab);
 
 #endif

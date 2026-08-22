@@ -1,0 +1,455 @@
+t=1500 dt=500 heartbeat=3 scans=148 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=198 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=248 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=298 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=348 status=35 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7242.78 deg raw=00141E6D error=+0.00 deg raw=00000000
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=48 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=98 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=148 status=15 link=waiting
+KEY_UP pressed
+POSITION theory=+0.0deg pulses=0 reason=manual_zero
+t=2000 dt=500 heartbeat=4 scans=198 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=248 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=298 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=348 status=35 link=waiting
+t=4000 dt=500 heartbeat=8 scans=398 status=40 link=waiting
+t=4500 dt=500 heartbeat=9 scans=448 status=45 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+t=5000 dt=500 heartbeat=10 scans=498 status=50 link=waiting
+t=5500 dt=500 heartbeat=11 scans=548 status=55 link=waiting
+t=6000 dt=500 heartbeat=12 scans=598 status=60 link=waiting
+t=6500 dt=500 heartbeat=13 scans=648 status=65 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+90.0deg pulses=800 reason=profile_complete
+MOTOR FB position=+7333.03 deg raw=00145E9B error=+0.00 deg raw=00000000
+t=7000 dt=500 heartbeat=14 scans=696 status=69 link=waiting
+t=7500 dt=500 heartbeat=15 scans=746 status=74 link=waiting
+t=8000 dt=500 heartbeat=16 scans=796 status=79 link=waiting
+t=8500 dt=500 heartbeat=17 scans=846 status=84 link=waiting
+t=9000 dt=500 heartbeat=18 scans=896 status=89 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=9500 dt=500 heartbeat=19 scans=946 status=94 link=waiting
+t=10000 dt=500 heartbeat=20 scans=996 status=99 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=10500 dt=500 heartbeat=21 scans=1046 status=104 link=waiting
+KEY1 pressed
+MOTOR direction=cw
+t=11000 dt=500 heartbeat=22 scans=1096 status=109 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+t=11500 dt=500 heartbeat=23 scans=1146 status=114 link=waiting
+t=12000 dt=500 heartbeat=24 scans=1196 status=119 link=waiting
+t=12500 dt=500 heartbeat=25 scans=1246 status=124 link=waiting
+t=13000 dt=500 heartbeat=26 scans=1296 status=129 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7242.85 deg raw=00141E79 error=+0.00 deg raw=00000000
+t=13500 dt=500 heartbeat=27 scans=1344 status=134 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+t=14000 dt=500 heartbeat=28 scans=1394 status=139 link=waiting
+t=14500 dt=500 heartbeat=29 scans=1444 status=144 link=waiting
+t=15000 dt=500 heartbeat=30 scans=1494 status=149 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=-90.0deg pulses=-800 reason=profile_complete
+MOTOR FB position=+7153.12 deg raw=0013DEAB error=+0.00 deg raw=00000000
+t=15504 dt=504 heartbeat=31 scans=1543 status=154 link=waiting
+t=16004 dt=500 heartbeat=32 scans=1593 status=159 link=waiting
+t=16504 dt=500 heartbeat=33 scans=1643 status=164 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=17004 dt=500 heartbeat=34 scans=1693 status=169 link=waiting
+t=17504 dt=500 heartbeat=35 scans=1743 status=174 link=waiting
+t=18004 dt=500 heartbeat=36 scans=1793 status=179 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=18504 dt=500 heartbeat=37 scans=1843 status=184 link=waiting
+t=19004 dt=500 heartbeat=38 scans=1893 status=189 link=waiting
+KEY1 pressed
+MOTOR direction=ccw
+t=19504 dt=500 heartbeat=39 scans=1943 status=194 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+t=20004 dt=500 heartbeat=40 scans=1993 status=199 link=waiting
+t=20504 dt=500 heartbeat=41 scans=2043 status=204 link=waiting
+t=21004 dt=500 heartbeat=42 scans=2093 status=209 link=waiting
+t=21504 dt=500 heartbeat=43 scans=2143 status=214 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7243.52 deg raw=00141EF3 error=+0.00 deg raw=00000000
+t=22004 dt=500 heartbeat=44 scans=2191 status=219 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+t=22504 dt=500 heartbeat=45 scans=2241 status=224 link=waiting
+t=23004 dt=500 heartbeat=46 scans=2291 status=229 link=waiting
+t=23504 dt=500 heartbeat=47 scans=2341 status=234 link=waiting
+t=24004 dt=500 heartbeat=48 scans=2391 status=239 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+90.0deg pulses=800 reason=profile_complete
+MOTOR FB position=+7333.73 deg raw=00145F19 error=+0.00 deg raw=00000000
+t=24504 dt=500 heartbeat=49 scans=2439 status=244 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=25004 dt=500 heartbeat=50 scans=2489 status=249 link=waiting
+t=25504 dt=500 heartbeat=51 scans=2539 status=254 link=waiting
+KEY1 pressed
+MOTOR direction=cw
+t=26004 dt=500 heartbeat=52 scans=2589 status=259 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+t=26504 dt=500 heartbeat=53 scans=2639 status=264 link=waiting
+t=27004 dt=500 heartbeat=54 scans=2689 status=269 link=waiting
+t=27504 dt=500 heartbeat=55 scans=2739 status=274 link=waiting
+t=28004 dt=500 heartbeat=56 scans=2789 status=279 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7243.35 deg raw=00141ED5 error=+0.00 deg raw=00000000
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+t=28504 dt=500 heartbeat=57 scans=2837 status=284 link=waiting
+t=29004 dt=500 heartbeat=58 scans=2887 status=289 link=waiting
+t=29504 dt=500 heartbeat=59 scans=2937 status=294 link=waiting
+t=30004 dt=500 heartbeat=60 scans=2987 status=299 link=waiting
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=-90.0deg pulses=-800 reason=profile_complete
+MOTOR FB position=+7153.54 deg raw=0013DEF7 error=+0.00 deg raw=00000000
+t=30504 dt=500 heartbeat=61 scans=3035 status=304 link=waiting
+t=31004 dt=500 heartbeat=62 scans=3085 status=309 link=waiting
+t=31504 dt=500 heartbeat=63 scans=3135 status=314 link=waiting
+t=32004 dt=500 heartbeat=64 scans=3185 status=319 link=waiting
+t=32504 dt=500 heartbeat=65 scans=3235 status=324 link=waiting
+t=33004 dt=500 heartbeat=66 scans=3285 status=329 link=waiting
+t=33504 dt=500 heartbeat=67 scans=3335 status=334 link=waiting
+t=34004 dt=500 heartbeat=68 scans=3385 status=339 link=waiting
+t=34504 dt=500 heartbeat=69 scans=3435 status=344 link=waiting
+t=448004 dt=500 heartbeat=896 scans=44785 status=4479 link=waiting
+t=448504 dt=500 heartbeat=897 scans=44835 status=4484 link=waiting
+t=449004 dt=500 heartbeat=898 scans=44885 status=4489 link=waiting
+t=449504 dt=500 heartbeat=899 scans=44935 status=4494 link=waiting
+t=450004 dt=500 heartbeat=900 scans=44985 status=4499 link=waiting
+t=450504 dt=500 heartbeat=901 scans=45035 status=4504 link=waiting
+t=451004 dt=500 heartbeat=902 scans=45085 status=4509 link=waiting
+t=451504 dt=500 heartbeat=903 scans=45135 status=4514 link=waiting
+t=452004 dt=500 heartbeat=904 scans=45185 status=4519 link=waiting
+t=452504 dt=500 heartbeat=905 scans=45235 status=4524 link=waiting
+t=453004 dt=500 heartbeat=906 scans=45285 status=4529 link=waiting
+t=453504 dt=500 heartbeat=907 scans=45335 status=4534 link=waiting
+t=454004 dt=500 heartbeat=908 scans=45385 status=4539 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.78 deg raw=00141973 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11723mV current=5mA encoder=20868 target=+7235.79deg speed=+0RPM position=+7235.78deg error=+0.00deg home=0x03 state=0x02
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=47 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=97 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=147 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=197 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=247 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=297 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=347 status=35 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.78 deg raw=00141973 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11710mV current=5mA encoder=20868 target=+7235.79deg speed=+0RPM position=+7235.78deg error=+0.00deg home=0x03 state=0x02
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=47 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=97 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=147 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=197 status=20 link=waiting
+t=1000 dt=500 heartbeat=2 scans=96 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=146 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=196 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=246 status=25 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.79 deg raw=00141975 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11710mV current=5mA encoder=20870 target=+7235.79deg speed=+0RPM position=+7235.79deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=46 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=96 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=146 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=196 status=20 link=waiting
+t=2500 dt=500 heartbeat=5 scans=246 status=25 link=waiting
+t=3000 dt=500 heartbeat=6 scans=296 status=30 link=waiting
+t=3500 dt=500 heartbeat=7 scans=346 status=35 link=waiting
+t=4000 dt=500 heartbeat=8 scans=396 status=40 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.79 deg raw=00141975 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11710mV current=5mA encoder=20870 target=+7235.79deg speed=+0RPM position=+7235.79deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=46 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=96 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=146 status=15 link=waiting
+t=2000 dt=500 heartbeat=4 scans=196 status=20 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.79 deg raw=00141975 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11724mV current=5mA encoder=20870 target=+7235.79deg speed=+0RPM position=+7235.79deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=46 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=96 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=146 status=15 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+7235.79 deg raw=00141975 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11714mV current=5mA encoder=20870 target=+7235.79deg speed=+0RPM position=+7235.79deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P01 boot
+t=500 dt=500 heartbeat=1 scans=46 status=5 link=waiting
+t=1000 dt=500 heartbeat=2 scans=96 status=10 link=waiting
+t=1500 dt=500 heartbeat=3 scans=146 status=15 link=waiting
+t=6000 dt=500 heartbeat=12 scans=596 status=60 link=waiting
+t=6500 dt=500 heartbeat=13 scans=646 status=65 link=waiting
+t=7000 dt=500 heartbeat=14 scans=696 status=70 link=waiting
+KEY_UP pressed
+POSITION theory=+0.0deg pulses=0 reason=manual_zero
+t=7500 dt=500 heartbeat=15 scans=746 status=75 link=waiting
+t=8000 dt=500 heartbeat=16 scans=796 status=80 link=waiting
+t=8500 dt=500 heartbeat=17 scans=846 status=85 link=waiting
+t=9000 dt=500 heartbeat=18 scans=896 status=90 link=waiting
+t=9500 dt=500 heartbeat=19 scans=946 status=95 link=waiting
+t=10000 dt=500 heartbeat=20 scans=996 status=100 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+MOTOR SYS bus=11716mV current=6mA encoder=20870 target=+7235.90deg speed=+0RPM position=+7235.79deg error=+0.10deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11653mV current=116mA encoder=21104 target=+7237.47deg speed=+3RPM position=+7237.08deg error=+0.39deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11642mV current=63mA encoder=21652 target=+7240.29deg speed=+5RPM position=+7240.09deg error=+0.19deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11641mV current=78mA encoder=22373 target=+7244.34deg speed=+7RPM position=+7244.05deg error=+0.29deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11647mV current=75mA encoder=23311 target=+7249.40deg speed=+9RPM position=+7249.20deg error=+0.20deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=10500 dt=500 heartbeat=21 scans=1038 status=105 link=waiting
+MOTOR SYS bus=11655mV current=48mA encoder=24356 target=+7255.03deg speed=+9RPM position=+7254.94deg error=+0.08deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=52mA encoder=25373 target=+7260.65deg speed=+9RPM position=+7260.53deg error=+0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11682mV current=40mA encoder=26424 target=+7266.28deg speed=+9RPM position=+7266.30deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=63mA encoder=27430 target=+7271.90deg speed=+9RPM position=+7271.83deg error=+0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11661mV current=51mA encoder=28463 target=+7277.53deg speed=+9RPM position=+7277.50deg error=+0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=11000 dt=500 heartbeat=22 scans=1077 status=110 link=waiting
+MOTOR SYS bus=11657mV current=59mA encoder=29481 target=+7283.15deg speed=+9RPM position=+7283.10deg error=+0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11655mV current=40mA encoder=30510 target=+7288.78deg speed=+9RPM position=+7288.75deg error=+0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11660mV current=53mA encoder=31545 target=+7294.40deg speed=+9RPM position=+7294.43deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11659mV current=50mA encoder=32558 target=+7300.03deg speed=+9RPM position=+7300.00deg error=+0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=60mA encoder=33586 target=+7305.65deg speed=+9RPM position=+7305.65deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=11500 dt=500 heartbeat=23 scans=1116 status=115 link=waiting
+MOTOR SYS bus=11663mV current=47mA encoder=34600 target=+7311.28deg speed=+8RPM position=+7311.22deg error=+0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11664mV current=39mA encoder=35637 target=+7316.79deg speed=+9RPM position=+7316.92deg error=-0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=16mA encoder=36434 target=+7321.06deg speed=+6RPM position=+7321.29deg error=-0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11668mV current=46mA encoder=36970 target=+7324.10deg speed=+4RPM position=+7324.23deg error=-0.13deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+90.0deg pulses=800 reason=profile_complete
+MOTOR FB position=+7326.07 deg raw=001459A7 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11710mV current=12mA encoder=37310 target=+7325.79deg speed=+1RPM position=+7326.10deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+t=12042 dt=542 heartbeat=24 scans=1156 status=120 link=waiting
+t=12542 dt=500 heartbeat=25 scans=1206 status=125 link=waiting
+t=13042 dt=500 heartbeat=26 scans=1256 status=130 link=waiting
+t=13542 dt=500 heartbeat=27 scans=1306 status=135 link=waiting
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=14042 dt=500 heartbeat=28 scans=1356 status=140 link=waiting
+t=14542 dt=500 heartbeat=29 scans=1406 status=145 link=waiting
+KEY1 pressed
+MOTOR direction=cw
+t=15042 dt=500 heartbeat=30 scans=1456 status=150 link=waiting
+t=15542 dt=500 heartbeat=31 scans=1506 status=155 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+MOTOR SYS bus=11661mV current=37mA encoder=37298 target=+7325.56deg speed=+0RPM position=+7326.04deg error=-0.46deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=69mA encoder=36852 target=+7323.54deg speed=-5RPM position=+7323.59deg error=-0.04deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=16042 dt=500 heartbeat=32 scans=1554 status=160 link=waiting
+MOTOR SYS bus=11645mV current=69mA encoder=36334 target=+7320.27deg speed=-4RPM position=+7320.74deg error=-0.46deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=69mA encoder=35431 target=+7315.77deg speed=-9RPM position=+7315.78deg error=-0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11651mV current=67mA encoder=34529 target=+7310.37deg speed=-7RPM position=+7310.83deg error=-0.45deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11717mV current=33mA encoder=33372 target=+7304.75deg speed=-10RPM position=+7304.47deg error=+0.28deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=95mA encoder=32463 target=+7299.12deg speed=-8RPM position=+7299.48deg error=-0.35deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=16542 dt=500 heartbeat=33 scans=1593 status=165 link=waiting
+MOTOR SYS bus=11695mV current=22mA encoder=31332 target=+7293.50deg speed=-10RPM position=+7293.26deg error=+0.23deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=100mA encoder=30403 target=+7287.87deg speed=-8RPM position=+7288.16deg error=-0.28deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11691mV current=31mA encoder=29297 target=+7282.25deg speed=-9RPM position=+7282.08deg error=+0.15deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=92mA encoder=28321 target=+7276.62deg speed=-9RPM position=+7276.72deg error=-0.09deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=17mA encoder=27270 target=+7271.00deg speed=-8RPM position=+7270.95deg error=+0.04deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=17042 dt=500 heartbeat=34 scans=1632 status=170 link=waiting
+MOTOR SYS bus=11662mV current=85mA encoder=26260 target=+7265.37deg speed=-10RPM position=+7265.40deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11647mV current=28mA encoder=25253 target=+7259.75deg speed=-8RPM position=+7259.87deg error=-0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11672mV current=47mA encoder=24185 target=+7254.12deg speed=-10RPM position=+7254.00deg error=+0.11deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11647mV current=37mA encoder=23210 target=+7248.50deg speed=-8RPM position=+7248.65deg error=-0.14deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11714mV current=34mA encoder=22166 target=+7243.33deg speed=-9RPM position=+7242.91deg error=+0.40deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=17542 dt=500 heartbeat=35 scans=1671 status=175 link=waiting
+MOTOR SYS bus=11638mV current=54mA encoder=21583 target=+7239.50deg speed=-4RPM position=+7239.71deg error=-0.20deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11679mV current=40mA encoder=20970 target=+7237.02deg speed=-5RPM position=+7236.34deg error=+0.68deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7235.85 deg raw=0014197F error=+0.00 deg raw=00000000
+MOTOR SYS bus=11709mV current=24mA encoder=20880 target=+7236.12deg speed=+0RPM position=+7235.85deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+t=18042 dt=500 heartbeat=36 scans=1710 status=179 link=waiting
+t=18542 dt=500 heartbeat=37 scans=1760 status=184 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+MOTOR SYS bus=11662mV current=16mA encoder=20906 target=+7235.67deg speed=+0RPM position=+7235.99deg error=-0.31deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11657mV current=99mA encoder=20568 target=+7233.87deg speed=-4RPM position=+7234.14deg error=-0.25deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11618mV current=57mA encoder=20049 target=+7230.84deg speed=-4RPM position=+7231.28deg error=-0.45deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=19042 dt=500 heartbeat=38 scans=1805 status=189 link=waiting
+MOTOR SYS bus=11673mV current=38mA encoder=19191 target=+7226.56deg speed=-8RPM position=+7226.57deg error=-0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11637mV current=102mA encoder=18329 target=+7221.39deg speed=-8RPM position=+7221.84deg error=-0.45deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11686mV current=26mA encoder=17200 target=+7215.76deg speed=-9RPM position=+7215.63deg error=+0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11637mV current=88mA encoder=16252 target=+7210.14deg speed=-9RPM position=+7210.43deg error=-0.29deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=20mA encoder=15150 target=+7204.51deg speed=-9RPM position=+7204.37deg error=+0.13deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=19542 dt=500 heartbeat=39 scans=1845 status=194 link=waiting
+MOTOR SYS bus=11658mV current=96mA encoder=14164 target=+7198.89deg speed=-9RPM position=+7198.96deg error=-0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11663mV current=22mA encoder=13130 target=+7193.26deg speed=-8RPM position=+7193.28deg error=-0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=74mA encoder=12115 target=+7187.64deg speed=-9RPM position=+7187.70deg error=-0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11649mV current=20mA encoder=11084 target=+7182.01deg speed=-8RPM position=+7182.04deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11686mV current=73mA encoder=10041 target=+7176.39deg speed=-10RPM position=+7176.31deg error=+0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=20042 dt=500 heartbeat=40 scans=1885 status=199 link=waiting
+MOTOR SYS bus=11638mV current=47mA encoder=9048 target=+7170.76deg speed=-8RPM position=+7170.85deg error=-0.08deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11656mV current=53mA encoder=7997 target=+7165.14deg speed=-10RPM position=+7165.08deg error=+0.04deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=42mA encoder=7008 target=+7159.51deg speed=-8RPM position=+7159.65deg error=-0.13deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11686mV current=43mA encoder=5949 target=+7154.11deg speed=-10RPM position=+7153.83deg error=+0.27deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=44mA encoder=5270 target=+7150.06deg speed=-5RPM position=+7150.10deg error=-0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=20542 dt=500 heartbeat=41 scans=1925 status=204 link=waiting
+MOTOR SYS bus=11712mV current=25mA encoder=4690 target=+7147.25deg speed=-4RPM position=+7146.91deg error=+0.33deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=-90.0deg pulses=-800 reason=profile_complete
+MOTOR FB position=+7146.05 deg raw=0013D9A3 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11722mV current=51mA encoder=4524 target=+7146.01deg speed=-1RPM position=+7146.00deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+KEY2 pressed
+MOTOR profile move rejected: horizontal_limit
+t=21042 dt=500 heartbeat=42 scans=1969 status=209 link=waiting
+KEY1 pressed
+MOTOR direction=ccw
+t=21542 dt=500 heartbeat=43 scans=2019 status=214 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+MOTOR SYS bus=11638mV current=123mA encoder=4692 target=+7147.47deg speed=+1RPM position=+7146.93deg error=+0.54deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11667mV current=47mA encoder=5232 target=+7150.06deg speed=+5RPM position=+7149.89deg error=+0.17deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11615mV current=141mA encoder=5863 target=+7153.78deg speed=+6RPM position=+7153.36deg error=+0.42deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=22042 dt=500 heartbeat=44 scans=2063 status=219 link=waiting
+MOTOR SYS bus=11661mV current=25mA encoder=6803 target=+7158.61deg speed=+8RPM position=+7158.52deg error=+0.09deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11649mV current=105mA encoder=7831 target=+7164.23deg speed=+10RPM position=+7164.17deg error=+0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11640mV current=28mA encoder=8852 target=+7169.86deg speed=+8RPM position=+7169.78deg error=+0.08deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11644mV current=94mA encoder=9884 target=+7175.48deg speed=+10RPM position=+7175.45deg error=+0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=30mA encoder=10889 target=+7181.11deg speed=+8RPM position=+7180.97deg error=+0.14deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=22542 dt=500 heartbeat=45 scans=2103 status=224 link=waiting
+MOTOR SYS bus=11662mV current=64mA encoder=11966 target=+7186.73deg speed=+10RPM position=+7186.88deg error=-0.13deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=50mA encoder=12940 target=+7192.36deg speed=+8RPM position=+7192.23deg error=+0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=66mA encoder=14006 target=+7197.98deg speed=+10RPM position=+7198.09deg error=-0.09deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=60mA encoder=14971 target=+7203.61deg speed=+8RPM position=+7203.39deg error=+0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=32mA encoder=16072 target=+7209.23deg speed=+10RPM position=+7209.44deg error=-0.19deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=23042 dt=500 heartbeat=46 scans=2143 status=229 link=waiting
+MOTOR SYS bus=11644mV current=71mA encoder=17032 target=+7214.86deg speed=+8RPM position=+7214.71deg error=+0.14deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11667mV current=41mA encoder=18110 target=+7220.48deg speed=+10RPM position=+7220.63deg error=-0.14deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=90mA encoder=19066 target=+7226.11deg speed=+8RPM position=+7225.88deg error=+0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11693mV current=38mA encoder=20008 target=+7230.72deg speed=+7RPM position=+7231.06deg error=-0.32deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+KEY2 pressed
+MOTOR profile move ignored: running
+MOTOR SYS bus=11679mV current=76mA encoder=20580 target=+7233.99deg speed=+5RPM position=+7234.20deg error=-0.20deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=23542 dt=500 heartbeat=47 scans=2183 status=234 link=waiting
+MOTOR SYS bus=11685mV current=25mA encoder=20934 target=+7236.01deg speed=+1RPM position=+7236.15deg error=-0.13deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7236.19 deg raw=001419BD error=+0.00 deg raw=00000000
+MOTOR SYS bus=11714mV current=24mA encoder=20942 target=+7236.24deg speed=+0RPM position=+7236.19deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+KEY2 pressed
+MOTOR state=profile_move dir=ccw target_deg=90 target_pulses=800
+t=24042 dt=500 heartbeat=48 scans=2228 status=239 link=waiting
+MOTOR SYS bus=11640mV current=41mA encoder=20916 target=+7236.57deg speed=+0RPM position=+7236.05deg error=+0.52deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=88mA encoder=21352 target=+7238.60deg speed=+5RPM position=+7238.44deg error=+0.15deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=57mA encoder=21924 target=+7241.86deg speed=+5RPM position=+7241.58deg error=+0.28deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11644mV current=78mA encoder=22762 target=+7246.36deg speed=+8RPM position=+7246.19deg error=+0.18deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=58mA encoder=23742 target=+7251.76deg speed=+9RPM position=+7251.57deg error=+0.19deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=24542 dt=500 heartbeat=49 scans=2268 status=244 link=waiting
+MOTOR SYS bus=11662mV current=46mA encoder=24808 target=+7257.39deg speed=+10RPM position=+7257.43deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=75mA encoder=25790 target=+7263.01deg speed=+8RPM position=+7262.82deg error=+0.19deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=30mA encoder=26860 target=+7268.64deg speed=+9RPM position=+7268.70deg error=-0.05deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11654mV current=63mA encoder=27856 target=+7274.26deg speed=+9RPM position=+7274.17deg error=+0.09deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=33mA encoder=28908 target=+7279.89deg speed=+9RPM position=+7279.95deg error=-0.04deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=25042 dt=500 heartbeat=50 scans=2308 status=249 link=waiting
+MOTOR SYS bus=11638mV current=72mA encoder=29910 target=+7285.51deg speed=+9RPM position=+7285.45deg error=+0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11659mV current=47mA encoder=30944 target=+7291.14deg speed=+9RPM position=+7291.13deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=57mA encoder=31964 target=+7296.76deg speed=+9RPM position=+7296.74deg error=+0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11654mV current=39mA encoder=32992 target=+7302.39deg speed=+9RPM position=+7302.38deg error=+0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=53mA encoder=34026 target=+7308.01deg speed=+9RPM position=+7308.06deg error=-0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=25542 dt=500 heartbeat=51 scans=2348 status=254 link=waiting
+MOTOR SYS bus=11640mV current=54mA encoder=35034 target=+7313.64deg speed=+9RPM position=+7313.60deg error=+0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11690mV current=23mA encoder=36026 target=+7318.81deg speed=+8RPM position=+7319.05deg error=-0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=29mA encoder=36691 target=+7322.64deg speed=+5RPM position=+7322.70deg error=-0.05deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11694mV current=38mA encoder=37188 target=+7325.11deg speed=+4RPM position=+7325.43deg error=-0.31deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+90.0deg pulses=800 reason=profile_complete
+MOTOR FB position=+7326.37 deg raw=001459DE error=+0.00 deg raw=00000000
+MOTOR SYS bus=11708mV current=13mA encoder=37364 target=+7326.01deg speed=+1RPM position=+7326.40deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+t=26042 dt=500 heartbeat=52 scans=2386 status=259 link=waiting
+KEY1 pressed
+MOTOR direction=cw
+t=26542 dt=500 heartbeat=53 scans=2436 status=264 link=waiting
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+MOTOR SYS bus=11638mV current=112mA encoder=37206 target=+7325.00deg speed=-2RPM position=+7325.53deg error=-0.52deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=27042 dt=500 heartbeat=54 scans=2484 status=269 link=waiting
+MOTOR SYS bus=11686mV current=20mA encoder=36656 target=+7322.53deg speed=-5RPM position=+7322.51deg error=+0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=114mA encoder=36068 target=+7318.81deg speed=-6RPM position=+7319.28deg error=-0.46deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11686mV current=17mA encoder=35088 target=+7313.97deg speed=-9RPM position=+7313.90deg error=+0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=107mA encoder=34132 target=+7308.35deg speed=-9RPM position=+7308.64deg error=-0.29deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11667mV current=33mA encoder=33051 target=+7302.72deg speed=-8RPM position=+7302.71deg error=+0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=27542 dt=500 heartbeat=55 scans=2524 status=274 link=waiting
+MOTOR SYS bus=11641mV current=80mA encoder=32037 target=+7297.10deg speed=-10RPM position=+7297.14deg error=-0.03deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11647mV current=19mA encoder=31020 target=+7291.47deg speed=-8RPM position=+7291.55deg error=-0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11676mV current=69mA encoder=29968 target=+7285.85deg speed=-10RPM position=+7285.77deg error=+0.07deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=37mA encoder=28999 target=+7280.22deg speed=-7RPM position=+7280.45deg error=-0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11687mV current=33mA encoder=27904 target=+7274.60deg speed=-10RPM position=+7274.43deg error=+0.16deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=28042 dt=500 heartbeat=56 scans=2564 status=279 link=waiting
+MOTOR SYS bus=11641mV current=48mA encoder=26954 target=+7268.97deg speed=-8RPM position=+7269.21deg error=-0.24deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11709mV current=31mA encoder=25838 target=+7263.35deg speed=-10RPM position=+7263.08deg error=+0.25deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11653mV current=76mA encoder=24911 target=+7257.72deg speed=-8RPM position=+7257.99deg error=-0.26deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11687mV current=17mA encoder=23810 target=+7252.10deg speed=-9RPM position=+7251.94deg error=+0.15deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11668mV current=73mA encoder=22854 target=+7246.47deg speed=-8RPM position=+7246.69deg error=-0.21deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=28542 dt=500 heartbeat=57 scans=2604 status=284 link=waiting
+MOTOR SYS bus=11717mV current=57mA encoder=21896 target=+7241.86deg speed=-7RPM position=+7241.43deg error=+0.43deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=96mA encoder=21370 target=+7238.49deg speed=-5RPM position=+7238.54deg error=-0.04deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=66mA encoder=20906 target=+7236.57deg speed=-2RPM position=+7235.99deg error=+0.58deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=+0.0deg pulses=0 reason=profile_complete
+MOTOR FB position=+7235.97 deg raw=00141995 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11708mV current=17mA encoder=20902 target=+7236.24deg speed=+0RPM position=+7235.97deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+KEY2 pressed
+MOTOR state=profile_move dir=cw target_deg=90 target_pulses=800
+t=29042 dt=500 heartbeat=58 scans=2644 status=289 link=waiting
+MOTOR SYS bus=11638mV current=54mA encoder=20906 target=+7235.45deg speed=+0RPM position=+7235.99deg error=-0.53deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=49mA encoder=20441 target=+7233.43deg speed=-5RPM position=+7233.44deg error=-0.01deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=106mA encoder=19927 target=+7230.16deg speed=-4RPM position=+7230.61deg error=-0.45deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11700mV current=16mA encoder=19030 target=+7225.66deg speed=-8RPM position=+7225.69deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11639mV current=114mA encoder=18090 target=+7220.26deg speed=-9RPM position=+7220.52deg error=-0.25deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=29542 dt=500 heartbeat=59 scans=2684 status=294 link=waiting
+MOTOR SYS bus=11662mV current=31mA encoder=17023 target=+7214.63deg speed=-8RPM position=+7214.66deg error=-0.02deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=89mA encoder=16015 target=+7209.01deg speed=-10RPM position=+7209.12deg error=-0.11deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11661mV current=29mA encoder=14986 target=+7203.38deg speed=-8RPM position=+7203.47deg error=-0.08deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11662mV current=69mA encoder=13924 target=+7197.76deg speed=-10RPM position=+7197.64deg error=+0.12deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11636mV current=42mA encoder=12957 target=+7192.13deg speed=-8RPM position=+7192.33deg error=-0.19deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=30042 dt=500 heartbeat=60 scans=2724 status=299 link=waiting
+MOTOR SYS bus=11664mV current=53mA encoder=11880 target=+7186.51deg speed=-10RPM position=+7186.41deg error=+0.09deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=50mA encoder=10917 target=+7180.88deg speed=-8RPM position=+7181.12deg error=-0.23deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11685mV current=38mA encoder=9808 target=+7175.26deg speed=-10RPM position=+7175.03deg error=+0.23deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11638mV current=77mA encoder=8867 target=+7169.63deg speed=-8RPM position=+7169.86deg error=-0.22deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11688mV current=32mA encoder=7773 target=+7164.01deg speed=-10RPM position=+7163.85deg error=+0.15deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+t=30542 dt=500 heartbeat=61 scans=2764 status=304 link=waiting
+MOTOR SYS bus=11616mV current=78mA encoder=6826 target=+7158.38deg speed=-8RPM position=+7158.65deg error=-0.25deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11710mV current=35mA encoder=5756 target=+7153.21deg speed=-9RPM position=+7152.77deg error=+0.43deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11646mV current=78mA encoder=5152 target=+7149.39deg speed=-5RPM position=+7149.45deg error=-0.06deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR SYS bus=11709mV current=33mA encoder=4628 target=+7146.91deg speed=-3RPM position=+7146.57deg error=+0.33deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x03(reached=yes,enabled=yes,stall=clear,left=low,right=low)
+MOTOR state=stopped reason=profile_complete target_pulses=800
+POSITION theory=-90.0deg pulses=-800 reason=profile_complete
+MOTOR FB position=+7146.12 deg raw=0013D9B0 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11709mV current=49mA encoder=4540 target=+7146.01deg speed=+0RPM position=+7146.09deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+t=31042 dt=500 heartbeat=62 scans=2802 status=309 link=waiting
+KEY1 pressed
+MOTOR direction=ccw
+t=31542 dt=500 heartbeat=63 scans=2852 status=314 link=waiting
+t=32042 dt=500 heartbeat=64 scans=2902 status=319 link=waiting
+t=32542 dt=500 heartbeat=65 scans=2952 status=324 link=waiting
+t=33042 dt=500 heartbeat=66 scans=3002 status=329 link=waiting
+t=33542 dt=500 heartbeat=67 scans=3052 status=334 link=waiting
+t=34042 dt=500 heartbeat=68 scans=3102 status=339 link=waiting

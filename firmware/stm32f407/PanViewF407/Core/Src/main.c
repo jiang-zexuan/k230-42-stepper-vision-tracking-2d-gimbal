@@ -58,6 +58,9 @@
 /* USER CODE BEGIN PV */
 /* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
 static uint8_t boot_message[] = "PanView P01 boot\r\n";
+static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
+static uint8_t motor_ttl_option_request[] = {0x01U, 0x1AU, 0x6BU};
+static uint8_t motor_ttl_system_status_request[] = {0x01U, 0x43U, 0x7AU, 0x6BU};
 
 enum {
   /* 单位：ms；串口发送阻塞等待上限，仅用于当前诊断日志。 */
@@ -82,6 +85,8 @@ enum {
   KEY_SCAN_PERIOD_MS = 10U,
   KEY_DEBOUNCE_MS = 20U,
   STATUS_PERIOD_MS = 100U,
+  /* 单位：ms；运动期间读取一次 X42S 状态，观察真实速度和跟随误差。 */
+  MOTOR_FEEDBACK_PERIOD_MS = 100U,
   HEARTBEAT_PERIOD_MS = 500U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
@@ -96,18 +101,6 @@ enum {
   /* 单位：脉冲/圈；X42S 当前 16 细分设置。 */
   MOTOR_PULSES_PER_REVOLUTION = 3200U
 };
-
-typedef struct
-{
-  uint16_t step_frequency_hz;
-  uint16_t tim_prescaler;
-} MotorPulseLabSpeedStage;
-
-/* 300 Hz 无法被当前 16 MHz 时钟精确整除，实际为约 300.019 Hz。 */
-static const MotorPulseLabSpeedStage motor_profile_speed_stages[] = {
-    {100U, 15999U}, {200U, 7999U},  {300U, 5332U},
-    {400U, 3999U},  {500U, 3199U},  {400U, 3999U},
-    {300U, 5332U},  {200U, 7999U},  {100U, 15999U}};
 
 /* KEY0 事件与心跳日志共用 USART1；心跳缓冲区避免逐字符发送。 */
 static uint8_t key0_pressed_message[] = "KEY0 pressed\r\n";
@@ -157,6 +150,323 @@ static MotorPulseLab motor_pulse_lab;
 static MotionLimits horizontal_motion_limits;
 static RelativePositionTracker relative_position_tracker;
 static volatile bool motor_profile_move_complete_pending;
+
+/*
+ * 只读探测 X42S TTL 链路。依据电机手册 5.6.30：发送 00 15 6B，
+ * 返回 Addr 15 Addr 6B。探测不会产生运动，也不会修改参数。
+ */
+static bool MotorTtlProbe(void)
+{
+  uint8_t response[4] = {0U};
+  char message[96];
+  int message_length;
+  HAL_StatusTypeDef receive_status = HAL_ERROR;
+
+  if (HAL_UART_Transmit(&huart3, motor_ttl_probe_request,
+                        sizeof(motor_ttl_probe_request),
+                        BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+  {
+    message_length = snprintf(message, sizeof(message),
+                              "MOTOR TTL probe=tx_error\r\n");
+  }
+  else
+  {
+    receive_status = HAL_UART_Receive(&huart3, response, sizeof(response),
+                                      BOOT_LOG_TIMEOUT_MS);
+    if ((receive_status == HAL_OK) && (response[1] == 0x15U) &&
+        (response[3] == 0x6BU))
+    {
+      message_length = snprintf(message, sizeof(message),
+                                "MOTOR TTL probe=ok id=%u raw=%02X %02X %02X %02X\r\n",
+                                (unsigned int)response[2], response[0],
+                                response[1], response[2], response[3]);
+    }
+    else
+    {
+      message_length = snprintf(message, sizeof(message),
+                                "MOTOR TTL probe=timeout_or_bad_frame status=%d raw=%02X %02X %02X %02X\r\n",
+                                (int)receive_status, response[0], response[1],
+                                response[2], response[3]);
+    }
+  }
+
+  if ((message_length <= 0) ||
+      (message_length >= (int)sizeof(message)) ||
+      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+                         BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+  {
+    Error_Handler();
+  }
+
+  return (message_length > 0) && (receive_status == HAL_OK) &&
+         (response[1] == 0x15U) && (response[3] == 0x6BU);
+}
+
+/*
+ * 读取 X42S 选项状态。依据电机手册 5.6.4：01 1A 6B，返回 5 字节。
+ * 返回的 flags 用于确定后续实时位置数据的单位，整个操作仍然只读。
+ */
+static void MotorTtlReadOption(void)
+{
+  uint8_t response[5] = {0U};
+  char message[128];
+  int message_length;
+  HAL_StatusTypeDef receive_status = HAL_TIMEOUT;
+
+  if (HAL_UART_Transmit(&huart3, motor_ttl_option_request,
+                        sizeof(motor_ttl_option_request),
+                        BOOT_LOG_TIMEOUT_MS) == HAL_OK)
+  {
+    receive_status = HAL_UART_Receive(&huart3, response, sizeof(response),
+                                      BOOT_LOG_TIMEOUT_MS);
+  }
+
+  if ((receive_status == HAL_OK) && (response[0] == 0x01U) &&
+      (response[1] == 0x1AU) && (response[4] == 0x6BU))
+  {
+    uint16_t flags = ((uint16_t)response[2] << 8U) | response[3];
+    const char *motor_type = (flags & (1U << 0)) ? "0.9deg" : "1.8deg";
+    const char *firmware = (flags & (1U << 1)) ? "Emm" : "X";
+    const char *control_mode = (flags & (1U << 2)) ? "closed" : "open";
+    const char *positive_direction = (flags & (1U << 4)) ? "CCW" : "CW";
+
+    message_length = snprintf(
+        message, sizeof(message),
+        "MOTOR CFG option=ok flags=%04X motor=%s fw=%s mode=%s dir=%s\r\n",
+        (unsigned int)flags, motor_type, firmware, control_mode,
+        positive_direction);
+  }
+  else
+  {
+    message_length = snprintf(
+        message, sizeof(message),
+        "MOTOR CFG option=timeout_or_bad_frame status=%d raw=%02X %02X %02X %02X %02X\r\n",
+        (int)receive_status, response[0], response[1], response[2],
+        response[3], response[4]);
+  }
+
+  if ((message_length <= 0) ||
+      (message_length >= (int)sizeof(message)) ||
+      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+                         BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+  {
+    Error_Handler();
+  }
+}
+
+/*
+ * 读取实时位置和位置误差。依据电机手册 5.5.13/5.5.14，两个返回帧都为：
+ * Addr、功能码、符号、4 字节数据、校验码。当前已确认是 Emm 固件，
+ * 每 65536 个计数对应一圈 360 度；位置值可跨圈累积。这里暂时只做诊断，
+ * 不参与控制。
+ */
+static void MotorTtlReadPositionAndError(void)
+{
+  uint8_t requests[2][3] = {
+      {0x01U, 0x36U, 0x6BU},
+      {0x01U, 0x37U, 0x6BU}};
+  uint8_t responses[2][8] = {{0U}};
+  uint32_t raw_values[2] = {0U, 0U};
+  uint32_t angle_hundredths[2] = {0U, 0U};
+  char message[160];
+  int message_length;
+  uint8_t index;
+
+  for (index = 0U; index < 2U; index++)
+  {
+    if (HAL_UART_Transmit(&huart3, requests[index], sizeof(requests[index]),
+                          BOOT_LOG_TIMEOUT_MS) != HAL_OK ||
+        HAL_UART_Receive(&huart3, responses[index], sizeof(responses[index]),
+                         BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+    {
+      message_length = snprintf(
+          message, sizeof(message),
+          "MOTOR FB read=%s failed raw=%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+          index == 0U ? "position" : "error", responses[index][0],
+          responses[index][1], responses[index][2], responses[index][3],
+          responses[index][4], responses[index][5], responses[index][6],
+          responses[index][7]);
+
+      if ((message_length <= 0) ||
+          (HAL_UART_Transmit(&huart1, (uint8_t *)message,
+                             (uint16_t)message_length,
+                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+      {
+        Error_Handler();
+      }
+      return;
+    }
+
+    if ((responses[index][0] != 0x01U) ||
+        (responses[index][1] != (index == 0U ? 0x36U : 0x37U)) ||
+        (responses[index][7] != 0x6BU))
+    {
+      message_length = snprintf(
+          message, sizeof(message),
+          "MOTOR FB read=%s bad_frame raw=%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+          index == 0U ? "position" : "error", responses[index][0],
+          responses[index][1], responses[index][2], responses[index][3],
+          responses[index][4], responses[index][5], responses[index][6],
+          responses[index][7]);
+
+      if ((message_length <= 0) ||
+          (HAL_UART_Transmit(&huart1, (uint8_t *)message,
+                             (uint16_t)message_length,
+                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+      {
+        Error_Handler();
+      }
+      return;
+    }
+
+    raw_values[index] = ((uint32_t)responses[index][3] << 24U) |
+                        ((uint32_t)responses[index][4] << 16U) |
+                        ((uint32_t)responses[index][5] << 8U) |
+                        responses[index][6];
+    angle_hundredths[index] = (uint32_t)(
+        ((uint64_t)raw_values[index] * 36000ULL) / 65536ULL);
+  }
+
+  message_length = snprintf(
+      message, sizeof(message),
+      "MOTOR FB position=%c%lu.%02u deg raw=%08lX error=%c%lu.%02u deg raw=%08lX\r\n",
+      responses[0][2] == 0U ? '+' : '-',
+      (unsigned long)(angle_hundredths[0] / 100U),
+      (unsigned int)(angle_hundredths[0] % 100U), (unsigned long)raw_values[0],
+      responses[1][2] == 0U ? '+' : '-',
+      (unsigned long)(angle_hundredths[1] / 100U),
+      (unsigned int)(angle_hundredths[1] % 100U), (unsigned long)raw_values[1]);
+
+  if ((message_length <= 0) ||
+      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+                         BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+  {
+    Error_Handler();
+  }
+}
+
+/*
+ * 读取 X42S Emm 系统状态。依据手册 5.8.2，回包固定 31 字节：
+ * 电压/电流单位为 mV/mA，位置相关计数每 65536 对应 360 度，
+ * 转速单位为 RPM。该函数只读，不参与运动控制。
+ */
+static void MotorTtlReadSystemStatus(void)
+{
+  uint8_t response[31] = {0U};
+  uint16_t bus_voltage_mv;
+  uint16_t phase_current_ma;
+  uint16_t encoder_value;
+  uint16_t speed_rpm;
+  uint32_t target_position;
+  uint32_t realtime_position;
+  uint32_t position_error;
+  uint32_t target_angle_hundredths;
+  uint32_t realtime_angle_hundredths;
+  uint32_t error_angle_hundredths;
+  const char *calibration_text;
+  const char *encoder_text;
+  const char *homing_text;
+  const char *protection_text;
+  const char *reached_text;
+  const char *enabled_text;
+  const char *stall_text;
+  const char *limit_left_text;
+  const char *limit_right_text;
+  char message[320];
+  int message_length;
+  HAL_StatusTypeDef receive_status = HAL_TIMEOUT;
+
+  if (HAL_UART_Transmit(&huart3, motor_ttl_system_status_request,
+                        sizeof(motor_ttl_system_status_request),
+                        BOOT_LOG_TIMEOUT_MS) == HAL_OK)
+  {
+    receive_status = HAL_UART_Receive(&huart3, response, sizeof(response),
+                                      BOOT_LOG_TIMEOUT_MS);
+  }
+
+  if ((receive_status != HAL_OK) || (response[0] != 0x01U) ||
+      (response[1] != 0x43U) || (response[2] != 0x1FU) ||
+      (response[3] != 0x09U) || (response[30] != 0x6BU))
+  {
+    message_length = snprintf(
+        message, sizeof(message),
+        "MOTOR SYS read=failed status=%d raw=%02X %02X %02X %02X ... %02X\r\n",
+        (int)receive_status, response[0], response[1], response[2],
+        response[3], response[30]);
+  }
+  else
+  {
+    bus_voltage_mv = ((uint16_t)response[4] << 8U) | response[5];
+    phase_current_ma = ((uint16_t)response[6] << 8U) | response[7];
+    encoder_value = ((uint16_t)response[8] << 8U) | response[9];
+    target_position = ((uint32_t)response[11] << 24U) |
+                      ((uint32_t)response[12] << 16U) |
+                      ((uint32_t)response[13] << 8U) | response[14];
+    speed_rpm = ((uint16_t)response[16] << 8U) | response[17];
+    realtime_position = ((uint32_t)response[19] << 24U) |
+                        ((uint32_t)response[20] << 16U) |
+                        ((uint32_t)response[21] << 8U) | response[22];
+    position_error = ((uint32_t)response[24] << 24U) |
+                     ((uint32_t)response[25] << 16U) |
+                     ((uint32_t)response[26] << 8U) | response[27];
+    target_angle_hundredths = (uint32_t)(((uint64_t)target_position * 36000ULL) /
+                                         65536ULL);
+    realtime_angle_hundredths = (uint32_t)(((uint64_t)realtime_position * 36000ULL) /
+                                           65536ULL);
+    error_angle_hundredths = (uint32_t)(((uint64_t)position_error * 36000ULL) /
+                                        65536ULL);
+
+    calibration_text = (response[28] & 0x02U) != 0U ? "ready" : "not_ready";
+    encoder_text = (response[28] & 0x01U) != 0U ? "ready" : "error";
+    if ((response[28] & 0x0CU) == 0x04U)
+    {
+      homing_text = "running";
+    }
+    else if ((response[28] & 0x0CU) == 0x08U)
+    {
+      homing_text = "failed";
+    }
+    else
+    {
+      homing_text = "idle";
+    }
+    protection_text = (response[28] & 0x30U) == 0U ? "clear" : "triggered";
+    reached_text = (response[29] & 0x02U) != 0U ? "yes" : "no";
+    enabled_text = (response[29] & 0x01U) != 0U ? "yes" : "no";
+    stall_text = (response[29] & 0x0CU) == 0U ? "clear" : "triggered";
+    limit_left_text = (response[29] & 0x10U) != 0U ? "high" : "low";
+    limit_right_text = (response[29] & 0x20U) != 0U ? "high" : "low";
+
+    message_length = snprintf(
+        message, sizeof(message),
+        "MOTOR SYS bus=%umV current=%umA encoder=%u target=%c%lu.%02udeg "
+        "speed=%c%uRPM position=%c%lu.%02udeg error=%c%lu.%02udeg "
+        "home=0x%02X(cal=%s,enc=%s,homing=%s,protect=%s) "
+        "state=0x%02X(reached=%s,enabled=%s,stall=%s,left=%s,right=%s)\r\n",
+        (unsigned int)bus_voltage_mv, (unsigned int)phase_current_ma,
+        (unsigned int)encoder_value, response[10] == 0U ? '+' : '-',
+        (unsigned long)(target_angle_hundredths / 100U),
+        (unsigned int)(target_angle_hundredths % 100U),
+        response[15] == 0U ? '+' : '-', (unsigned int)speed_rpm,
+        response[18] == 0U ? '+' : '-',
+        (unsigned long)(realtime_angle_hundredths / 100U),
+        (unsigned int)(realtime_angle_hundredths % 100U),
+        response[23] == 0U ? '+' : '-',
+        (unsigned long)(error_angle_hundredths / 100U),
+        (unsigned int)(error_angle_hundredths % 100U),
+        response[28], calibration_text, encoder_text, homing_text,
+        protection_text, response[29], reached_text, enabled_text, stall_text,
+        limit_left_text, limit_right_text);
+  }
+
+  if ((message_length <= 0) ||
+      (message_length >= (int)sizeof(message)) ||
+      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+                         BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+  {
+    Error_Handler();
+  }
+}
 
 static const char *CommunicationStateText(CommunicationState state)
 {
@@ -223,6 +533,25 @@ static void MotorPulseLab_SetTimerPrescaler(uint16_t prescaler)
   __HAL_TIM_SET_PRESCALER(&htim4, prescaler);
 }
 
+static void MotorPulseLab_SetTimerFrequency(uint16_t frequency_hz)
+{
+  enum
+  {
+    /* 单位：Hz；当前 TIM4 输入时钟实测配置为 16 MHz，ARR=9。 */
+    TIM4_INPUT_CLOCK_HZ = 16000000U,
+    TIM4_AUTO_RELOAD_COUNTS = 10U
+  };
+  uint32_t divider = TIM4_INPUT_CLOCK_HZ /
+                     ((uint32_t)frequency_hz * TIM4_AUTO_RELOAD_COUNTS);
+
+  if (divider == 0U)
+  {
+    Error_Handler();
+  }
+
+  MotorPulseLab_SetTimerPrescaler((uint16_t)(divider - 1U));
+}
+
 static void MotorPulseLab_StartHardware(MotorPulseLabDirection direction,
                                         uint16_t prescaler)
 {
@@ -264,16 +593,12 @@ static void MotorPulseLab_StopHardware(void)
 
 static void MotorPulseLab_StartFixedHardware(MotorPulseLabDirection direction)
 {
-  uint8_t stage_index = MotorPulseLab_GetProfileStageIndex(&motor_pulse_lab);
-
-  if (stage_index >=
-      (sizeof(motor_profile_speed_stages) / sizeof(motor_profile_speed_stages[0])))
-  {
-    Error_Handler();
-  }
-
   MotorPulseLab_StartHardware(
-      direction, motor_profile_speed_stages[stage_index].tim_prescaler);
+      direction,
+      (uint16_t)(16000000U /
+                 ((uint32_t)MotorPulseLab_GetStepFrequencyHz(&motor_pulse_lab) *
+                  10U) -
+                 1U));
 
   if (HAL_TIM_Base_Start_IT(&htim4) != HAL_OK)
   {
@@ -383,9 +708,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim4)
   {
-    uint8_t stage_index_before =
-        MotorPulseLab_GetProfileStageIndex(&motor_pulse_lab);
-
     if (MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
     {
       if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1) != HAL_OK)
@@ -404,22 +726,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else if (MotorPulseLab_GetState(&motor_pulse_lab) ==
              MOTOR_PULSE_LAB_FIXED_MOVE)
     {
-      uint8_t stage_index =
-          MotorPulseLab_GetProfileStageIndex(&motor_pulse_lab);
-
-      if (stage_index != stage_index_before)
-      {
-        if (stage_index >=
-            (sizeof(motor_profile_speed_stages) /
-             sizeof(motor_profile_speed_stages[0])))
-        {
-          Error_Handler();
-        }
-
-        /* 新分频在下一次 TIM4 更新事件生效，脉冲数量不受影响。 */
-        MotorPulseLab_SetTimerPrescaler(
-            motor_profile_speed_stages[stage_index].tim_prescaler);
-      }
+      /* 新分频在下一次 TIM4 更新事件生效，脉冲数量不受影响。 */
+      MotorPulseLab_SetTimerFrequency(
+          MotorPulseLab_GetStepFrequencyHz(&motor_pulse_lab));
     }
   }
 }
@@ -457,6 +766,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_TIM4_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
   DebouncedButton key0_button;
@@ -465,6 +775,7 @@ int main(void)
   DebouncedButton key_up_button;
   PeriodicTask key_scan_task;
   PeriodicTask status_task;
+  PeriodicTask motor_feedback_task;
   PeriodicTask heartbeat_task;
   uint32_t last_heartbeat_log_ms = HAL_GetTick();
   uint32_t key_scan_count = 0U;
@@ -485,6 +796,8 @@ int main(void)
                                         BOARD_KEY_UP_Pin) == GPIO_PIN_SET);
   PeriodicTask_Init(&key_scan_task, KEY_SCAN_PERIOD_MS, HAL_GetTick());
   PeriodicTask_Init(&status_task, STATUS_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&motor_feedback_task, MOTOR_FEEDBACK_PERIOD_MS,
+                    HAL_GetTick());
   PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
   UartRxFrame_Init(&uart_rx_frame);
   VisionFrameParser_Init(&vision_frame_parser);
@@ -494,6 +807,12 @@ int main(void)
   horizontal_motion_limits = MotionLimits_HorizontalDefault();
   RelativePositionTracker_Init(&relative_position_tracker);
   MotorPulseLab_StopHardware();
+  if (MotorTtlProbe())
+  {
+    MotorTtlReadOption();
+    MotorTtlReadPositionAndError();
+    MotorTtlReadSystemStatus();
+  }
   StartUartRxDma();
   /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
   if (HAL_UART_Transmit(&huart1, boot_message,
@@ -531,6 +850,17 @@ int main(void)
               ? MOTOR_FIXED_MOVE_PULSES
               : -MOTOR_FIXED_MOVE_PULSES);
       PublishRelativePosition("profile_complete");
+
+      /* 运动完成后在主循环读取一次真实反馈，和理论脉冲坐标对照。 */
+      MotorTtlReadPositionAndError();
+      MotorTtlReadSystemStatus();
+    }
+
+    /* 运动期间周期读取系统状态；串口读取在主循环中执行，不放入脉冲中断。 */
+    if (PeriodicTask_IsDue(&motor_feedback_task, current_tick) &&
+        MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED)
+    {
+      MotorTtlReadSystemStatus();
     }
 
     /* 10 ms：采样 KEY0/KEY1，并将抖动过滤与主循环其他工作解耦。 */
