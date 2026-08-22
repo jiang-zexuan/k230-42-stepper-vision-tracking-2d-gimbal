@@ -67,6 +67,10 @@ void Error_Handler(void);
 #define BOARD_STATUS_LED_GPIO_Port GPIOF
 #define BOARD_KEY_UP_Pin GPIO_PIN_0
 #define BOARD_KEY_UP_GPIO_Port GPIOA
+#define PITCH_EN_Pin GPIO_PIN_7
+#define PITCH_EN_GPIO_Port GPIOC
+#define PITCH_DIR_Pin GPIO_PIN_8
+#define PITCH_DIR_GPIO_Port GPIOC
 #define MOTOR_EN_Pin GPIO_PIN_15
 #define MOTOR_EN_GPIO_Port GPIOG
 #define MOTOR_DIR_Pin GPIO_PIN_7

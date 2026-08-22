@@ -33,5 +33,30 @@ UartTextCommand UartTextCommand_Parse(const uint8_t *data, uint16_t size)
         return UART_TEXT_COMMAND_STATUS;
     }
 
+    if ((size == 8U) && (memcmp(data, "PITCH_UP", size) == 0))
+    {
+        return UART_TEXT_COMMAND_PITCH_UP;
+    }
+
+    if ((size == 10U) && (memcmp(data, "PITCH_DOWN", size) == 0))
+    {
+        return UART_TEXT_COMMAND_PITCH_DOWN;
+    }
+
+    if ((size == 10U) && (memcmp(data, "PITCH_STOP", size) == 0))
+    {
+        return UART_TEXT_COMMAND_PITCH_STOP;
+    }
+
+    if ((size == 9U) && (memcmp(data, "DUAL_TEST", size) == 0))
+    {
+        return UART_TEXT_COMMAND_DUAL_TEST;
+    }
+
+    if ((size == 13U) && (memcmp(data, "DUAL_TEST_NEG", size) == 0))
+    {
+        return UART_TEXT_COMMAND_DUAL_TEST_NEG;
+    }
+
     return UART_TEXT_COMMAND_UNKNOWN;
 }
