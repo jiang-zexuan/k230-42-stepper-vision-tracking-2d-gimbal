@@ -11,5 +11,6 @@
 | EXP-0007 | P06 水平轴软件限位 | 2026-08-21 | 软件测试和 ARM 编译通过；板上行为待验证 | `docs/06-experiments/EXP-0007-p06-horizontal-motion-limits.md` |
 | EXP-0008 | P07 双轴云台基础控制器 | 2026-08-22 | 双轴板上实测通过 | `docs/06-experiments/EXP-0008-p07-dual-axis-controller.md` |
 | EXP-0009 | P08 K230-F407 视觉通信链路 | 2026-08-23 | 文本过渡链路和误差计算已实测；二进制协议待完成 | `docs/06-experiments/EXP-0009-p08-k230-f407-link.md` |
+| EXP-0010 | P09 单轴视觉跟踪器 | 2026-08-23 | 水平跟随和安全停机已阶段性实测；精确时延、错帧根因和置信度门槛待补测 | `docs/06-experiments/EXP-0010-p09-horizontal-visual-tracking.md` |
 
 新增实验后在此登记，并创建独立实验记录文件。

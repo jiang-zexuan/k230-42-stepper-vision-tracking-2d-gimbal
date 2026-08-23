@@ -61,7 +61,7 @@
 
 /* USER CODE BEGIN PV */
 /* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
-static uint8_t boot_message[] = "PanView P08 boot\r\n";
+static uint8_t boot_message[] = "PanView P09 boot\r\n";
 static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
 static uint8_t motor_ttl_option_request[] = {0x01U, 0x1AU, 0x6BU};
 static uint8_t motor_ttl_system_status_request[] = {0x01U, 0x43U, 0x7AU, 0x6BU};
@@ -94,6 +94,8 @@ enum {
   HEARTBEAT_PERIOD_MS = 5000U,
   /* 单位：ms；P08 只汇总 K230 接收统计，避免逐帧刷屏。 */
   K230_UART_LOG_PERIOD_MS = 1000U,
+  /* 单位：ms；视觉结果超过此时间未更新就停止水平 STEP。 */
+  VISUAL_TARGET_TIMEOUT_MS = 300U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -132,7 +134,7 @@ static uint8_t k230_uart_rx_dma_buffer[UART_RX_FRAME_CAPACITY];
 static UartRxFrame k230_uart_rx_frame;
 static UartTextLineAccumulator k230_uart_line_accumulator;
 static char uart_rx_log_message[128];
-static char k230_uart_log_message[192];
+static char k230_uart_log_message[224];
 static uint16_t k230_uart_last_frame_size;
 static VisionTextResult latest_k230_result;
 static VisionError latest_k230_error;
@@ -205,6 +207,9 @@ static volatile int32_t pitch_active_delta_pulses;
 static volatile bool dual_test_running;
 static volatile uint16_t dual_test_remaining_pulses;
 static volatile int32_t dual_test_direction_sign;
+static volatile bool visual_pan_running;
+static volatile int32_t visual_pan_direction_sign;
+static uint32_t last_k230_valid_tick;
 
 /*
  * 只读探测 X42S TTL 链路。依据电机手册 5.6.30：发送 00 15 6B，
@@ -772,6 +777,83 @@ static void MotorPulseLab_StopHardware(void)
   HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
 }
 
+/* P09：停止视觉水平轴；已接管时保持 EN，避免轴被手动转动。 */
+static void VisualPan_StopHardware(void)
+{
+  if (visual_pan_running)
+  {
+    (void)HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
+    (void)HAL_TIM_Base_Stop_IT(&htim4);
+    visual_pan_running = false;
+  }
+
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin,
+                    control_takeover_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+/* P09 第一版：把抽象速度目标转换成 TIM4 STEP 频率，单位为脉冲/s。 */
+static void VisualPan_ApplySpeed(int32_t speed_pulses_per_second)
+{
+  int32_t magnitude;
+  int32_t direction_sign;
+  uint16_t timer_frequency;
+
+  if (!control_takeover_active || pitch_running || dual_test_running ||
+      (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED) ||
+      !RelativePositionTracker_IsValid(&relative_position_tracker))
+  {
+    VisualPan_StopHardware();
+    return;
+  }
+
+  if (speed_pulses_per_second == 0)
+  {
+    VisualPan_StopHardware();
+    return;
+  }
+
+  direction_sign = speed_pulses_per_second > 0 ? 1 : -1;
+  magnitude = speed_pulses_per_second > 0 ? speed_pulses_per_second
+                                          : -speed_pulses_per_second;
+  /* 低于 25 脉冲/s 时仍保持一个可计算的定时器频率；死区通常会先把
+   * 这类小误差变成 0，实际参数仍需结合电机实测。 */
+  timer_frequency = (uint16_t)(magnitude < 25 ? 25 : magnitude);
+  MotorPulseLab_SetTimerFrequency(timer_frequency);
+
+  /* 方向变化前先停止 STEP，确保 DIR 不在脉冲输出期间翻转。 */
+  if (visual_pan_running && (visual_pan_direction_sign != direction_sign))
+  {
+    VisualPan_StopHardware();
+  }
+
+  if (!visual_pan_running)
+  {
+    int32_t position = RelativePositionTracker_GetPositionPulses(
+        &relative_position_tracker);
+    int32_t next_position = position + direction_sign;
+
+    if ((next_position < horizontal_motion_limits.min_pulses) ||
+        (next_position > horizontal_motion_limits.max_pulses))
+    {
+      VisualPan_StopHardware();
+      return;
+    }
+
+    HAL_GPIO_WritePin(MOTOR_DIR_GPIO_Port, MOTOR_DIR_Pin,
+                      direction_sign > 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+    HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
+    visual_pan_direction_sign = direction_sign;
+    visual_pan_running = true;
+    if ((HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) ||
+        (HAL_TIM_Base_Start_IT(&htim4) != HAL_OK))
+    {
+      VisualPan_StopHardware();
+      Error_Handler();
+    }
+  }
+
+}
+
 static void MotorPulseLab_StartFixedHardware(MotorPulseLabDirection direction)
 {
   MotorPulseLab_StartHardware(
@@ -927,7 +1009,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim == &htim4)
   {
-    if (MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
+    if ((MotorPulseLab_GetState(&motor_pulse_lab) ==
+         MOTOR_PULSE_LAB_FIXED_MOVE) &&
+        MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
     {
       if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1) != HAL_OK)
       {
@@ -949,6 +1033,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       /* 新分频在下一次 TIM4 更新事件生效，脉冲数量不受影响。 */
       MotorPulseLab_SetTimerFrequency(
           MotorPulseLab_GetStepFrequencyHz(&motor_pulse_lab));
+    }
+    else if (visual_pan_running)
+    {
+      int32_t position = RelativePositionTracker_GetPositionPulses(
+          &relative_position_tracker);
+      int32_t next_position = position + visual_pan_direction_sign;
+
+      /* 先判断下一脉冲是否越界，再提交一个已完成脉冲。 */
+      if ((next_position < horizontal_motion_limits.min_pulses) ||
+          (next_position > horizontal_motion_limits.max_pulses) ||
+          !RelativePositionTracker_ApplyCompletedPulseDelta(
+              &relative_position_tracker, visual_pan_direction_sign))
+      {
+        VisualPan_StopHardware();
+      }
+      else if ((next_position == horizontal_motion_limits.min_pulses) ||
+               (next_position == horizontal_motion_limits.max_pulses))
+      {
+        VisualPan_StopHardware();
+      }
     }
   }
 }
@@ -1033,6 +1137,9 @@ int main(void)
   MotorPulseLab_Init(&motor_pulse_lab);
   horizontal_motion_limits = MotionLimits_HorizontalDefault();
   RelativePositionTracker_Init(&relative_position_tracker);
+  visual_pan_running = false;
+  visual_pan_direction_sign = 0;
+  last_k230_valid_tick = 0U;
   MotorPulseLab_StopHardware();
   Pitch_DisableHardware();
   if (MotorTtlProbe())
@@ -1061,7 +1168,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     uint32_t current_tick = HAL_GetTick();
 
-    /* P08 第一阶段只验证 K230 数据是否到达，不将其映射为运动。 */
+    /* P09：处理 K230 有效结果，并将水平误差映射为视觉速度目标。 */
     if (k230_uart_rx_frame.pending)
     {
       k230_uart_last_frame_size = k230_uart_rx_frame.size;
@@ -1076,6 +1183,8 @@ int main(void)
         latest_pan_speed_target = VisualTrackController_HorizontalSpeed(
             &visual_track_config, latest_k230_error.target_present,
             latest_k230_error.error_x);
+        last_k230_valid_tick = current_tick;
+        VisualPan_ApplySpeed(latest_pan_speed_target);
         k230_text_valid_count++;
       }
       else
@@ -1085,11 +1194,17 @@ int main(void)
       UartRxFrame_Release(&k230_uart_rx_frame);
     }
 
+    if ((last_k230_valid_tick == 0U) ||
+        ((current_tick - last_k230_valid_tick) > VISUAL_TARGET_TIMEOUT_MS))
+    {
+      VisualPan_StopHardware();
+    }
+
     if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
     {
       int k230_log_length = snprintf(
           k230_uart_log_message, sizeof(k230_uart_log_message),
-          "K230 RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld\r\n",
+          "K230 RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld visual_run=%u pan_pos=%ld\r\n",
           (unsigned long)k230_uart_rx_frame.received_count,
           (unsigned long)k230_uart_rx_frame.dropped_count,
           (unsigned long)k230_text_valid_count,
@@ -1104,7 +1219,10 @@ int main(void)
           latest_k230_result_valid ? latest_k230_result.center_y : 0,
           latest_k230_result_valid ? latest_k230_error.error_x : 0,
           latest_k230_result_valid ? latest_k230_error.error_y : 0,
-          (long)(latest_k230_result_valid ? latest_pan_speed_target : 0));
+          (long)(latest_k230_result_valid ? latest_pan_speed_target : 0),
+          (unsigned int)visual_pan_running,
+          (long)RelativePositionTracker_GetPositionPulses(
+              &relative_position_tracker));
 
       if ((k230_log_length <= 0) ||
           (k230_log_length >= (int)sizeof(k230_uart_log_message)) ||
@@ -1158,6 +1276,7 @@ int main(void)
       if (DebouncedButton_Update(&key0_button, key0_pressed, current_tick,
                                  KEY_DEBOUNCE_MS))
       {
+        VisualPan_StopHardware();
         HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
 
         if (HAL_UART_Transmit(&huart1, key0_pressed_message,
@@ -1189,7 +1308,12 @@ int main(void)
           Error_Handler();
         }
 
-        if (MotorPulseLab_ToggleDirection(&motor_pulse_lab))
+        if (visual_pan_running)
+        {
+          direction_message = motor_direction_ignored_message;
+          direction_message_size = sizeof(motor_direction_ignored_message) - 1U;
+        }
+        else if (MotorPulseLab_ToggleDirection(&motor_pulse_lab))
         {
           direction_message = MotorPulseLab_GetDirection(&motor_pulse_lab) ==
                                       MOTOR_PULSE_LAB_DIRECTION_HIGH
@@ -1233,7 +1357,8 @@ int main(void)
           Error_Handler();
         }
 
-        if (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED)
+        if (visual_pan_running ||
+            (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED))
         {
           if (HAL_UART_Transmit(&huart1, motor_profile_move_ignored_message,
                                 sizeof(motor_profile_move_ignored_message) - 1U,
@@ -1311,7 +1436,7 @@ int main(void)
         }
 
         if ((MotorPulseLab_GetState(&motor_pulse_lab) == MOTOR_PULSE_LAB_STOPPED) &&
-            !pitch_running && !dual_test_running)
+            !pitch_running && !dual_test_running && !visual_pan_running)
         {
           RelativePositionTracker_SetManualZero(&relative_position_tracker);
           pitch_zeroed = true;
