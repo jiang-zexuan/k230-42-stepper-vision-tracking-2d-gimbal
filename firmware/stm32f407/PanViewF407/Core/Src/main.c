@@ -65,7 +65,7 @@
 
 /* USER CODE BEGIN PV */
 /* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
-static uint8_t boot_message[] = "PanView P09 boot\r\n";
+static uint8_t boot_message[] = "PanView P10 boot\r\n";
 static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
 static uint8_t motor_ttl_option_request[] = {0x01U, 0x1AU, 0x6BU};
 static uint8_t motor_ttl_system_status_request[] = {0x01U, 0x43U, 0x7AU, 0x6BU};
@@ -102,6 +102,10 @@ enum {
   K230_UART_LOG_PERIOD_MS = 1000U,
   /* 单位：ms；视觉结果超过此时间未更新就停止水平 STEP。 */
   VISUAL_TARGET_TIMEOUT_MS = 300U,
+  /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
+  VISUAL_LOCK_HOLD_MS = 500U,
+  /* 单位：ms；TFT 状态仪表盘刷新周期，避免阻塞运动控制。 */
+  VISUAL_STATUS_REFRESH_MS = 500U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -226,6 +230,22 @@ static volatile int32_t visual_pan_direction_sign;
 static volatile bool visual_pitch_running;
 static volatile int32_t visual_pitch_direction_sign;
 static uint32_t last_k230_valid_tick;
+
+typedef enum
+{
+  VISUAL_STATE_SEARCH = 0,
+  VISUAL_STATE_TRACKING,
+  VISUAL_STATE_LOCKED,
+  VISUAL_STATE_LOST,
+  VISUAL_STATE_FAULT
+} VisualState;
+
+static VisualState visual_state = VISUAL_STATE_SEARCH;
+static bool visual_state_initialized;
+static uint32_t visual_lock_candidate_tick;
+static uint32_t visual_dashboard_last_tick;
+static bool visual_dashboard_dirty = true;
+static bool tft_ready;
 
 /*
  * 只读探测 X42S TTL 链路。依据电机手册 5.6.30：发送 00 15 6B，
@@ -1080,7 +1100,7 @@ static void PublishMotionLimitRejection(MotionLimitsResult result)
   }
 }
 
-/* P10：绘制触摸验证用的四个区域，暂不绑定真实云台动作。 */
+/* P10：底部四个触摸区域用于模式、接管、停止和状态查询。 */
 static void TouchUi_DrawButton(uint16_t x, uint16_t y, uint16_t color,
                                uint16_t foreground, const char *label)
 {
@@ -1099,6 +1119,236 @@ static void TouchUi_DrawAll(void)
                      "STOP");
   TouchUi_DrawButton(124U, 182U, ILI9341_COLOR_CYAN, ILI9341_COLOR_BLACK,
                      "INFO");
+}
+
+static const char *VisualStateText(VisualState state)
+{
+  switch (state)
+  {
+    case VISUAL_STATE_TRACKING: return "TRACKING";
+    case VISUAL_STATE_LOCKED: return "LOCKED";
+    case VISUAL_STATE_LOST: return "LOST";
+    case VISUAL_STATE_FAULT: return "FAULT";
+    case VISUAL_STATE_SEARCH:
+    default: return "SEARCH";
+  }
+}
+
+static uint16_t VisualStateColor(VisualState state)
+{
+  switch (state)
+  {
+    case VISUAL_STATE_TRACKING: return ILI9341_COLOR_YELLOW;
+    case VISUAL_STATE_LOCKED: return ILI9341_COLOR_GREEN;
+    case VISUAL_STATE_LOST: return ILI9341_COLOR_ORANGE;
+    case VISUAL_STATE_FAULT: return ILI9341_COLOR_RED;
+    case VISUAL_STATE_SEARCH:
+    default: return ILI9341_COLOR_BLUE;
+  }
+}
+
+/* 顶部只刷新状态和关键数值，底部四个触摸按钮保持原来的位置。 */
+static void TouchUi_DrawStatus(VisualState state, int16_t error_x,
+                               int16_t error_y, int32_t pan_position,
+                               int32_t pitch_position, int32_t pan_speed,
+                               int32_t pitch_speed)
+{
+  char line[40];
+  uint16_t state_color = VisualStateColor(state);
+
+  if (!tft_ready)
+  {
+    return;
+  }
+
+  ILI9341_FillRect(0U, 0U, ILI9341_WIDTH, 70U, ILI9341_COLOR_BLACK);
+  ILI9341_DrawText(4U, 2U, "PANVIEW", ILI9341_COLOR_WHITE,
+                   ILI9341_COLOR_BLACK, 2U);
+  ILI9341_FillRect(158U, 2U, 78U, 22U, state_color);
+  ILI9341_DrawText(162U, 9U, VisualStateText(state),
+                   state == VISUAL_STATE_SEARCH || state == VISUAL_STATE_TRACKING
+                       ? ILI9341_COLOR_BLACK
+                       : ILI9341_COLOR_WHITE,
+                   state_color, 1U);
+
+  (void)snprintf(line, sizeof(line), "X=%d Y=%d", (int)error_x,
+                 (int)error_y);
+  ILI9341_DrawText(4U, 25U, line, ILI9341_COLOR_CYAN,
+                   ILI9341_COLOR_BLACK, 1U);
+  (void)snprintf(line, sizeof(line), "P=%ld T=%ld", (long)pan_position,
+                 (long)pitch_position);
+  ILI9341_DrawText(4U, 36U, line, ILI9341_COLOR_WHITE,
+                   ILI9341_COLOR_BLACK, 1U);
+  (void)snprintf(line, sizeof(line), "V=%ld W=%ld", (long)pan_speed,
+                 (long)pitch_speed);
+  ILI9341_DrawText(4U, 47U, line, ILI9341_COLOR_YELLOW,
+                   ILI9341_COLOR_BLACK, 1U);
+}
+
+static bool VisualState_AtLimitFault(void)
+{
+  int32_t pan_position = RelativePositionTracker_GetPositionPulses(
+      &relative_position_tracker);
+
+  if ((latest_pan_speed_target > 0) &&
+      (pan_position >= horizontal_motion_limits.max_pulses))
+  {
+    return true;
+  }
+  if ((latest_pan_speed_target < 0) &&
+      (pan_position <= horizontal_motion_limits.min_pulses))
+  {
+    return true;
+  }
+  if ((latest_pitch_speed_target > 0) &&
+      (pitch_position_pulses >= (int32_t)PITCH_LIMIT_PULSES))
+  {
+    return true;
+  }
+  if ((latest_pitch_speed_target < 0) &&
+      (pitch_position_pulses <= -(int32_t)PITCH_LIMIT_PULSES))
+  {
+    return true;
+  }
+  return false;
+}
+
+static void VisualState_Set(VisualState next_state, const char *reason)
+{
+  char message[96];
+  int length;
+
+  if (visual_state_initialized && (visual_state == next_state))
+  {
+    return;
+  }
+
+  visual_state = next_state;
+  visual_state_initialized = true;
+  visual_dashboard_dirty = true;
+  length = snprintf(message, sizeof(message), "VIS state=%s reason=%s\r\n",
+                    VisualStateText(next_state), reason);
+  if ((length > 0) && (length < (int)sizeof(message)))
+  {
+    (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
+                            BOOT_LOG_TIMEOUT_MS);
+  }
+}
+
+/* P10 状态机：通信先判 LOST，安全条件再判 FAULT，误差稳定 500 ms 才 LOCKED。 */
+static void VisualState_Update(uint32_t current_tick)
+{
+  bool target_present = latest_k230_result_valid &&
+                        latest_k230_result.target_present;
+  bool communication_timed_out =
+      (last_k230_valid_tick == 0U) ||
+      ((current_tick - last_k230_valid_tick) > VISUAL_TARGET_TIMEOUT_MS);
+  bool centered = target_present &&
+                  (latest_k230_error.error_x <=
+                       visual_track_config.deadzone_pixels) &&
+                  (latest_k230_error.error_x >=
+                       -visual_track_config.deadzone_pixels) &&
+                  (latest_k230_error.error_y <=
+                       visual_track_config.deadzone_pixels) &&
+                  (latest_k230_error.error_y >=
+                       -visual_track_config.deadzone_pixels);
+  VisualState next_state;
+  const char *reason;
+
+  if (!control_takeover_active || !visual_tracking_enabled)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_SEARCH;
+    reason = "waiting_for_takeover";
+  }
+  else if (communication_timed_out)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_LOST;
+    reason = "vision_timeout";
+  }
+  else if (!RelativePositionTracker_IsValid(&relative_position_tracker) ||
+           !pitch_zeroed)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_FAULT;
+    reason = "position_not_zeroed";
+  }
+  else if (VisualState_AtLimitFault())
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_FAULT;
+    reason = "software_limit";
+  }
+  else if (!target_present)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_SEARCH;
+    reason = "target_absent";
+  }
+  else if (!centered)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_TRACKING;
+    reason = "error_outside_deadzone";
+  }
+  else
+  {
+    if (visual_lock_candidate_tick == 0U)
+    {
+      visual_lock_candidate_tick = current_tick;
+    }
+    if ((current_tick - visual_lock_candidate_tick) >= VISUAL_LOCK_HOLD_MS)
+    {
+      next_state = VISUAL_STATE_LOCKED;
+      reason = "centered_for_500ms";
+    }
+    else
+    {
+      next_state = VISUAL_STATE_TRACKING;
+      reason = "center_candidate";
+    }
+  }
+
+  VisualState_Set(next_state, reason);
+
+  if ((next_state == VISUAL_STATE_TRACKING) && target_present)
+  {
+    VisualPan_ApplySpeed(latest_pan_speed_target);
+    VisualPitch_ApplySpeed(latest_pitch_speed_target);
+  }
+  else
+  {
+    VisualPan_StopHardware();
+    VisualPitch_StopHardware();
+    if (next_state == VISUAL_STATE_FAULT)
+    {
+      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
+    }
+  }
+}
+
+static void VisualUi_Refresh(uint32_t current_tick)
+{
+  if (!tft_ready ||
+      (!visual_dashboard_dirty &&
+       ((current_tick - visual_dashboard_last_tick) <
+        VISUAL_STATUS_REFRESH_MS)))
+  {
+    return;
+  }
+
+  visual_dashboard_last_tick = current_tick;
+  visual_dashboard_dirty = false;
+  TouchUi_DrawStatus(
+      visual_state,
+      latest_k230_result_valid ? latest_k230_error.error_x : 0,
+      latest_k230_result_valid ? latest_k230_error.error_y : 0,
+      RelativePositionTracker_GetPositionPulses(&relative_position_tracker),
+      pitch_position_pulses,
+      latest_k230_result_valid ? latest_pan_speed_target : 0,
+      latest_k230_result_valid ? latest_pitch_speed_target : 0);
 }
 
 static void TouchUi_DrawFeedback(uint16_t screen_x, uint16_t screen_y,
@@ -1437,6 +1687,7 @@ int main(void)
   StartK230UartRxDma();
   if (ILI9341_Init())
   {
+    tft_ready = true;
     uint8_t tft_id[4] = {0U};
     char tft_id_message[64];
 
@@ -1503,6 +1754,8 @@ int main(void)
   {
     Error_Handler();
   }
+  VisualState_Set(VISUAL_STATE_SEARCH, "boot");
+  VisualUi_Refresh(HAL_GetTick());
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -1609,18 +1862,6 @@ int main(void)
             &visual_track_config, latest_k230_error.target_present,
             latest_k230_error.error_y);
         last_k230_valid_tick = current_tick;
-        if (visual_tracking_enabled)
-        {
-          VisualPan_ApplySpeed(latest_pan_speed_target);
-          VisualPitch_ApplySpeed(latest_pitch_speed_target);
-        }
-        else
-        {
-          VisualPan_StopHardware();
-          VisualPitch_StopHardware();
-          latest_pan_speed_target = 0;
-          latest_pitch_speed_target = 0;
-        }
         k230_text_valid_count++;
       }
       else
@@ -1639,11 +1880,15 @@ int main(void)
       latest_pitch_speed_target = 0;
     }
 
+    VisualState_Update(current_tick);
+    VisualUi_Refresh(current_tick);
+
     if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
     {
       int k230_log_length = snprintf(
           k230_uart_log_message, sizeof(k230_uart_log_message),
-          "K230 RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
+          "K230 state=%s RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
+          VisualStateText(visual_state),
           (unsigned long)k230_uart_rx_frame.received_count,
           (unsigned long)k230_uart_rx_frame.dropped_count,
           (unsigned long)k230_text_valid_count,

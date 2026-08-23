@@ -19,3 +19,8 @@
 | REQ-015 | `firmware/stm32f407/PanViewF407/Core/Src/main.c`、`tim.c`、`uart_text_command.c` | `docs/07-test/TEST-0007-p07-dual-axis-controller.md` | `docs/06-experiments/EXP-0008-p07-dual-axis-controller.md`、用户保存的 P07 串口日志 | 双轴接管、同步运动和俯仰 ±45° 限位已实测通过 |
 | REQ-016 | `uart_text_line_accumulator.c`、`vision_text_result_parser.c`、`vision_error.c`、`visual_track_controller.c`、`main.c` | `docs/07-test/TEST-0008-p08-k230-f407-link.md` | `docs/06-experiments/EXP-0009-p08-k230-f407-link.md`、P08 原始串口日志 | 文本过渡链路、误差和水平速度目标已实测；正式二进制协议待完成 |
 | REQ-017 | `visual_track_controller.c`、`relative_position_tracker.c`、`main.c` | `docs/07-test/TEST-0009-p09-horizontal-visual-tracking.md` | `docs/06-experiments/EXP-0010-p09-horizontal-visual-tracking.md`、`evidence/serial-logs/exp-0010-p09-horizontal-visual-tracking.log` | 水平视觉跟随、死区、比例、限速、软件限位和功能停机已阶段性实测；精确 300 ms、错帧根因和置信度门槛待补测 |
+| REQ-003 | `vision_text_result_parser.c`、`main.c` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | K230 无目标帧和目标帧均可进入状态机；实际帧率待本轮记录 |
+| REQ-004 | `main.c`：`VISUAL_TARGET_TIMEOUT_MS`、`VisualState_Update()` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | 设计为 300 ms 超时进入 `LOST`；精确现场时延待验证 |
+| REQ-006 | `main.c`：`visual_lock_candidate_tick`、`VISUAL_LOCK_HOLD_MS` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志、TFT 状态 | 设计为中心 500 ms 后进入 `LOCKED`；实测待补录 |
+| REQ-007 | `ili9341.c`、`main.c` | `docs/07-test/TEST-0010-p10-f407-tft-pure-color.md`、`TEST-0012-p10-dual-axis-visual-state-machine.md` | TFT 纯色记录、P10 状态机日志 | 以屏幕颜色提示状态，不使用主动光学发射器 |
+| REQ-008 | `main.c`：`VIS state=...`、K230 汇总日志 | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | 状态、通信计数和错误原因均有日志路径，长时间运行待验证 |
