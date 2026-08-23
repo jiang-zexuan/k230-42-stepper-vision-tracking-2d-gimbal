@@ -104,8 +104,6 @@ enum {
   VISUAL_TARGET_TIMEOUT_MS = 300U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
   VISUAL_LOCK_HOLD_MS = 500U,
-  /* 单位：ms；TFT 状态仪表盘刷新周期，避免阻塞运动控制。 */
-  VISUAL_STATUS_REFRESH_MS = 500U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -243,7 +241,6 @@ typedef enum
 static VisualState visual_state = VISUAL_STATE_SEARCH;
 static bool visual_state_initialized;
 static uint32_t visual_lock_candidate_tick;
-static uint32_t visual_dashboard_last_tick;
 static bool visual_dashboard_dirty = true;
 static bool tft_ready;
 
@@ -1329,17 +1326,13 @@ static void VisualState_Update(uint32_t current_tick)
   }
 }
 
-static void VisualUi_Refresh(uint32_t current_tick)
+static void VisualUi_Refresh(void)
 {
-  if (!tft_ready ||
-      (!visual_dashboard_dirty &&
-       ((current_tick - visual_dashboard_last_tick) <
-        VISUAL_STATUS_REFRESH_MS)))
+  if (!tft_ready || !visual_dashboard_dirty)
   {
     return;
   }
 
-  visual_dashboard_last_tick = current_tick;
   visual_dashboard_dirty = false;
   TouchUi_DrawStatus(
       visual_state,
@@ -1755,7 +1748,7 @@ int main(void)
     Error_Handler();
   }
   VisualState_Set(VISUAL_STATE_SEARCH, "boot");
-  VisualUi_Refresh(HAL_GetTick());
+  VisualUi_Refresh();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -1881,7 +1874,7 @@ int main(void)
     }
 
     VisualState_Update(current_tick);
-    VisualUi_Refresh(current_tick);
+    VisualUi_Refresh();
 
     if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
     {
