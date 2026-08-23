@@ -104,6 +104,8 @@ enum {
   VISUAL_TARGET_TIMEOUT_MS = 300U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
   VISUAL_LOCK_HOLD_MS = 500U,
+  /* 单位：ms；仅局部覆盖变化字段后的 TFT 遥测刷新周期。 */
+  VISUAL_STATUS_REFRESH_MS = 500U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
   COMMUNICATION_TIMEOUT_MS = 1000U,
   /* 单位：Hz；TIM4 配置为 16 MHz / (3199 + 1) / (9 + 1)，用于 P05 空载验收。 */
@@ -241,7 +243,9 @@ typedef enum
 static VisualState visual_state = VISUAL_STATE_SEARCH;
 static bool visual_state_initialized;
 static uint32_t visual_lock_candidate_tick;
+static uint32_t visual_dashboard_last_tick;
 static bool visual_dashboard_dirty = true;
+static bool visual_dashboard_initialized;
 static bool tft_ready;
 
 /*
@@ -1144,13 +1148,16 @@ static uint16_t VisualStateColor(VisualState state)
   }
 }
 
-/* 顶部只刷新状态和关键数值，底部四个触摸按钮保持原来的位置。 */
+/* 顶部固定标题只画一次；后续仅覆盖单个字段，避免整块区域闪烁。 */
 static void TouchUi_DrawStatus(VisualState state, int16_t error_x,
                                int16_t error_y, int32_t pan_position,
                                int32_t pitch_position, int32_t pan_speed,
                                int32_t pitch_speed)
 {
-  char line[40];
+  char state_line[9];
+  char error_line[18];
+  char position_line[18];
+  char speed_line[18];
   uint16_t state_color = VisualStateColor(state);
 
   if (!tft_ready)
@@ -1158,27 +1165,34 @@ static void TouchUi_DrawStatus(VisualState state, int16_t error_x,
     return;
   }
 
-  ILI9341_FillRect(0U, 0U, ILI9341_WIDTH, 70U, ILI9341_COLOR_BLACK);
-  ILI9341_DrawText(4U, 2U, "PANVIEW", ILI9341_COLOR_WHITE,
-                   ILI9341_COLOR_BLACK, 2U);
+  if (!visual_dashboard_initialized)
+  {
+    ILI9341_FillRect(0U, 0U, ILI9341_WIDTH, 70U, ILI9341_COLOR_BLACK);
+    ILI9341_DrawText(4U, 2U, "PANVIEW", ILI9341_COLOR_WHITE,
+                     ILI9341_COLOR_BLACK, 2U);
+    visual_dashboard_initialized = true;
+  }
+
   ILI9341_FillRect(158U, 2U, 78U, 22U, state_color);
-  ILI9341_DrawText(162U, 9U, VisualStateText(state),
+  (void)snprintf(state_line, sizeof(state_line), "%-8s", VisualStateText(state));
+  ILI9341_DrawText(162U, 9U, state_line,
                    state == VISUAL_STATE_SEARCH || state == VISUAL_STATE_TRACKING
                        ? ILI9341_COLOR_BLACK
                        : ILI9341_COLOR_WHITE,
                    state_color, 1U);
 
-  (void)snprintf(line, sizeof(line), "X=%d Y=%d", (int)error_x,
+  /* 固定字段宽度，新的数值会连同空白背景覆盖旧数值，不需要先刷黑。 */
+  (void)snprintf(error_line, sizeof(error_line), "X=%05d Y=%05d", (int)error_x,
                  (int)error_y);
-  ILI9341_DrawText(4U, 25U, line, ILI9341_COLOR_CYAN,
+  ILI9341_DrawText(4U, 25U, error_line, ILI9341_COLOR_CYAN,
                    ILI9341_COLOR_BLACK, 1U);
-  (void)snprintf(line, sizeof(line), "P=%ld T=%ld", (long)pan_position,
+  (void)snprintf(position_line, sizeof(position_line), "P=%05ld T=%05ld", (long)pan_position,
                  (long)pitch_position);
-  ILI9341_DrawText(4U, 36U, line, ILI9341_COLOR_WHITE,
+  ILI9341_DrawText(4U, 36U, position_line, ILI9341_COLOR_WHITE,
                    ILI9341_COLOR_BLACK, 1U);
-  (void)snprintf(line, sizeof(line), "V=%ld W=%ld", (long)pan_speed,
+  (void)snprintf(speed_line, sizeof(speed_line), "V=%05ld W=%05ld", (long)pan_speed,
                  (long)pitch_speed);
-  ILI9341_DrawText(4U, 47U, line, ILI9341_COLOR_YELLOW,
+  ILI9341_DrawText(4U, 47U, speed_line, ILI9341_COLOR_YELLOW,
                    ILI9341_COLOR_BLACK, 1U);
 }
 
@@ -1326,13 +1340,17 @@ static void VisualState_Update(uint32_t current_tick)
   }
 }
 
-static void VisualUi_Refresh(void)
+static void VisualUi_Refresh(uint32_t current_tick)
 {
-  if (!tft_ready || !visual_dashboard_dirty)
+  if (!tft_ready ||
+      (!visual_dashboard_dirty &&
+       ((current_tick - visual_dashboard_last_tick) <
+        VISUAL_STATUS_REFRESH_MS)))
   {
     return;
   }
 
+  visual_dashboard_last_tick = current_tick;
   visual_dashboard_dirty = false;
   TouchUi_DrawStatus(
       visual_state,
@@ -1748,7 +1766,7 @@ int main(void)
     Error_Handler();
   }
   VisualState_Set(VISUAL_STATE_SEARCH, "boot");
-  VisualUi_Refresh();
+  VisualUi_Refresh(HAL_GetTick());
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -1874,7 +1892,7 @@ int main(void)
     }
 
     VisualState_Update(current_tick);
-    VisualUi_Refresh();
+    VisualUi_Refresh(current_tick);
 
     if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
     {

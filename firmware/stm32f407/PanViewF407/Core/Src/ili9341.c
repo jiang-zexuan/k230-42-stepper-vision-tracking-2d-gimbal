@@ -161,6 +161,25 @@ static const uint8_t *Tft_Font5x7(char character)
   }
 }
 
+/*
+ * 文字按一个完整矩形窗口写入，而不是让每个字模像素各开一次 SPI 事务。
+ * 当前屏幕为 240 px 宽，现有界面最大字高为 7 px * 3 倍，静态缓存约 10 KB。
+ */
+static uint8_t tft_text_pixel_buffer[ILI9341_WIDTH * 21U * 2U];
+
+static uint16_t Tft_DrawTextWidth(const char *text, uint8_t scale)
+{
+  uint16_t width = 0U;
+
+  while ((text != NULL) && (*text != '\0') &&
+         ((uint32_t)width + 6U * scale <= ILI9341_WIDTH))
+  {
+    width = (uint16_t)(width + 6U * scale);
+    text++;
+  }
+  return width;
+}
+
 bool ILI9341_Init(void)
 {
   static const uint8_t power_on_sequence[] = {0x00U, 0xC1U, 0x30U};
@@ -332,28 +351,85 @@ void ILI9341_DrawText(uint16_t x, uint16_t y, const char *text,
   const uint8_t *glyph;
   uint8_t glyph_row;
   uint8_t glyph_column;
+  uint16_t text_width;
+  uint16_t text_height;
+  uint16_t character_index;
+  uint16_t pixel_x;
+  uint16_t pixel_y;
+  uint16_t byte_index;
+  uint16_t color;
 
-  if ((text == NULL) || (scale == 0U))
+  if ((text == NULL) || (scale == 0U) || (scale > 3U) ||
+      (x >= ILI9341_WIDTH) || (y >= ILI9341_HEIGHT))
   {
     return;
   }
 
-  while (*text != '\0')
+  text_width = Tft_DrawTextWidth(text, scale);
+  text_height = (uint16_t)(7U * scale);
+  if ((text_width == 0U) || (text_height > 21U))
   {
-    glyph = Tft_Font5x7(*text);
+    return;
+  }
+  if (text_width > (ILI9341_WIDTH - x))
+  {
+    text_width = ILI9341_WIDTH - x;
+  }
+  if (text_height > (ILI9341_HEIGHT - y))
+  {
+    text_height = ILI9341_HEIGHT - y;
+  }
+
+  /* 先填充背景，随后只改写字模前景；空格也会覆盖旧字符。 */
+  for (pixel_y = 0U; pixel_y < text_height; pixel_y++)
+  {
+    for (pixel_x = 0U; pixel_x < text_width; pixel_x++)
+    {
+      byte_index = (uint16_t)((pixel_y * text_width + pixel_x) * 2U);
+      tft_text_pixel_buffer[byte_index] = (uint8_t)(background >> 8U);
+      tft_text_pixel_buffer[byte_index + 1U] = (uint8_t)background;
+    }
+  }
+
+  for (character_index = 0U;
+       (text[character_index] != '\0') &&
+       ((uint32_t)(character_index + 1U) * 6U * scale <= text_width);
+       character_index++)
+  {
+    glyph = Tft_Font5x7(text[character_index]);
     for (glyph_row = 0U; glyph_row < 7U; glyph_row++)
     {
       for (glyph_column = 0U; glyph_column < 5U; glyph_column++)
       {
-        uint16_t color = (glyph[glyph_row] & (uint8_t)(0x10U >> glyph_column))
-                             ? foreground
-                             : background;
-        ILI9341_FillRect((uint16_t)(x + glyph_column * scale),
-                         (uint16_t)(y + glyph_row * scale),
-                         scale, scale, color);
+        color = (glyph[glyph_row] & (uint8_t)(0x10U >> glyph_column))
+                    ? foreground
+                    : background;
+        for (pixel_y = 0U; pixel_y < scale; pixel_y++)
+        {
+          for (pixel_x = 0U; pixel_x < scale; pixel_x++)
+          {
+            uint16_t draw_x = (uint16_t)(character_index * 6U * scale +
+                                         glyph_column * scale + pixel_x);
+            uint16_t draw_y = (uint16_t)(glyph_row * scale + pixel_y);
+            byte_index = (uint16_t)((draw_y * text_width + draw_x) * 2U);
+            tft_text_pixel_buffer[byte_index] = (uint8_t)(color >> 8U);
+            tft_text_pixel_buffer[byte_index + 1U] = (uint8_t)color;
+          }
+        }
       }
     }
-    x = (uint16_t)(x + 6U * scale);
-    text++;
   }
+
+  if (!Tft_SetWindow(x, y, (uint16_t)(x + text_width - 1U),
+                     (uint16_t)(y + text_height - 1U)))
+  {
+    return;
+  }
+
+  HAL_GPIO_WritePin(TFT_LCD_DC_GPIO_Port, TFT_LCD_DC_Pin, GPIO_PIN_SET);
+  Tft_Select();
+  (void)HAL_SPI_Transmit(&hspi1, tft_text_pixel_buffer,
+                         (uint16_t)(text_width * text_height * 2U),
+                         TFT_SPI_TIMEOUT_MS);
+  Tft_Deselect();
 }
