@@ -118,3 +118,31 @@ TFT 顶部已增加状态块和三行运行数据：`X/Y` 为图像像素误差�
 - `D:\datasheet-knowledge\parsed\MSP2833_MSP2834_Specification_CN_V1.0\full.md`
 - `D:\datasheet-knowledge\parsed\2.8inch_SPI_ILI9341_Demo_STM32\full.md` 的 `LCD_Init()` 与 `Lcd_WriteData_16Bit()`
 - `D:\datasheet-knowledge\parsed\4-Driver_IC_Data_Sheet__ILI9341_Datasheet_part1\full.md` 第 8.2 节
+
+## ES8388 板载语音播报扩展（2026-08-24）
+
+本次在 P10 的显示与状态机基础上加入 F407 板载 ES8388 音频链路。依据探索者 V3 硬件参考手册第 2.1.28 节，使用 I2C1 配置 ES8388，使用 I2S2 + DMA 向板载扬声器发送 48 kHz、16 bit PCM。K230 仍只负责视觉结果，语音由 F407 本地播放。
+
+### 已完成
+
+1. 已确认 `AUDIO ES8388 probe=ok`、`AUDIO ES8388 init=ok`，板载扬声器可以发声。
+2. 已将 `searching.wav`、`tracking.wav`、`locked.wav`、`limit.wav` 转为 16 bit、48 kHz、单声道 PCM 数组，并纳入 Keil 工程。
+3. 已实现单声道到 I2S 双声道复制，以及每次 1024 个采样帧的 DMA 分块播放，避免 `HAL_I2S_Transmit_DMA()` 的 `uint16_t Size` 上限问题。
+4. 已把语音绑定到 `SEARCH/LOST`、`TRACKING`、`LOCKED`、`FAULT` 状态，状态改变时才尝试播报，冷却时间为 500 ms。
+5. 已实测语音基本可用；首字起音仍偏弱，因此保留约 170 ms 的无声 I2S 预热，不再使用刺耳的校准音。
+6. 当前 Keil 构建结果为 `0 Error(s), 0 Warning(s)`。
+
+### 代码动作 -> 工程意图
+
+| 代码动作 | 工程意图 | 大白话描述给 AI |
+| --- | --- | --- |
+| `Es8388_InitPlayback()` | 建立 I2C 配置的 DAC 播放路径 | “请按芯片寄存器顺序打开 F407 到板载扬声器的播放链路。” |
+| `AudioPlayer_FillSilence()` | 在 DMA 开始时先发送稳定时钟 | “语音开始前先给音频芯片一点稳定时间，但不要让用户听到提示音。” |
+| `AudioPlayer_FillBuffer()` | 将单声道 PCM 复制为左右声道 | “一个采样同时送左右声道，让单声道 WAV 适配当前 I2S 双声道格式。” |
+| `HAL_I2S_TxCpltCallback()` | 每个 DMA 块完成后续发下一块 | “不要一次把整段语音塞给 DMA，分块连续播放。” |
+| `VisualState_PlayAudio()` | 将状态变化映射到语音文件 | “状态机切换时播报一次对应提示，不要每帧重复播报。” |
+
+### 本次复盘
+
+- 静音预热可以保持 I2S 时钟，但没有完全消除首字起音偏弱；这说明问题可能还与 ES8388 的输出启动瞬态或 WAV 起音包络有关，当前不把它误判为已彻底解决。
+- 低音量校准音虽然能提供非零波形，但实测刺耳，因此已删除；后续若继续优化，应优先调整 ES8388 的播放启动/保持策略或重新处理 WAV 起音，而不是继续提高整段增益。

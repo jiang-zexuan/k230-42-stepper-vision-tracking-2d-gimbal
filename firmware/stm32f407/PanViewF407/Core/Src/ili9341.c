@@ -7,6 +7,7 @@
 #include "ili9341.h"
 #include "main.h"
 #include "spi.h"
+#include "panview_font_16.h"
 
 enum
 {
@@ -93,6 +94,7 @@ static const uint8_t *Tft_Font5x7(char character)
   static const uint8_t glyph_g[] = {0x0FU, 0x10U, 0x10U, 0x17U, 0x11U, 0x11U, 0x0FU};
   static const uint8_t glyph_h[] = {0x11U, 0x11U, 0x11U, 0x1FU, 0x11U, 0x11U, 0x11U};
   static const uint8_t glyph_i[] = {0x1FU, 0x04U, 0x04U, 0x04U, 0x04U, 0x04U, 0x1FU};
+  static const uint8_t glyph_j[] = {0x01U, 0x01U, 0x01U, 0x01U, 0x01U, 0x11U, 0x0EU};
   static const uint8_t glyph_k[] = {0x11U, 0x12U, 0x14U, 0x18U, 0x14U, 0x12U, 0x11U};
   static const uint8_t glyph_l[] = {0x10U, 0x10U, 0x10U, 0x10U, 0x10U, 0x10U, 0x1FU};
   static const uint8_t glyph_m[] = {0x11U, 0x1BU, 0x15U, 0x15U, 0x11U, 0x11U, 0x11U};
@@ -107,6 +109,7 @@ static const uint8_t *Tft_Font5x7(char character)
   static const uint8_t glyph_w[] = {0x11U, 0x11U, 0x11U, 0x15U, 0x15U, 0x15U, 0x0AU};
   static const uint8_t glyph_y[] = {0x11U, 0x11U, 0x0AU, 0x04U, 0x04U, 0x04U, 0x04U};
   static const uint8_t glyph_x[] = {0x11U, 0x11U, 0x0AU, 0x04U, 0x0AU, 0x11U, 0x11U};
+  static const uint8_t glyph_z[] = {0x1FU, 0x01U, 0x02U, 0x04U, 0x08U, 0x10U, 0x1FU};
   static const uint8_t glyph_0[] = {0x0EU, 0x11U, 0x13U, 0x15U, 0x19U, 0x11U, 0x0EU};
   static const uint8_t glyph_1[] = {0x04U, 0x0CU, 0x04U, 0x04U, 0x04U, 0x04U, 0x0EU};
   static const uint8_t glyph_2[] = {0x0EU, 0x11U, 0x01U, 0x02U, 0x04U, 0x08U, 0x1FU};
@@ -131,6 +134,7 @@ static const uint8_t *Tft_Font5x7(char character)
     case 'G': return glyph_g;
     case 'H': return glyph_h;
     case 'I': return glyph_i;
+    case 'J': return glyph_j;
     case 'K': return glyph_k;
     case 'L': return glyph_l;
     case 'M': return glyph_m;
@@ -145,6 +149,7 @@ static const uint8_t *Tft_Font5x7(char character)
     case 'W': return glyph_w;
     case 'Y': return glyph_y;
     case 'X': return glyph_x;
+    case 'Z': return glyph_z;
     case '0': return glyph_0;
     case '1': return glyph_1;
     case '2': return glyph_2;
@@ -431,5 +436,81 @@ void ILI9341_DrawText(uint16_t x, uint16_t y, const char *text,
   (void)HAL_SPI_Transmit(&hspi1, tft_text_pixel_buffer,
                          (uint16_t)(text_width * text_height * 2U),
                          TFT_SPI_TIMEOUT_MS);
+  Tft_Deselect();
+}
+
+void ILI9341_DrawText16(uint16_t x, uint16_t y, const uint16_t *text,
+                        uint16_t count, uint16_t foreground,
+                        uint16_t background)
+{
+  uint16_t width;
+  uint16_t row;
+  uint16_t column;
+  uint16_t index;
+  uint16_t byte_index;
+  uint8_t row_high;
+  uint8_t row_low;
+  const uint8_t *glyph;
+
+  if ((text == NULL) || (count == 0U) || (x >= ILI9341_WIDTH) ||
+      (y >= ILI9341_HEIGHT))
+  {
+    return;
+  }
+  width = (uint16_t)(count * 16U);
+  if (width > (ILI9341_WIDTH - x))
+  {
+    width = ILI9341_WIDTH - x;
+    count = (uint16_t)(width / 16U);
+    width = (uint16_t)(count * 16U);
+  }
+  if (16U > (ILI9341_HEIGHT - y) || width == 0U)
+  {
+    return;
+  }
+
+  for (row = 0U; row < 16U; row++)
+  {
+    for (column = 0U; column < width; column++)
+    {
+      byte_index = (uint16_t)((row * width + column) * 2U);
+      tft_text_pixel_buffer[byte_index] = (uint8_t)(background >> 8U);
+      tft_text_pixel_buffer[byte_index + 1U] = (uint8_t)background;
+    }
+  }
+
+  for (index = 0U; index < count; index++)
+  {
+    glyph = PanViewFont16_Find(text[index]);
+    if (glyph == NULL)
+    {
+      continue;
+    }
+    for (row = 0U; row < 16U; row++)
+    {
+      row_high = glyph[row * 2U];
+      row_low = glyph[row * 2U + 1U];
+      for (column = 0U; column < 16U; column++)
+      {
+        if ((column < 8U ? row_high : row_low) &
+            (uint8_t)(0x80U >> (column & 7U)))
+        {
+          byte_index = (uint16_t)((row * width + index * 16U + column) * 2U);
+          tft_text_pixel_buffer[byte_index] = (uint8_t)(foreground >> 8U);
+          tft_text_pixel_buffer[byte_index + 1U] = (uint8_t)foreground;
+        }
+      }
+    }
+  }
+
+  if (!Tft_SetWindow(x, y, (uint16_t)(x + width - 1U),
+                     (uint16_t)(y + 15U)))
+  {
+    return;
+  }
+  HAL_GPIO_WritePin(TFT_LCD_DC_GPIO_Port, TFT_LCD_DC_Pin, GPIO_PIN_SET);
+  Tft_Select();
+  (void)HAL_SPI_Transmit(&hspi1, tft_text_pixel_buffer,
+                         (uint16_t)(width * 16U * 2U), TFT_SPI_TIMEOUT_MS);
   Tft_Deselect();
 }

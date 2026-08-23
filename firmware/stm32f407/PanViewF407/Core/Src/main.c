@@ -20,6 +20,7 @@
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
+#include "i2s.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -28,6 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 #include "communication_watchdog.h"
 #include "debounced_button.h"
 #include "frame_sequence_tracker.h"
@@ -44,6 +46,9 @@
 #include "visual_track_controller.h"
 #include "ili9341.h"
 #include "ft6336g.h"
+#include "es8388.h"
+#include "audio_player.h"
+#include "panview_ui.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,6 +87,10 @@ enum {
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+static bool VisualState_AtLimitFault(void);
+static void TouchUi_StopAllMotion(void);
+static void PublishRelativePosition(const char *reason);
+static void Pitch_EnableHold(void);
 
 /* USER CODE END PFP */
 
@@ -104,6 +113,8 @@ enum {
   VISUAL_TARGET_TIMEOUT_MS = 300U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
   VISUAL_LOCK_HOLD_MS = 500U,
+  /* 单位：ms；状态语音最短间隔，避免状态抖动造成连续播报。 */
+  VISUAL_AUDIO_COOLDOWN_MS = 500U,
   /* 单位：ms；仅局部覆盖变化字段后的 TFT 遥测刷新周期。 */
   VISUAL_STATUS_REFRESH_MS = 500U,
   /* 单位：ms；P03 通信超时观察参数，不是最终云台安全阈值。 */
@@ -243,10 +254,114 @@ typedef enum
 static VisualState visual_state = VISUAL_STATE_SEARCH;
 static bool visual_state_initialized;
 static uint32_t visual_lock_candidate_tick;
-static uint32_t visual_dashboard_last_tick;
-static bool visual_dashboard_dirty = true;
-static bool visual_dashboard_initialized;
+static uint32_t visual_audio_last_tick;
+static bool visual_audio_played;
 static bool tft_ready;
+static bool touch_ready;
+static uint16_t ui_touch_raw_x;
+static uint16_t ui_touch_raw_y;
+static uint16_t ui_touch_screen_x;
+static uint16_t ui_touch_screen_y;
+static uint8_t ui_touch_count;
+
+static PanViewUiData MainUiData(void)
+{
+  PanViewUiData data;
+  (void)memset(&data, 0, sizeof(data));
+  switch (visual_state)
+  {
+    case VISUAL_STATE_TRACKING: data.state = UI_STATE_TRACKING; break;
+    case VISUAL_STATE_LOCKED: data.state = UI_STATE_LOCKED; break;
+    case VISUAL_STATE_LOST: data.state = UI_STATE_LOST; break;
+    case VISUAL_STATE_FAULT: data.state = UI_STATE_FAULT; break;
+    case VISUAL_STATE_SEARCH:
+    default: data.state = UI_STATE_SEARCH; break;
+  }
+  data.running = control_takeover_active;
+  data.target_present = latest_k230_result_valid && latest_k230_result.target_present;
+  data.error_x = latest_k230_result_valid ? latest_k230_error.error_x : 0;
+  data.error_y = latest_k230_result_valid ? latest_k230_error.error_y : 0;
+  data.pan_position = RelativePositionTracker_GetPositionPulses(&relative_position_tracker);
+  data.pitch_position = pitch_position_pulses;
+  data.pan_speed = latest_k230_result_valid ? latest_pan_speed_target : 0;
+  data.pitch_speed = latest_k230_result_valid ? latest_pitch_speed_target : 0;
+  data.rx_frames = k230_uart_rx_frame.received_count;
+  data.rx_drops = k230_uart_rx_frame.dropped_count;
+  data.parse_errors = k230_text_error_count;
+  data.last_frame_age_ms = last_k230_valid_tick == 0U ? 0U : HAL_GetTick() - last_k230_valid_tick;
+  data.position_valid = RelativePositionTracker_IsValid(&relative_position_tracker);
+  data.pitch_zeroed = pitch_zeroed;
+  data.tft_ready = tft_ready;
+  data.touch_ready = touch_ready;
+  data.touch_raw_x = ui_touch_raw_x;
+  data.touch_raw_y = ui_touch_raw_y;
+  data.touch_screen_x = ui_touch_screen_x;
+  data.touch_screen_y = ui_touch_screen_y;
+  data.touch_count = ui_touch_count;
+  data.pan_limit = VisualState_AtLimitFault();
+  data.pitch_limit = (pitch_position_pulses >= (int32_t)PITCH_LIMIT_PULSES) ||
+                     (pitch_position_pulses <= -(int32_t)PITCH_LIMIT_PULSES);
+  return data;
+}
+
+static void ExecuteManualZeroStart(void)
+{
+  if ((MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED) ||
+      pitch_running || dual_test_running || visual_pan_running || visual_pitch_running)
+  {
+    return;
+  }
+  RelativePositionTracker_SetManualZero(&relative_position_tracker);
+  pitch_zeroed = true;
+  pitch_position_pulses = 0;
+  pitch_active_delta_pulses = 0;
+  control_takeover_active = true;
+  visual_tracking_enabled = true;
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
+  Pitch_EnableHold();
+  PublishRelativePosition("manual_zero");
+  (void)HAL_UART_Transmit(&huart1, pitch_zero_message,
+                          sizeof(pitch_zero_message) - 1U, BOOT_LOG_TIMEOUT_MS);
+}
+
+static void MainUi_HandleEvent(UiEvent event)
+{
+  switch (event)
+  {
+    case UI_EVENT_START_STOP:
+      if (control_takeover_active)
+      {
+        TouchUi_StopAllMotion();
+        visual_tracking_enabled = false;
+      }
+      else
+      {
+        ExecuteManualZeroStart();
+      }
+      break;
+    case UI_EVENT_OPEN_SETTINGS:
+      TouchUi_StopAllMotion(); visual_tracking_enabled = false;
+      PanViewUi_Navigate(UI_PAGE_SETTINGS);
+      break;
+    case UI_EVENT_LANGUAGE_ZH: PanViewUi_SetLanguage(UI_LANGUAGE_ZH); break;
+    case UI_EVENT_LANGUAGE_EN: PanViewUi_SetLanguage(UI_LANGUAGE_EN); break;
+    case UI_EVENT_THEME_BLACK_GOLD: PanViewUi_SetTheme(UI_THEME_BLACK_GOLD); break;
+    case UI_EVENT_THEME_NEON: PanViewUi_SetTheme(UI_THEME_NEON); break;
+    case UI_EVENT_THEME_MONO: PanViewUi_SetTheme(UI_THEME_MONO); break;
+    case UI_EVENT_THEME_FLUORESCENT_GREEN:
+      PanViewUi_SetTheme(UI_THEME_FLUORESCENT_GREEN);
+      break;
+    case UI_EVENT_OPEN_DIAGNOSTIC:
+      TouchUi_StopAllMotion(); visual_tracking_enabled = false;
+      PanViewUi_Navigate(UI_PAGE_DIAGNOSTIC);
+      break;
+    case UI_EVENT_BACK:
+      TouchUi_StopAllMotion(); visual_tracking_enabled = false;
+      PanViewUi_Navigate(UI_PAGE_RUN);
+      break;
+    default: break;
+  }
+}
 
 /*
  * 只读探测 X42S TTL 链路。依据电机手册 5.6.30：发送 00 15 6B，
@@ -1101,27 +1216,6 @@ static void PublishMotionLimitRejection(MotionLimitsResult result)
   }
 }
 
-/* P10：底部四个触摸区域用于模式、接管、停止和状态查询。 */
-static void TouchUi_DrawButton(uint16_t x, uint16_t y, uint16_t color,
-                               uint16_t foreground, const char *label)
-{
-  ILI9341_FillRect(x, y, 112U, 98U, color);
-  ILI9341_DrawText((uint16_t)(x + 24U), (uint16_t)(y + 40U), label,
-                   foreground, color, 2U);
-}
-
-static void TouchUi_DrawAll(void)
-{
-  TouchUi_DrawButton(4U, 72U, ILI9341_COLOR_BLUE, ILI9341_COLOR_WHITE,
-                     "MODE");
-  TouchUi_DrawButton(124U, 72U, ILI9341_COLOR_GREEN, ILI9341_COLOR_BLACK,
-                     "TAKE");
-  TouchUi_DrawButton(4U, 182U, ILI9341_COLOR_YELLOW, ILI9341_COLOR_BLACK,
-                     "STOP");
-  TouchUi_DrawButton(124U, 182U, ILI9341_COLOR_CYAN, ILI9341_COLOR_BLACK,
-                     "INFO");
-}
-
 static const char *VisualStateText(VisualState state)
 {
   switch (state)
@@ -1135,65 +1229,56 @@ static const char *VisualStateText(VisualState state)
   }
 }
 
-static uint16_t VisualStateColor(VisualState state)
+static bool VisualState_PlayAudio(VisualState state, uint32_t current_tick)
 {
+  PanViewAudioClip clip;
+  const char *clip_name;
+  char message[64];
+  int length;
+
+  if (visual_audio_played &&
+      ((current_tick - visual_audio_last_tick) < VISUAL_AUDIO_COOLDOWN_MS))
+  {
+    return false;
+  }
+
   switch (state)
   {
-    case VISUAL_STATE_TRACKING: return ILI9341_COLOR_YELLOW;
-    case VISUAL_STATE_LOCKED: return ILI9341_COLOR_GREEN;
-    case VISUAL_STATE_LOST: return ILI9341_COLOR_ORANGE;
-    case VISUAL_STATE_FAULT: return ILI9341_COLOR_RED;
+    case VISUAL_STATE_TRACKING:
+      clip = PANVIEW_AUDIO_TRACKING;
+      clip_name = "tracking";
+      break;
+    case VISUAL_STATE_LOCKED:
+      clip = PANVIEW_AUDIO_LOCKED;
+      clip_name = "locked";
+      break;
+    case VISUAL_STATE_FAULT:
+      clip = PANVIEW_AUDIO_LIMIT;
+      clip_name = "limit";
+      break;
     case VISUAL_STATE_SEARCH:
-    default: return ILI9341_COLOR_BLUE;
+    case VISUAL_STATE_LOST:
+    default:
+      clip = PANVIEW_AUDIO_SEARCHING;
+      clip_name = "searching";
+      break;
   }
-}
 
-/* 顶部固定标题只画一次；后续仅覆盖单个字段，避免整块区域闪烁。 */
-static void TouchUi_DrawStatus(VisualState state, int16_t error_x,
-                               int16_t error_y, int32_t pan_position,
-                               int32_t pitch_position, int32_t pan_speed,
-                               int32_t pitch_speed)
-{
-  char state_line[9];
-  char error_line[18];
-  char position_line[18];
-  char speed_line[18];
-  uint16_t state_color = VisualStateColor(state);
-
-  if (!tft_ready)
+  if (!AudioPlayer_Play(clip))
   {
-    return;
+    return false;
   }
 
-  if (!visual_dashboard_initialized)
+  visual_audio_last_tick = current_tick;
+  visual_audio_played = true;
+  length = snprintf(message, sizeof(message), "AUDIO state=%s\\r\\n",
+                    clip_name);
+  if ((length > 0) && (length < (int)sizeof(message)))
   {
-    ILI9341_FillRect(0U, 0U, ILI9341_WIDTH, 70U, ILI9341_COLOR_BLACK);
-    ILI9341_DrawText(4U, 2U, "PANVIEW", ILI9341_COLOR_WHITE,
-                     ILI9341_COLOR_BLACK, 2U);
-    visual_dashboard_initialized = true;
+    (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
+                            BOOT_LOG_TIMEOUT_MS);
   }
-
-  ILI9341_FillRect(158U, 2U, 78U, 22U, state_color);
-  (void)snprintf(state_line, sizeof(state_line), "%-8s", VisualStateText(state));
-  ILI9341_DrawText(162U, 9U, state_line,
-                   state == VISUAL_STATE_SEARCH || state == VISUAL_STATE_TRACKING
-                       ? ILI9341_COLOR_BLACK
-                       : ILI9341_COLOR_WHITE,
-                   state_color, 1U);
-
-  /* 固定字段宽度，新的数值会连同空白背景覆盖旧数值，不需要先刷黑。 */
-  (void)snprintf(error_line, sizeof(error_line), "X=%05d Y=%05d", (int)error_x,
-                 (int)error_y);
-  ILI9341_DrawText(4U, 25U, error_line, ILI9341_COLOR_CYAN,
-                   ILI9341_COLOR_BLACK, 1U);
-  (void)snprintf(position_line, sizeof(position_line), "P=%05ld T=%05ld", (long)pan_position,
-                 (long)pitch_position);
-  ILI9341_DrawText(4U, 36U, position_line, ILI9341_COLOR_WHITE,
-                   ILI9341_COLOR_BLACK, 1U);
-  (void)snprintf(speed_line, sizeof(speed_line), "V=%05ld W=%05ld", (long)pan_speed,
-                 (long)pitch_speed);
-  ILI9341_DrawText(4U, 47U, speed_line, ILI9341_COLOR_YELLOW,
-                   ILI9341_COLOR_BLACK, 1U);
+  return true;
 }
 
 static bool VisualState_AtLimitFault(void)
@@ -1236,7 +1321,10 @@ static void VisualState_Set(VisualState next_state, const char *reason)
 
   visual_state = next_state;
   visual_state_initialized = true;
-  visual_dashboard_dirty = true;
+  if (strcmp(reason, "boot") != 0)
+  {
+    (void)VisualState_PlayAudio(next_state, HAL_GetTick());
+  }
   length = snprintf(message, sizeof(message), "VIS state=%s reason=%s\r\n",
                     VisualStateText(next_state), reason);
   if ((length > 0) && (length < (int)sizeof(message)))
@@ -1340,69 +1428,6 @@ static void VisualState_Update(uint32_t current_tick)
   }
 }
 
-static void VisualUi_Refresh(uint32_t current_tick)
-{
-  if (!tft_ready ||
-      (!visual_dashboard_dirty &&
-       ((current_tick - visual_dashboard_last_tick) <
-        VISUAL_STATUS_REFRESH_MS)))
-  {
-    return;
-  }
-
-  visual_dashboard_last_tick = current_tick;
-  visual_dashboard_dirty = false;
-  TouchUi_DrawStatus(
-      visual_state,
-      latest_k230_result_valid ? latest_k230_error.error_x : 0,
-      latest_k230_result_valid ? latest_k230_error.error_y : 0,
-      RelativePositionTracker_GetPositionPulses(&relative_position_tracker),
-      pitch_position_pulses,
-      latest_k230_result_valid ? latest_pan_speed_target : 0,
-      latest_k230_result_valid ? latest_pitch_speed_target : 0);
-}
-
-static void TouchUi_DrawFeedback(uint16_t screen_x, uint16_t screen_y,
-                                 bool pressed)
-{
-  uint16_t x = (screen_x < TOUCH_SCREEN_MID_X) ? 4U : 124U;
-  uint16_t y = (screen_y < TOUCH_SCREEN_MID_Y) ? 72U : 182U;
-  const char *label;
-
-  if ((screen_x < TOUCH_SCREEN_MID_X) &&
-      (screen_y < TOUCH_SCREEN_MID_Y))
-  {
-    label = "MODE";
-  }
-  else if ((screen_x >= TOUCH_SCREEN_MID_X) &&
-           (screen_y < TOUCH_SCREEN_MID_Y))
-  {
-    label = "TAKE";
-  }
-  else if (screen_x < TOUCH_SCREEN_MID_X)
-  {
-    label = "STOP";
-  }
-  else
-  {
-    label = "INFO";
-  }
-
-  TouchUi_DrawButton(x, y, pressed ? ILI9341_COLOR_WHITE
-                                   : ((x < TOUCH_SCREEN_MID_X)
-                                          ? ((y < TOUCH_SCREEN_MID_Y)
-                                                 ? ILI9341_COLOR_BLUE
-                                                 : ILI9341_COLOR_YELLOW)
-                                          : ((y < TOUCH_SCREEN_MID_Y)
-                                                 ? ILI9341_COLOR_GREEN
-                                                 : ILI9341_COLOR_CYAN)),
-                     pressed ? ILI9341_COLOR_BLACK
-                             : ((x == 4U && y == 72U)
-                                    ? ILI9341_COLOR_WHITE
-                                    : ILI9341_COLOR_BLACK),
-                     label);
-}
-
 static void TouchUi_StopAllMotion(void)
 {
   VisualPan_StopHardware();
@@ -1424,60 +1449,6 @@ static void TouchUi_StopAllMotion(void)
   control_takeover_active = false;
   HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
-}
-
-static void TouchUi_HandlePress(uint16_t screen_x, uint16_t screen_y)
-{
-  char message[64];
-  const char *action;
-
-  if ((screen_x < TOUCH_SCREEN_MID_X) &&
-      (screen_y < TOUCH_SCREEN_MID_Y))
-  {
-    visual_tracking_enabled = !visual_tracking_enabled;
-    if (!visual_tracking_enabled)
-    {
-      VisualPan_StopHardware();
-      VisualPitch_StopHardware();
-    }
-    action = visual_tracking_enabled ? "mode_tracking_on"
-                                     : "mode_tracking_off";
-  }
-  else if ((screen_x >= TOUCH_SCREEN_MID_X) &&
-           (screen_y < TOUCH_SCREEN_MID_Y))
-  {
-    if (control_takeover_active)
-    {
-      TouchUi_StopAllMotion();
-      action = "takeover_off";
-    }
-    else
-    {
-      control_takeover_active = true;
-      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_SET);
-      action = "takeover_on";
-    }
-  }
-  else if (screen_x < TOUCH_SCREEN_MID_X)
-  {
-    TouchUi_StopAllMotion();
-    visual_tracking_enabled = false;
-    action = "stop_all";
-  }
-  else
-  {
-    MotorTtlReadSystemStatus();
-    action = "info_status";
-  }
-
-  int length = snprintf(message, sizeof(message), "TOUCH action=%s\r\n",
-                        action);
-  if ((length > 0) && (length < (int)sizeof(message)))
-  {
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
-                            BOOT_LOG_TIMEOUT_MS);
-  }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -1629,7 +1600,23 @@ int main(void)
   MX_USART2_UART_Init();
   MX_SPI1_Init();
   MX_I2C1_Init();
+  MX_I2S2_Init();
   /* USER CODE BEGIN 2 */
+  AudioPlayer_Init();
+  {
+    const char *audio_probe = "AUDIO ES8388 probe=failed\\r\\n";
+    if (Es8388_Probe() && Es8388_InitPlayback())
+    {
+      /* 解码器刚解除静音时先留出稳定时间，避免上电首段语音瞬态失真。 */
+      HAL_Delay(100U);
+      audio_probe = AudioPlayer_Play(PANVIEW_AUDIO_SEARCHING)
+                        ? "AUDIO ES8388 voice=searching\\r\\n"
+                        : "AUDIO ES8388 voice=failed\\r\\n";
+    }
+    (void)HAL_UART_Transmit(&huart1, (uint8_t *)audio_probe,
+                            (uint16_t)strlen(audio_probe),
+                            BOOT_LOG_TIMEOUT_MS);
+  }
   /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
   DebouncedButton key0_button;
   DebouncedButton key1_button;
@@ -1646,7 +1633,6 @@ int main(void)
   uint16_t touch_last_x = 0U;
   uint16_t touch_last_y = 0U;
   char touch_runtime_message[96];
-  bool touch_ready = false;
   uint32_t last_heartbeat_log_ms = HAL_GetTick();
   uint32_t key_scan_count = 0U;
   uint32_t status_task_count = 0U;
@@ -1702,22 +1688,6 @@ int main(void)
     uint8_t tft_id[4] = {0U};
     char tft_id_message[64];
 
-    /* TFT 第一阶段诊断：依次显示红、绿、蓝，确认像素数据链路和颜色格式。 */
-    ILI9341_FillColor(ILI9341_COLOR_RED);
-    HAL_Delay(1000U);
-    ILI9341_FillColor(ILI9341_COLOR_GREEN);
-    HAL_Delay(1000U);
-    ILI9341_FillColor(ILI9341_COLOR_BLUE);
-
-    /* P10 第二步：触摸 UI 验证页，先验证区域反馈，不绑定真实动作。 */
-    HAL_Delay(1000U);
-    ILI9341_FillColor(ILI9341_COLOR_BLACK);
-    ILI9341_DrawText(18U, 12U, "PANVIEW", ILI9341_COLOR_YELLOW,
-                     ILI9341_COLOR_BLACK, 3U);
-    ILI9341_DrawText(16U, 48U, "TOUCH UI", ILI9341_COLOR_WHITE,
-                     ILI9341_COLOR_BLACK, 2U);
-    TouchUi_DrawAll();
-
     {
       uint8_t touch_chip_id = 0U;
       uint8_t touch_chip_high = 0U;
@@ -1757,6 +1727,8 @@ int main(void)
                                 (uint16_t)tft_id_length, BOOT_LOG_TIMEOUT_MS);
       }
     }
+
+    PanViewUi_Init(UI_LANGUAGE_ZH);
   }
   /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
   if (HAL_UART_Transmit(&huart1, boot_message,
@@ -1766,7 +1738,10 @@ int main(void)
     Error_Handler();
   }
   VisualState_Set(VISUAL_STATE_SEARCH, "boot");
-  VisualUi_Refresh(HAL_GetTick());
+  {
+    PanViewUiData initial_ui_data = MainUiData();
+    PanViewUi_Refresh(&initial_ui_data, HAL_GetTick());
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -1797,6 +1772,11 @@ int main(void)
             (touch_point.y > TOUCH_SCREEN_MAX_Y)
                 ? 0U
                 : (uint16_t)(TOUCH_SCREEN_MAX_Y - touch_point.y);
+        ui_touch_raw_x = touch_point.x;
+        ui_touch_raw_y = touch_point.y;
+        ui_touch_screen_x = touch_screen_x;
+        ui_touch_screen_y = touch_screen_y;
+        ui_touch_count = touch_point.touch_count;
         const char *touch_zone;
         if (touch_point.touch_count == 0U)
         {
@@ -1838,15 +1818,11 @@ int main(void)
                                   (uint16_t)touch_runtime_length,
                                   BOOT_LOG_TIMEOUT_MS);
         }
-        if (touch_point.touch_count <= 1U)
-        {
-          TouchUi_DrawFeedback(touch_screen_x, touch_screen_y,
-                               touch_point.touch_count > 0U);
-        }
         if ((touch_point.touch_count == 1U) &&
             (touch_last_count == 0U))
         {
-          TouchUi_HandlePress(touch_screen_x, touch_screen_y);
+          MainUi_HandleEvent(PanViewUi_HandleTouch(touch_screen_x,
+                                                   touch_screen_y, true));
         }
         touch_last_count = touch_point.touch_count;
         touch_last_x = touch_point.x;
@@ -1892,7 +1868,10 @@ int main(void)
     }
 
     VisualState_Update(current_tick);
-    VisualUi_Refresh(current_tick);
+    {
+      PanViewUiData ui_data = MainUiData();
+      PanViewUi_Refresh(&ui_data, current_tick);
+    }
 
     if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
     {
@@ -2137,20 +2116,7 @@ int main(void)
             !pitch_running && !dual_test_running && !visual_pan_running &&
             !visual_pitch_running)
         {
-          RelativePositionTracker_SetManualZero(&relative_position_tracker);
-          pitch_zeroed = true;
-          pitch_position_pulses = 0;
-          pitch_active_delta_pulses = 0;
-          control_takeover_active = true;
-          HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-          Pitch_EnableHold();
-          PublishRelativePosition("manual_zero");
-          if (HAL_UART_Transmit(&huart1, pitch_zero_message,
-                                sizeof(pitch_zero_message) - 1U,
-                                BOOT_LOG_TIMEOUT_MS) != HAL_OK)
-          {
-            Error_Handler();
-          }
+          ExecuteManualZeroStart();
         }
         else if (HAL_UART_Transmit(&huart1, relative_position_zero_ignored_message,
                                    sizeof(relative_position_zero_ignored_message) - 1U,
@@ -2429,6 +2395,14 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Macro to configure the PLL multiplication factor
+  */
+  __HAL_RCC_PLL_PLLM_CONFIG(16);
+
+  /** Macro to configure the PLL clock source
+  */
+  __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSI);
+
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -2441,6 +2415,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

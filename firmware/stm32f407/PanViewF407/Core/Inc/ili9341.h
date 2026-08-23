@@ -32,5 +32,8 @@ void ILI9341_FillRect(uint16_t x, uint16_t y, uint16_t width,
 void ILI9341_DrawText(uint16_t x, uint16_t y, const char *text,
                       uint16_t foreground, uint16_t background,
                       uint8_t scale);
+void ILI9341_DrawText16(uint16_t x, uint16_t y, const uint16_t *text,
+                        uint16_t count, uint16_t foreground,
+                        uint16_t background);
 
 #endif /* __ILI9341_H__ */
