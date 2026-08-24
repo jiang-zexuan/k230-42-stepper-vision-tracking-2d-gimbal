@@ -24,10 +24,7 @@ typedef struct
 } AudioClipData;
 
 static const AudioClipData audio_clips[] = {
-    {searching_audio, 77760U},
-    {tracking_audio, 66240U},
-    {locked_audio, 69120U},
-    {limit_audio, 103680U},
+    {hit_audio, 35314U},
 };
 
 static uint16_t audio_dma_buffer[AUDIO_DMA_HALFWWORDS];

@@ -7,18 +7,33 @@
 typedef struct
 {
   int16_t deadzone_pixels;
-  int16_t gain_pulses_per_pixel;
+  float kp;
+  float ki;
+  float kd;
+  float integral_limit;
   int32_t max_speed_pulses_per_second;
+  int32_t max_acceleration_pulses_per_second2;
 } VisualTrackControllerConfig;
 
-/* 输出是抽象的带符号速度目标，轴向正负由各轴实测方向约定解释。 */
-int32_t VisualTrackController_HorizontalSpeed(
-    const VisualTrackControllerConfig *config, bool target_present,
-    int16_t error_x);
+typedef struct
+{
+  float integral;
+  float derivative;
+  int16_t previous_error;
+  uint32_t previous_tick_ms;
+  int32_t previous_output;
+  bool previous_valid;
+} VisualTrackControllerState;
 
-/* 俯仰轴正方向约定为向上；图像 Y 向下为正，因此这里需要反向映射。 */
-int32_t VisualTrackController_VerticalSpeed(
-    const VisualTrackControllerConfig *config, bool target_present,
-    int16_t error_y);
+void VisualTrackController_Reset(VisualTrackControllerState *state);
+
+/*
+ * 根据图像误差计算带符号的速度目标。输出方向沿用现有装配约定：
+ * 图像误差为正时输出负速度，图像误差为负时输出正速度。
+ */
+int32_t VisualTrackController_Update(
+    const VisualTrackControllerConfig *config,
+    VisualTrackControllerState *state, bool target_present, int16_t error,
+    uint32_t tick_ms);
 
 #endif

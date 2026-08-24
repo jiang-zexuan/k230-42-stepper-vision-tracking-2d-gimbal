@@ -5,10 +5,7 @@
 
 typedef enum
 {
-  PANVIEW_AUDIO_SEARCHING = 0,
-  PANVIEW_AUDIO_TRACKING,
-  PANVIEW_AUDIO_LOCKED,
-  PANVIEW_AUDIO_LIMIT
+  PANVIEW_AUDIO_HIT = 0
 } PanViewAudioClip;
 
 void AudioPlayer_Init(void);

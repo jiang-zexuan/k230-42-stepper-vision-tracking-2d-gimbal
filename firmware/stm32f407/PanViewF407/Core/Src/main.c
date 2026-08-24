@@ -113,7 +113,7 @@ enum {
   VISUAL_TARGET_TIMEOUT_MS = 300U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
   VISUAL_LOCK_HOLD_MS = 500U,
-  /* 单位：ms；状态语音最短间隔，避免状态抖动造成连续播报。 */
+  /* 单位：ms；命中音效最短间隔，避免锁定状态抖动造成重复播放。 */
   VISUAL_AUDIO_COOLDOWN_MS = 500U,
   /* 单位：ms；仅局部覆盖变化字段后的 TFT 遥测刷新周期。 */
   VISUAL_STATUS_REFRESH_MS = 500U,
@@ -164,8 +164,11 @@ static char k230_uart_log_message[224];
 static uint16_t k230_uart_last_frame_size;
 static VisionTextResult latest_k230_result;
 static VisionError latest_k230_error;
-/* P09 设计初值，单位分别为 px、脉冲/px、脉冲/s；均待实测调参。 */
-static VisualTrackControllerConfig visual_track_config = {40, 2, 800};
+/* P10 到位稳定调参：放宽中心死区，限制速度变化率，抑制到位后的机械抖动。 */
+static VisualTrackControllerConfig visual_track_config =
+    {30, 3.0f, 0.02f, 0.15f, 200.0f, 800, 5000};
+static VisualTrackControllerState pan_track_state;
+static VisualTrackControllerState pitch_track_state;
 static int32_t latest_pan_speed_target;
 static int32_t latest_pitch_speed_target;
 static bool latest_k230_result_valid;
@@ -1229,10 +1232,8 @@ static const char *VisualStateText(VisualState state)
   }
 }
 
-static bool VisualState_PlayAudio(VisualState state, uint32_t current_tick)
+static bool VisualState_PlayHitAudio(uint32_t current_tick)
 {
-  PanViewAudioClip clip;
-  const char *clip_name;
   char message[64];
   int length;
 
@@ -1242,37 +1243,14 @@ static bool VisualState_PlayAudio(VisualState state, uint32_t current_tick)
     return false;
   }
 
-  switch (state)
-  {
-    case VISUAL_STATE_TRACKING:
-      clip = PANVIEW_AUDIO_TRACKING;
-      clip_name = "tracking";
-      break;
-    case VISUAL_STATE_LOCKED:
-      clip = PANVIEW_AUDIO_LOCKED;
-      clip_name = "locked";
-      break;
-    case VISUAL_STATE_FAULT:
-      clip = PANVIEW_AUDIO_LIMIT;
-      clip_name = "limit";
-      break;
-    case VISUAL_STATE_SEARCH:
-    case VISUAL_STATE_LOST:
-    default:
-      clip = PANVIEW_AUDIO_SEARCHING;
-      clip_name = "searching";
-      break;
-  }
-
-  if (!AudioPlayer_Play(clip))
+  if (!AudioPlayer_Play(PANVIEW_AUDIO_HIT))
   {
     return false;
   }
 
   visual_audio_last_tick = current_tick;
   visual_audio_played = true;
-  length = snprintf(message, sizeof(message), "AUDIO state=%s\\r\\n",
-                    clip_name);
+  length = snprintf(message, sizeof(message), "AUDIO effect=hit\\r\\n");
   if ((length > 0) && (length < (int)sizeof(message)))
   {
     (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
@@ -1321,9 +1299,9 @@ static void VisualState_Set(VisualState next_state, const char *reason)
 
   visual_state = next_state;
   visual_state_initialized = true;
-  if (strcmp(reason, "boot") != 0)
+  if ((strcmp(reason, "boot") != 0) && (next_state == VISUAL_STATE_LOCKED))
   {
-    (void)VisualState_PlayAudio(next_state, HAL_GetTick());
+    (void)VisualState_PlayHitAudio(HAL_GetTick());
   }
   length = snprintf(message, sizeof(message), "VIS state=%s reason=%s\r\n",
                     VisualStateText(next_state), reason);
@@ -1447,6 +1425,8 @@ static void TouchUi_StopAllMotion(void)
   RelativePositionTracker_Invalidate(&relative_position_tracker);
   pitch_zeroed = false;
   control_takeover_active = false;
+  VisualTrackController_Reset(&pan_track_state);
+  VisualTrackController_Reset(&pitch_track_state);
   HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
 }
@@ -1607,11 +1587,7 @@ int main(void)
     const char *audio_probe = "AUDIO ES8388 probe=failed\\r\\n";
     if (Es8388_Probe() && Es8388_InitPlayback())
     {
-      /* 解码器刚解除静音时先留出稳定时间，避免上电首段语音瞬态失真。 */
-      HAL_Delay(100U);
-      audio_probe = AudioPlayer_Play(PANVIEW_AUDIO_SEARCHING)
-                        ? "AUDIO ES8388 voice=searching\\r\\n"
-                        : "AUDIO ES8388 voice=failed\\r\\n";
+      audio_probe = "AUDIO ES8388 init=ok\\r\\n";
     }
     (void)HAL_UART_Transmit(&huart1, (uint8_t *)audio_probe,
                             (uint16_t)strlen(audio_probe),
@@ -1842,12 +1818,14 @@ int main(void)
         latest_k230_error = VisionError_FromTarget(
             1920U, 1080U, latest_k230_result.target_present,
             latest_k230_result.center_x, latest_k230_result.center_y);
-        latest_pan_speed_target = VisualTrackController_HorizontalSpeed(
-            &visual_track_config, latest_k230_error.target_present,
-            latest_k230_error.error_x);
-        latest_pitch_speed_target = VisualTrackController_VerticalSpeed(
-            &visual_track_config, latest_k230_error.target_present,
-            latest_k230_error.error_y);
+        latest_pan_speed_target = VisualTrackController_Update(
+            &visual_track_config, &pan_track_state,
+            latest_k230_error.target_present, latest_k230_error.error_x,
+            current_tick);
+        latest_pitch_speed_target = VisualTrackController_Update(
+            &visual_track_config, &pitch_track_state,
+            latest_k230_error.target_present, latest_k230_error.error_y,
+            current_tick);
         last_k230_valid_tick = current_tick;
         k230_text_valid_count++;
       }
@@ -1863,6 +1841,8 @@ int main(void)
     {
       VisualPan_StopHardware();
       VisualPitch_StopHardware();
+      VisualTrackController_Reset(&pan_track_state);
+      VisualTrackController_Reset(&pitch_track_state);
       latest_pan_speed_target = 0;
       latest_pitch_speed_target = 0;
     }

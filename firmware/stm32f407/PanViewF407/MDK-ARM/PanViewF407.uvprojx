@@ -652,24 +652,9 @@
               <FilePath>../Core/Src/audio_player.c</FilePath>
             </File>
             <File>
-              <FileName>searching.c</FileName>
+              <FileName>hit.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Audio/searching.c</FilePath>
-            </File>
-            <File>
-              <FileName>tracking.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Audio/tracking.c</FilePath>
-            </File>
-            <File>
-              <FileName>locked.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Audio/locked.c</FilePath>
-            </File>
-            <File>
-              <FileName>limit.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Audio/limit.c</FilePath>
+              <FilePath>../Audio/hit.c</FilePath>
             </File>
           </Files>
         </Group>
