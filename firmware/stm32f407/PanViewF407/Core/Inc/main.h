@@ -36,6 +36,21 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef struct
+{
+  uint8_t target_present;
+  int16_t error_x;
+  int16_t error_y;
+  uint16_t center_x;
+  uint16_t center_y;
+  uint32_t tick;
+} VisionTargetMessage;
+
+typedef struct
+{
+  uint16_t screen_x;
+  uint16_t screen_y;
+} PanViewTouchMessage;
 
 /* USER CODE END ET */
 
@@ -53,6 +68,19 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void PanView_AppStep(void);
+void PanView_InputStep(uint32_t current_tick);
+void PanView_ApplyUiTouch(uint16_t screen_x, uint16_t screen_y);
+void PanView_UiRefreshStep(uint32_t current_tick);
+void PanView_TelemetryStep(uint32_t current_tick);
+void PanView_SafetyStep(uint32_t current_tick);
+HAL_StatusTypeDef PanView_Uart1Transmit(UART_HandleTypeDef *huart,
+                                        uint8_t *data,
+                                        uint16_t size,
+                                        uint32_t timeout);
+void PanView_RtosPublishVision(const VisionTargetMessage *message);
+void PanView_RtosPublishTouch(uint16_t screen_x, uint16_t screen_y);
+void PanView_RtosProcessUiEvents(void);
 
 /* USER CODE END EFP */
 

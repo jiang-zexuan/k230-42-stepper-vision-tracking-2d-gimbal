@@ -18,9 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
+#include "iwdg.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -58,6 +60,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* P11 第一阶段只验证调度器；保持 0 时不启动 RTOS，避免原裸机主循环失效。 */
+#define PANVIEW_P11_RTOS_DEMO 1
 
 /* USER CODE END PD */
 
@@ -74,6 +78,26 @@ static uint8_t boot_message[] = "PanView P10 boot\r\n";
 static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
 static uint8_t motor_ttl_option_request[] = {0x01U, 0x1AU, 0x6BU};
 static uint8_t motor_ttl_system_status_request[] = {0x01U, 0x43U, 0x7AU, 0x6BU};
+/* PanView_AppStep 在裸机主循环和 RTOS 任务之间共用的运行时状态。 */
+static DebouncedButton key0_button;
+static DebouncedButton key1_button;
+static DebouncedButton key2_button;
+static DebouncedButton key_up_button;
+static PeriodicTask key_scan_task;
+static PeriodicTask status_task;
+static PeriodicTask motor_feedback_task;
+static PeriodicTask heartbeat_task;
+static PeriodicTask k230_uart_log_task;
+static PeriodicTask touch_poll_task;
+static Ft6336gPoint touch_point;
+static uint8_t touch_last_count;
+static uint16_t touch_last_x;
+static uint16_t touch_last_y;
+static char touch_runtime_message[96];
+static uint32_t last_heartbeat_log_ms;
+static uint32_t key_scan_count;
+static uint32_t status_task_count;
+static uint32_t heartbeat_count;
 
 enum {
   /* 单位：ms；串口发送阻塞等待上限，仅用于当前诊断日志。 */
@@ -85,12 +109,25 @@ enum {
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+typedef enum
+{
+  PANVIEW_SAFETY_CLEAR = 0,
+  PANVIEW_SAFETY_VISION_TIMEOUT,
+  PANVIEW_SAFETY_LIMIT,
+  PANVIEW_SAFETY_CONTROL_STALE
+} PanViewSafetyFault;
+
+static volatile PanViewSafetyFault safety_fault_latched = PANVIEW_SAFETY_CLEAR;
+
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 static bool VisualState_AtLimitFault(void);
 static void TouchUi_StopAllMotion(void);
 static void PublishRelativePosition(const char *reason);
 static void Pitch_EnableHold(void);
+static const char *PanView_SafetyFaultText(PanViewSafetyFault fault);
+static void PanView_SafetyStop(PanViewSafetyFault fault);
 
 /* USER CODE END PFP */
 
@@ -111,6 +148,8 @@ enum {
   K230_UART_LOG_PERIOD_MS = 1000U,
   /* 单位：ms；视觉结果超过此时间未更新就停止水平 STEP。 */
   VISUAL_TARGET_TIMEOUT_MS = 300U,
+  /* 单位：ms；控制任务超过此时间没有打心跳就执行独立安全停机。 */
+  SAFETY_CONTROL_STALE_TIMEOUT_MS = 200U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
   VISUAL_LOCK_HOLD_MS = 500U,
   /* 单位：ms；命中音效最短间隔，避免锁定状态抖动造成重复播放。 */
@@ -160,7 +199,7 @@ static uint8_t k230_uart_rx_dma_buffer[UART_RX_FRAME_CAPACITY];
 static UartRxFrame k230_uart_rx_frame;
 static UartTextLineAccumulator k230_uart_line_accumulator;
 static char uart_rx_log_message[128];
-static char k230_uart_log_message[224];
+static char k230_uart_log_message[320];
 static uint16_t k230_uart_last_frame_size;
 static VisionTextResult latest_k230_result;
 static VisionError latest_k230_error;
@@ -244,6 +283,7 @@ static volatile int32_t visual_pan_direction_sign;
 static volatile bool visual_pitch_running;
 static volatile int32_t visual_pitch_direction_sign;
 static uint32_t last_k230_valid_tick;
+static volatile uint32_t last_pan_view_step_tick;
 
 typedef enum
 {
@@ -266,6 +306,8 @@ static uint16_t ui_touch_raw_y;
 static uint16_t ui_touch_screen_x;
 static uint16_t ui_touch_screen_y;
 static uint8_t ui_touch_count;
+/* P11 临时故障定位：只在视觉状态变化时标记 TFT 重绘前后。 */
+static int32_t ui_trace_last_state = -1;
 
 static PanViewUiData MainUiData(void)
 {
@@ -320,10 +362,12 @@ static void ExecuteManualZeroStart(void)
   pitch_active_delta_pulses = 0;
   control_takeover_active = true;
   visual_tracking_enabled = true;
+  safety_fault_latched = PANVIEW_SAFETY_CLEAR;
+  last_k230_valid_tick = HAL_GetTick();
   HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
   Pitch_EnableHold();
   PublishRelativePosition("manual_zero");
-  (void)HAL_UART_Transmit(&huart1, pitch_zero_message,
+  (void)PanView_Uart1Transmit(&huart1, pitch_zero_message,
                           sizeof(pitch_zero_message) - 1U, BOOT_LOG_TIMEOUT_MS);
 }
 
@@ -364,6 +408,11 @@ static void MainUi_HandleEvent(UiEvent event)
       break;
     default: break;
   }
+}
+
+void PanView_ApplyUiTouch(uint16_t screen_x, uint16_t screen_y)
+{
+  MainUi_HandleEvent(PanViewUi_HandleTouch(screen_x, screen_y, true));
 }
 
 /*
@@ -407,7 +456,7 @@ static bool MotorTtlProbe(void)
 
   if ((message_length <= 0) ||
       (message_length >= (int)sizeof(message)) ||
-      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+      (PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
                          BOOT_LOG_TIMEOUT_MS) != HAL_OK))
   {
     Error_Handler();
@@ -462,7 +511,7 @@ static void MotorTtlReadOption(void)
 
   if ((message_length <= 0) ||
       (message_length >= (int)sizeof(message)) ||
-      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+      (PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
                          BOOT_LOG_TIMEOUT_MS) != HAL_OK))
   {
     Error_Handler();
@@ -503,7 +552,7 @@ static void MotorTtlReadPositionAndError(void)
           responses[index][7]);
 
       if ((message_length <= 0) ||
-          (HAL_UART_Transmit(&huart1, (uint8_t *)message,
+          (PanView_Uart1Transmit(&huart1, (uint8_t *)message,
                              (uint16_t)message_length,
                              BOOT_LOG_TIMEOUT_MS) != HAL_OK))
       {
@@ -525,7 +574,7 @@ static void MotorTtlReadPositionAndError(void)
           responses[index][7]);
 
       if ((message_length <= 0) ||
-          (HAL_UART_Transmit(&huart1, (uint8_t *)message,
+          (PanView_Uart1Transmit(&huart1, (uint8_t *)message,
                              (uint16_t)message_length,
                              BOOT_LOG_TIMEOUT_MS) != HAL_OK))
       {
@@ -553,7 +602,7 @@ static void MotorTtlReadPositionAndError(void)
       (unsigned int)(angle_hundredths[1] % 100U), (unsigned long)raw_values[1]);
 
   if ((message_length <= 0) ||
-      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+      (PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
                          BOOT_LOG_TIMEOUT_MS) != HAL_OK))
   {
     Error_Handler();
@@ -676,7 +725,7 @@ static void MotorTtlReadSystemStatus(void)
 
   if ((message_length <= 0) ||
       (message_length >= (int)sizeof(message)) ||
-      (HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
+      (PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)message_length,
                          BOOT_LOG_TIMEOUT_MS) != HAL_OK))
   {
     Error_Handler();
@@ -1146,7 +1195,7 @@ static void MotorPulseLab_ApplyState(const MotorPulseLab *lab)
     message_size = sizeof(motor_stopped_message) - 1U;
   }
 
-  if (HAL_UART_Transmit(&huart1, message, message_size,
+  if (PanView_Uart1Transmit(&huart1, message, message_size,
                         BOOT_LOG_TIMEOUT_MS) != HAL_OK)
   {
     Error_Handler();
@@ -1182,7 +1231,7 @@ static void PublishRelativePosition(const char *reason)
 
   if ((position_length <= 0) ||
       (position_length >= (int)sizeof(relative_position_message)) ||
-      (HAL_UART_Transmit(&huart1, (uint8_t *)relative_position_message,
+      (PanView_Uart1Transmit(&huart1, (uint8_t *)relative_position_message,
                          (uint16_t)position_length,
                          BOOT_LOG_TIMEOUT_MS) != HAL_OK))
   {
@@ -1212,7 +1261,7 @@ static void PublishMotionLimitRejection(MotionLimitsResult result)
       break;
   }
 
-  if (HAL_UART_Transmit(&huart1, message, message_size,
+  if (PanView_Uart1Transmit(&huart1, message, message_size,
                         BOOT_LOG_TIMEOUT_MS) != HAL_OK)
   {
     Error_Handler();
@@ -1253,7 +1302,7 @@ static bool VisualState_PlayHitAudio(uint32_t current_tick)
   length = snprintf(message, sizeof(message), "AUDIO effect=hit\\r\\n");
   if ((length > 0) && (length < (int)sizeof(message)))
   {
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
+    (void)PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
                             BOOT_LOG_TIMEOUT_MS);
   }
   return true;
@@ -1307,7 +1356,7 @@ static void VisualState_Set(VisualState next_state, const char *reason)
                     VisualStateText(next_state), reason);
   if ((length > 0) && (length < (int)sizeof(message)))
   {
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
+    (void)PanView_Uart1Transmit(&huart1, (uint8_t *)message, (uint16_t)length,
                             BOOT_LOG_TIMEOUT_MS);
   }
 }
@@ -1332,7 +1381,13 @@ static void VisualState_Update(uint32_t current_tick)
   VisualState next_state;
   const char *reason;
 
-  if (!control_takeover_active || !visual_tracking_enabled)
+  if (safety_fault_latched != PANVIEW_SAFETY_CLEAR)
+  {
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_FAULT;
+    reason = PanView_SafetyFaultText(safety_fault_latched);
+  }
+  else if (!control_takeover_active || !visual_tracking_enabled)
   {
     visual_lock_candidate_tick = 0U;
     next_state = VISUAL_STATE_SEARCH;
@@ -1431,304 +1486,87 @@ static void TouchUi_StopAllMotion(void)
   HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+static const char *PanView_SafetyFaultText(PanViewSafetyFault fault)
 {
-  if (dual_test_running && ((htim == &htim3) || (htim == &htim4)))
+  switch (fault)
   {
-    /* 以 TIM3 更新事件作为双轴联动的公共脉冲计数时基。 */
-    if (htim == &htim3)
-    {
-      if (dual_test_remaining_pulses > 0U)
-      {
-        dual_test_remaining_pulses--;
-      }
-
-      if (dual_test_remaining_pulses == 0U)
-      {
-        (void)RelativePositionTracker_ApplyCompletedPulseDelta(
-            &relative_position_tracker,
-            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES);
-        pitch_position_pulses +=
-            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES;
-        Dual_StopHardware();
-      }
-    }
-    return;
-  }
-
-  if (htim == &htim3)
-  {
-    if (pitch_running && (pitch_remaining_pulses > 0U))
-    {
-      pitch_remaining_pulses--;
-      if (pitch_remaining_pulses == 0U)
-      {
-        pitch_position_pulses += pitch_active_delta_pulses;
-        pitch_active_delta_pulses = 0;
-        Pitch_StopPulses();
-      }
-    }
-    else if (visual_pitch_running)
-    {
-      int32_t next_position = pitch_position_pulses +
-                              visual_pitch_direction_sign;
-
-      /* 先判断下一脉冲是否越界，再提交一个已完成脉冲。 */
-      if ((next_position < -(int32_t)PITCH_LIMIT_PULSES) ||
-          (next_position > (int32_t)PITCH_LIMIT_PULSES))
-      {
-        VisualPitch_StopHardware();
-      }
-      else
-      {
-        pitch_position_pulses = next_position;
-        if ((next_position == -(int32_t)PITCH_LIMIT_PULSES) ||
-            (next_position == (int32_t)PITCH_LIMIT_PULSES))
-        {
-          VisualPitch_StopHardware();
-        }
-      }
-    }
-    return;
-  }
-
-  if (htim == &htim4)
-  {
-    if ((MotorPulseLab_GetState(&motor_pulse_lab) ==
-         MOTOR_PULSE_LAB_FIXED_MOVE) &&
-        MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
-    {
-      if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1) != HAL_OK)
-      {
-        Error_Handler();
-      }
-
-      if (HAL_TIM_Base_Stop_IT(&htim4) != HAL_OK)
-      {
-        Error_Handler();
-      }
-
-      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin,
-                        control_takeover_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
-      motor_profile_move_complete_pending = true;
-    }
-    else if (MotorPulseLab_GetState(&motor_pulse_lab) ==
-             MOTOR_PULSE_LAB_FIXED_MOVE)
-    {
-      /* 新分频在下一次 TIM4 更新事件生效，脉冲数量不受影响。 */
-      MotorPulseLab_SetTimerFrequency(
-          MotorPulseLab_GetStepFrequencyHz(&motor_pulse_lab));
-    }
-    else if (visual_pan_running)
-    {
-      int32_t position = RelativePositionTracker_GetPositionPulses(
-          &relative_position_tracker);
-      int32_t next_position = position + visual_pan_direction_sign;
-
-      /* 先判断下一脉冲是否越界，再提交一个已完成脉冲。 */
-      if ((next_position < horizontal_motion_limits.min_pulses) ||
-          (next_position > horizontal_motion_limits.max_pulses) ||
-          !RelativePositionTracker_ApplyCompletedPulseDelta(
-              &relative_position_tracker, visual_pan_direction_sign))
-      {
-        VisualPan_StopHardware();
-      }
-      else if ((next_position == horizontal_motion_limits.min_pulses) ||
-               (next_position == horizontal_motion_limits.max_pulses))
-      {
-        VisualPan_StopHardware();
-      }
-    }
+    case PANVIEW_SAFETY_VISION_TIMEOUT: return "vision_timeout";
+    case PANVIEW_SAFETY_LIMIT: return "software_limit";
+    case PANVIEW_SAFETY_CONTROL_STALE: return "control_task_stale";
+    case PANVIEW_SAFETY_CLEAR:
+    default: return "clear";
   }
 }
-/* USER CODE END 0 */
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
+/*
+ * 安全停机路径不打印日志、不等待队列，也不依赖 TelemetryTask。
+ * 只做可重复的硬件停止、释放 EN 和清除位置有效性；下一次启动必须重新回中。
+ */
+static void PanView_SafetyStop(PanViewSafetyFault fault)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_TIM4_Init();
-  MX_USART3_UART_Init();
-  MX_TIM3_Init();
-  MX_USART2_UART_Init();
-  MX_SPI1_Init();
-  MX_I2C1_Init();
-  MX_I2S2_Init();
-  /* USER CODE BEGIN 2 */
-  AudioPlayer_Init();
+  if (safety_fault_latched != PANVIEW_SAFETY_CLEAR)
   {
-    const char *audio_probe = "AUDIO ES8388 probe=failed\\r\\n";
-    if (Es8388_Probe() && Es8388_InitPlayback())
-    {
-      audio_probe = "AUDIO ES8388 init=ok\\r\\n";
-    }
-    (void)HAL_UART_Transmit(&huart1, (uint8_t *)audio_probe,
-                            (uint16_t)strlen(audio_probe),
-                            BOOT_LOG_TIMEOUT_MS);
+    return;
   }
-  /* 三个任务对象只保存各自的时间状态，实际执行仍在同一个 while(1) 中。 */
-  DebouncedButton key0_button;
-  DebouncedButton key1_button;
-  DebouncedButton key2_button;
-  DebouncedButton key_up_button;
-  PeriodicTask key_scan_task;
-  PeriodicTask status_task;
-  PeriodicTask motor_feedback_task;
-  PeriodicTask heartbeat_task;
-  PeriodicTask k230_uart_log_task;
-  PeriodicTask touch_poll_task;
-  Ft6336gPoint touch_point;
-  uint8_t touch_last_count = 0U;
-  uint16_t touch_last_x = 0U;
-  uint16_t touch_last_y = 0U;
-  char touch_runtime_message[96];
-  uint32_t last_heartbeat_log_ms = HAL_GetTick();
-  uint32_t key_scan_count = 0U;
-  uint32_t status_task_count = 0U;
-  uint32_t heartbeat_count = 0U;
 
-  /* KEY0 为低有效：读到 RESET 表示已按下。 */
-  DebouncedButton_Init(&key0_button,
-                       HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET);
-  DebouncedButton_Init(&key1_button,
-                       HAL_GPIO_ReadPin(BOARD_KEY1_GPIO_Port, BOARD_KEY1_Pin) ==
-                           GPIO_PIN_RESET);
-  DebouncedButton_Init(&key2_button,
-                       HAL_GPIO_ReadPin(BOARD_KEY2_GPIO_Port, BOARD_KEY2_Pin) ==
-                           GPIO_PIN_RESET);
-  DebouncedButton_Init(&key_up_button,
-                       HAL_GPIO_ReadPin(BOARD_KEY_UP_GPIO_Port,
-                                        BOARD_KEY_UP_Pin) == GPIO_PIN_SET);
-  PeriodicTask_Init(&key_scan_task, KEY_SCAN_PERIOD_MS, HAL_GetTick());
-  PeriodicTask_Init(&status_task, STATUS_PERIOD_MS, HAL_GetTick());
-  PeriodicTask_Init(&motor_feedback_task, MOTOR_FEEDBACK_PERIOD_MS,
-                    HAL_GetTick());
-  PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
-  PeriodicTask_Init(&k230_uart_log_task, K230_UART_LOG_PERIOD_MS,
-                    HAL_GetTick());
-  PeriodicTask_Init(&touch_poll_task, TOUCH_POLL_PERIOD_MS, HAL_GetTick());
-  UartRxFrame_Init(&uart_rx_frame);
-  UartRxFrame_Init(&k230_uart_rx_frame);
-  UartTextLineAccumulator_Init(&k230_uart_line_accumulator);
-  VisionFrameParser_Init(&vision_frame_parser);
-  CommunicationWatchdog_Init(&communication_watchdog, COMMUNICATION_TIMEOUT_MS);
-  FrameSequenceTracker_Init(&frame_sequence_tracker);
-  MotorPulseLab_Init(&motor_pulse_lab);
-  horizontal_motion_limits = MotionLimits_HorizontalDefault();
-  RelativePositionTracker_Init(&relative_position_tracker);
-  visual_pan_running = false;
-  visual_pan_direction_sign = 0;
-  visual_pitch_running = false;
-  visual_pitch_direction_sign = 0;
-  last_k230_valid_tick = 0U;
-  MotorPulseLab_StopHardware();
-  Pitch_DisableHardware();
-  if (MotorTtlProbe())
+  safety_fault_latched = fault;
+  VisualPan_StopHardware();
+  VisualPitch_StopHardware();
+  if (dual_test_running)
   {
-    MotorTtlReadOption();
-    MotorTtlReadPositionAndError();
-    MotorTtlReadSystemStatus();
+    Dual_StopHardware();
   }
-  StartUartRxDma();
-  StartK230UartRxDma();
-  if (ILI9341_Init())
+  if (pitch_running)
   {
-    tft_ready = true;
-    uint8_t tft_id[4] = {0U};
-    char tft_id_message[64];
-
-    {
-      uint8_t touch_chip_id = 0U;
-      uint8_t touch_chip_high = 0U;
-      uint8_t touch_vendor = 0U;
-      uint8_t touch_count = 0U;
-      char touch_message[96];
-      touch_ready = FT6336G_Init();
-      bool touch_id_ok = touch_ready && FT6336G_ReadChipId(&touch_chip_id);
-      bool touch_diag_ok = touch_id_ok &&
-                           FT6336G_ReadRegister(0xA3U, &touch_chip_high) &&
-                           FT6336G_ReadRegister(0xA8U, &touch_vendor) &&
-                           FT6336G_ReadRegister(0x02U, &touch_count);
-      int touch_length = snprintf(
-          touch_message, sizeof(touch_message),
-          "TOUCH probe=%s id_low=%02X id_high=%02X vendor=%02X points=%u\r\n",
-          touch_diag_ok ? "ok" : (touch_ready ? "id_read_failed" : "failed"),
-          touch_chip_id, touch_chip_high, touch_vendor,
-          (unsigned int)touch_count);
-      if ((touch_length > 0) &&
-          (touch_length < (int)sizeof(touch_message)))
-      {
-        (void)HAL_UART_Transmit(&huart1, (uint8_t *)touch_message,
-                                (uint16_t)touch_length,
-                                BOOT_LOG_TIMEOUT_MS);
-      }
-    }
-
-    if (ILI9341_ReadId(tft_id))
-    {
-      int tft_id_length = snprintf(tft_id_message, sizeof(tft_id_message),
-                                   "TFT ID=%02X %02X %02X %02X\r\n",
-                                   tft_id[0], tft_id[1], tft_id[2], tft_id[3]);
-      if ((tft_id_length > 0) &&
-          (tft_id_length < (int)sizeof(tft_id_message)))
-      {
-        (void)HAL_UART_Transmit(&huart1, (uint8_t *)tft_id_message,
-                                (uint16_t)tft_id_length, BOOT_LOG_TIMEOUT_MS);
-      }
-    }
-
-    PanViewUi_Init(UI_LANGUAGE_ZH);
+    Pitch_StopPulses();
   }
-  /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
-  if (HAL_UART_Transmit(&huart1, boot_message,
-                        sizeof(boot_message) - 1U,
-                        BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+  if (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED)
   {
-    Error_Handler();
+    MotorPulseLab_StopHardware();
   }
-  VisualState_Set(VISUAL_STATE_SEARCH, "boot");
+
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
+  control_takeover_active = false;
+  visual_tracking_enabled = false;
+  pitch_zeroed = false;
+  latest_pan_speed_target = 0;
+  latest_pitch_speed_target = 0;
+  RelativePositionTracker_Invalidate(&relative_position_tracker);
+  VisualTrackController_Reset(&pan_track_state);
+  VisualTrackController_Reset(&pitch_track_state);
+  visual_lock_candidate_tick = 0U;
+  visual_state = VISUAL_STATE_FAULT;
+  visual_state_initialized = true;
+}
+
+void PanView_SafetyStep(uint32_t current_tick)
+{
+  if ((safety_fault_latched != PANVIEW_SAFETY_CLEAR) ||
+      !control_takeover_active || !visual_tracking_enabled)
   {
-    PanViewUiData initial_ui_data = MainUiData();
-    PanViewUi_Refresh(&initial_ui_data, HAL_GetTick());
+    return;
   }
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
+  if ((last_pan_view_step_tick == 0U) ||
+      ((current_tick - last_pan_view_step_tick) >
+       SAFETY_CONTROL_STALE_TIMEOUT_MS))
   {
-    /* USER CODE END WHILE */
+    PanView_SafetyStop(PANVIEW_SAFETY_CONTROL_STALE);
+  }
+  else if ((last_k230_valid_tick == 0U) ||
+           ((current_tick - last_k230_valid_tick) > VISUAL_TARGET_TIMEOUT_MS))
+  {
+    PanView_SafetyStop(PANVIEW_SAFETY_VISION_TIMEOUT);
+  }
+  else if (VisualState_AtLimitFault())
+  {
+    PanView_SafetyStop(PANVIEW_SAFETY_LIMIT);
+  }
+}
 
-    /* USER CODE BEGIN 3 */
-    uint32_t current_tick = HAL_GetTick();
-
+void PanView_InputStep(uint32_t current_tick)
+{
     /* P10：只验证 FT6336G 原始触摸点，状态或坐标变化时输出一条日志。 */
     if (touch_ready && PeriodicTask_IsDue(&touch_poll_task, current_tick) &&
         FT6336G_ReadPoint(&touch_point))
@@ -1790,21 +1628,29 @@ int main(void)
         if ((touch_runtime_length > 0) &&
             (touch_runtime_length < (int)sizeof(touch_runtime_message)))
         {
-          (void)HAL_UART_Transmit(&huart1, (uint8_t *)touch_runtime_message,
+          (void)PanView_Uart1Transmit(&huart1, (uint8_t *)touch_runtime_message,
                                   (uint16_t)touch_runtime_length,
                                   BOOT_LOG_TIMEOUT_MS);
         }
         if ((touch_point.touch_count == 1U) &&
             (touch_last_count == 0U))
         {
-          MainUi_HandleEvent(PanViewUi_HandleTouch(touch_screen_x,
-                                                   touch_screen_y, true));
+          PanView_RtosPublishTouch(touch_screen_x, touch_screen_y);
         }
         touch_last_count = touch_point.touch_count;
         touch_last_x = touch_point.x;
         touch_last_y = touch_point.y;
       }
     }
+
+
+}
+
+void PanView_AppStep(void)
+{
+    uint32_t current_tick = HAL_GetTick();
+    last_pan_view_step_tick = current_tick;
+    PanView_RtosProcessUiEvents();
 
     /* P10：处理 K230 有效结果，同时生成水平和俯仰速度目标。 */
     if (k230_uart_rx_frame.pending)
@@ -1826,6 +1672,16 @@ int main(void)
             &visual_track_config, &pitch_track_state,
             latest_k230_error.target_present, latest_k230_error.error_y,
             current_tick);
+        {
+          VisionTargetMessage vision_message = {
+              (uint8_t)(latest_k230_error.target_present ? 1U : 0U),
+              latest_k230_error.error_x,
+              latest_k230_error.error_y,
+              latest_k230_result.center_x,
+              latest_k230_result.center_y,
+              current_tick};
+          PanView_RtosPublishVision(&vision_message);
+        }
         last_k230_valid_tick = current_tick;
         k230_text_valid_count++;
       }
@@ -1848,53 +1704,14 @@ int main(void)
     }
 
     VisualState_Update(current_tick);
-    {
-      PanViewUiData ui_data = MainUiData();
-      PanViewUi_Refresh(&ui_data, current_tick);
-    }
 
-    if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
-    {
-      int k230_log_length = snprintf(
-          k230_uart_log_message, sizeof(k230_uart_log_message),
-          "K230 state=%s RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
-          VisualStateText(visual_state),
-          (unsigned long)k230_uart_rx_frame.received_count,
-          (unsigned long)k230_uart_rx_frame.dropped_count,
-          (unsigned long)k230_text_valid_count,
-          (unsigned long)k230_text_error_count,
-          (unsigned int)k230_uart_last_frame_size,
-          (unsigned int)(latest_k230_result_valid &&
-                                 latest_k230_result.target_present),
-          (unsigned int)(latest_k230_result_valid
-                             ? latest_k230_result.target_count
-                             : 0U),
-          latest_k230_result_valid ? latest_k230_result.center_x : 0,
-          latest_k230_result_valid ? latest_k230_result.center_y : 0,
-          latest_k230_result_valid ? latest_k230_error.error_x : 0,
-          latest_k230_result_valid ? latest_k230_error.error_y : 0,
-          (long)(latest_k230_result_valid ? latest_pan_speed_target : 0),
-          (long)(latest_k230_result_valid ? latest_pitch_speed_target : 0),
-          (unsigned int)visual_pan_running,
-          (unsigned int)visual_pitch_running,
-          (long)RelativePositionTracker_GetPositionPulses(
-              &relative_position_tracker),
-          (long)pitch_position_pulses);
 
-      if ((k230_log_length <= 0) ||
-          (k230_log_length >= (int)sizeof(k230_uart_log_message)) ||
-          (HAL_UART_Transmit(&huart1, (uint8_t *)k230_uart_log_message,
-                             (uint16_t)k230_log_length,
-                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
-      {
-        Error_Handler();
-      }
-    }
+
 
     if (motor_profile_move_complete_pending)
     {
       motor_profile_move_complete_pending = false;
-      if (HAL_UART_Transmit(&huart1, motor_profile_move_complete_message,
+      if (PanView_Uart1Transmit(&huart1, motor_profile_move_complete_message,
                             sizeof(motor_profile_move_complete_message) - 1U,
                             BOOT_LOG_TIMEOUT_MS) != HAL_OK)
       {
@@ -1936,7 +1753,7 @@ int main(void)
         VisualPan_StopHardware();
         HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_9);
 
-        if (HAL_UART_Transmit(&huart1, key0_pressed_message,
+        if (PanView_Uart1Transmit(&huart1, key0_pressed_message,
                               sizeof(key0_pressed_message) - 1U,
                               BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
@@ -1958,7 +1775,7 @@ int main(void)
         uint8_t *direction_message;
         uint16_t direction_message_size;
 
-        if (HAL_UART_Transmit(&huart1, key1_pressed_message,
+        if (PanView_Uart1Transmit(&huart1, key1_pressed_message,
                               sizeof(key1_pressed_message) - 1U,
                               BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
@@ -1993,7 +1810,7 @@ int main(void)
           direction_message_size = sizeof(motor_direction_ignored_message) - 1U;
         }
 
-        if (HAL_UART_Transmit(&huart1, direction_message, direction_message_size,
+        if (PanView_Uart1Transmit(&huart1, direction_message, direction_message_size,
                               BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
           Error_Handler();
@@ -2007,7 +1824,7 @@ int main(void)
       {
         MotionLimitsResult limit_result = MOTION_LIMITS_ACCEPTED;
 
-        if (HAL_UART_Transmit(&huart1, key2_pressed_message,
+        if (PanView_Uart1Transmit(&huart1, key2_pressed_message,
                               sizeof(key2_pressed_message) - 1U,
                               BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
@@ -2017,7 +1834,7 @@ int main(void)
         if (visual_pan_running ||
             (MotorPulseLab_GetState(&motor_pulse_lab) != MOTOR_PULSE_LAB_STOPPED))
         {
-          if (HAL_UART_Transmit(&huart1, motor_profile_move_ignored_message,
+          if (PanView_Uart1Transmit(&huart1, motor_profile_move_ignored_message,
                                 sizeof(motor_profile_move_ignored_message) - 1U,
                                 BOOT_LOG_TIMEOUT_MS) != HAL_OK)
           {
@@ -2060,7 +1877,7 @@ int main(void)
                     : sizeof(motor_profile_move_ccw_message) - 1U;
 
             MotorPulseLab_StartFixedHardware(direction);
-            if (HAL_UART_Transmit(&huart1, fixed_move_message,
+            if (PanView_Uart1Transmit(&huart1, fixed_move_message,
                                   fixed_move_message_size,
                                   BOOT_LOG_TIMEOUT_MS) != HAL_OK)
             {
@@ -2069,7 +1886,7 @@ int main(void)
           }
           else
           {
-            if (HAL_UART_Transmit(&huart1, motor_profile_move_ignored_message,
+            if (PanView_Uart1Transmit(&huart1, motor_profile_move_ignored_message,
                                   sizeof(motor_profile_move_ignored_message) - 1U,
                                   BOOT_LOG_TIMEOUT_MS) != HAL_OK)
             {
@@ -2085,7 +1902,7 @@ int main(void)
                                                   BOARD_KEY_UP_Pin) == GPIO_PIN_SET,
                                  current_tick, KEY_DEBOUNCE_MS))
       {
-        if (HAL_UART_Transmit(&huart1, key_up_pressed_message,
+        if (PanView_Uart1Transmit(&huart1, key_up_pressed_message,
                               sizeof(key_up_pressed_message) - 1U,
                               BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
@@ -2098,7 +1915,7 @@ int main(void)
         {
           ExecuteManualZeroStart();
         }
-        else if (HAL_UART_Transmit(&huart1, relative_position_zero_ignored_message,
+        else if (PanView_Uart1Transmit(&huart1, relative_position_zero_ignored_message,
                                    sizeof(relative_position_zero_ignored_message) - 1U,
                                    BOOT_LOG_TIMEOUT_MS) != HAL_OK)
         {
@@ -2113,36 +1930,7 @@ int main(void)
       status_task_count++;
     }
 
-    /* 5 s：输出心跳、实际间隔和其他任务计数，作为非阻塞调度证据。 */
-    if (PeriodicTask_IsDue(&heartbeat_task, current_tick))
-    {
-      uint32_t heartbeat_interval_ms = current_tick - last_heartbeat_log_ms;
-      int heartbeat_length;
-      CommunicationState communication_state;
 
-      last_heartbeat_log_ms = current_tick;
-      communication_state = CommunicationWatchdog_GetState(&communication_watchdog,
-                                                            current_tick);
-      heartbeat_length = snprintf(
-          heartbeat_message, sizeof(heartbeat_message),
-          "t=%lu dt=%lu heartbeat=%lu scans=%lu status=%lu link=%s\r\n",
-          (unsigned long)current_tick,
-          (unsigned long)heartbeat_interval_ms,
-          (unsigned long)++heartbeat_count,
-          (unsigned long)key_scan_count,
-          (unsigned long)status_task_count,
-          CommunicationStateText(communication_state));
-
-      if ((heartbeat_length <= 0) ||
-          (heartbeat_length >= (int)sizeof(heartbeat_message)) ||
-          (HAL_UART_Transmit(&huart1,
-                             (uint8_t *)heartbeat_message,
-                             (uint16_t)heartbeat_length,
-                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
-      {
-        Error_Handler();
-      }
-    }
 
     /* 主循环按需识别文本命令或喂给二进制帧解析器。 */
     if (uart_rx_frame.pending)
@@ -2353,7 +2141,7 @@ int main(void)
       }
 
       if ((response_size > 0U) &&
-          (HAL_UART_Transmit(&huart1, response, response_size,
+          (PanView_Uart1Transmit(&huart1, response, response_size,
                              UART_RX_LOG_TIMEOUT_MS) != HAL_OK))
       {
         Error_Handler();
@@ -2361,8 +2149,402 @@ int main(void)
 
       UartRxFrame_Release(&uart_rx_frame);
     }
+
+}
+
+void PanView_UiRefreshStep(uint32_t current_tick)
+{
+  PanViewUiData ui_data = MainUiData();
+  bool ui_state_changed = ui_trace_last_state != (int32_t)ui_data.state;
+
+  if (ui_state_changed)
+  {
+    static const uint8_t ui_refresh_begin[] = "UI refresh begin\\r\\n";
+    (void)PanView_Uart1Transmit(&huart1, (uint8_t *)ui_refresh_begin,
+                                sizeof(ui_refresh_begin) - 1U,
+                                UART_RX_LOG_TIMEOUT_MS);
   }
 
+  PanViewUi_Refresh(&ui_data, current_tick);
+
+  if (ui_state_changed)
+  {
+    static const uint8_t ui_refresh_end[] = "UI refresh end\\r\\n";
+    (void)PanView_Uart1Transmit(&huart1, (uint8_t *)ui_refresh_end,
+                                sizeof(ui_refresh_end) - 1U,
+                                UART_RX_LOG_TIMEOUT_MS);
+    ui_trace_last_state = (int32_t)ui_data.state;
+  }
+}
+
+void PanView_TelemetryStep(uint32_t current_tick)
+{    if (PeriodicTask_IsDue(&k230_uart_log_task, current_tick))
+    {
+      int k230_log_length = snprintf(
+          k230_uart_log_message, sizeof(k230_uart_log_message),
+          "K230 state=%s safety=%s RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
+          VisualStateText(visual_state),
+        PanView_SafetyFaultText(safety_fault_latched),
+          (unsigned long)k230_uart_rx_frame.received_count,
+          (unsigned long)k230_uart_rx_frame.dropped_count,
+          (unsigned long)k230_text_valid_count,
+          (unsigned long)k230_text_error_count,
+          (unsigned int)k230_uart_last_frame_size,
+          (unsigned int)(latest_k230_result_valid &&
+                                 latest_k230_result.target_present),
+          (unsigned int)(latest_k230_result_valid
+                             ? latest_k230_result.target_count
+                             : 0U),
+          latest_k230_result_valid ? latest_k230_result.center_x : 0,
+          latest_k230_result_valid ? latest_k230_result.center_y : 0,
+          latest_k230_result_valid ? latest_k230_error.error_x : 0,
+          latest_k230_result_valid ? latest_k230_error.error_y : 0,
+          (long)(latest_k230_result_valid ? latest_pan_speed_target : 0),
+          (long)(latest_k230_result_valid ? latest_pitch_speed_target : 0),
+          (unsigned int)visual_pan_running,
+          (unsigned int)visual_pitch_running,
+          (long)RelativePositionTracker_GetPositionPulses(
+              &relative_position_tracker),
+          (long)pitch_position_pulses);
+
+      if ((k230_log_length <= 0) ||
+          (k230_log_length >= (int)sizeof(k230_uart_log_message)) ||
+          (PanView_Uart1Transmit(&huart1, (uint8_t *)k230_uart_log_message,
+                             (uint16_t)k230_log_length,
+                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+      {
+        Error_Handler();
+      }
+    }    /* 5 s：输出心跳、实际间隔和其他任务计数，作为非阻塞调度证据。 */
+    if (PeriodicTask_IsDue(&heartbeat_task, current_tick))
+    {
+      uint32_t heartbeat_interval_ms = current_tick - last_heartbeat_log_ms;
+      int heartbeat_length;
+      CommunicationState communication_state;
+
+      last_heartbeat_log_ms = current_tick;
+      communication_state = CommunicationWatchdog_GetState(&communication_watchdog,
+                                                            current_tick);
+      heartbeat_length = snprintf(
+          heartbeat_message, sizeof(heartbeat_message),
+          "t=%lu dt=%lu heartbeat=%lu scans=%lu status=%lu link=%s\r\n",
+          (unsigned long)current_tick,
+          (unsigned long)heartbeat_interval_ms,
+          (unsigned long)++heartbeat_count,
+          (unsigned long)key_scan_count,
+          (unsigned long)status_task_count,
+          CommunicationStateText(communication_state));
+
+      if ((heartbeat_length <= 0) ||
+          (heartbeat_length >= (int)sizeof(heartbeat_message)) ||
+          (PanView_Uart1Transmit(&huart1,
+                             (uint8_t *)heartbeat_message,
+                             (uint16_t)heartbeat_length,
+                             BOOT_LOG_TIMEOUT_MS) != HAL_OK))
+      {
+        Error_Handler();
+      }
+    }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (dual_test_running && ((htim == &htim3) || (htim == &htim4)))
+  {
+    /* 以 TIM3 更新事件作为双轴联动的公共脉冲计数时基。 */
+    if (htim == &htim3)
+    {
+      if (dual_test_remaining_pulses > 0U)
+      {
+        dual_test_remaining_pulses--;
+      }
+
+      if (dual_test_remaining_pulses == 0U)
+      {
+        (void)RelativePositionTracker_ApplyCompletedPulseDelta(
+            &relative_position_tracker,
+            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES);
+        pitch_position_pulses +=
+            dual_test_direction_sign * (int32_t)DUAL_TEST_PULSES;
+        Dual_StopHardware();
+      }
+    }
+    return;
+  }
+
+  if (htim == &htim3)
+  {
+    if (pitch_running && (pitch_remaining_pulses > 0U))
+    {
+      pitch_remaining_pulses--;
+      if (pitch_remaining_pulses == 0U)
+      {
+        pitch_position_pulses += pitch_active_delta_pulses;
+        pitch_active_delta_pulses = 0;
+        Pitch_StopPulses();
+      }
+    }
+    else if (visual_pitch_running)
+    {
+      int32_t next_position = pitch_position_pulses +
+                              visual_pitch_direction_sign;
+
+      /* 先判断下一脉冲是否越界，再提交一个已完成脉冲。 */
+      if ((next_position < -(int32_t)PITCH_LIMIT_PULSES) ||
+          (next_position > (int32_t)PITCH_LIMIT_PULSES))
+      {
+        VisualPitch_StopHardware();
+      }
+      else
+      {
+        pitch_position_pulses = next_position;
+        if ((next_position == -(int32_t)PITCH_LIMIT_PULSES) ||
+            (next_position == (int32_t)PITCH_LIMIT_PULSES))
+        {
+          VisualPitch_StopHardware();
+        }
+      }
+    }
+    return;
+  }
+
+  if (htim == &htim4)
+  {
+    if ((MotorPulseLab_GetState(&motor_pulse_lab) ==
+         MOTOR_PULSE_LAB_FIXED_MOVE) &&
+        MotorPulseLab_OnPulsePeriod(&motor_pulse_lab))
+    {
+      if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1) != HAL_OK)
+      {
+        Error_Handler();
+      }
+
+      if (HAL_TIM_Base_Stop_IT(&htim4) != HAL_OK)
+      {
+        Error_Handler();
+      }
+
+      HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin,
+                        control_takeover_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
+      motor_profile_move_complete_pending = true;
+    }
+    else if (MotorPulseLab_GetState(&motor_pulse_lab) ==
+             MOTOR_PULSE_LAB_FIXED_MOVE)
+    {
+      /* 新分频在下一次 TIM4 更新事件生效，脉冲数量不受影响。 */
+      MotorPulseLab_SetTimerFrequency(
+          MotorPulseLab_GetStepFrequencyHz(&motor_pulse_lab));
+    }
+    else if (visual_pan_running)
+    {
+      int32_t position = RelativePositionTracker_GetPositionPulses(
+          &relative_position_tracker);
+      int32_t next_position = position + visual_pan_direction_sign;
+
+      /* 先判断下一脉冲是否越界，再提交一个已完成脉冲。 */
+      if ((next_position < horizontal_motion_limits.min_pulses) ||
+          (next_position > horizontal_motion_limits.max_pulses) ||
+          !RelativePositionTracker_ApplyCompletedPulseDelta(
+              &relative_position_tracker, visual_pan_direction_sign))
+      {
+        VisualPan_StopHardware();
+      }
+      else if ((next_position == horizontal_motion_limits.min_pulses) ||
+               (next_position == horizontal_motion_limits.max_pulses))
+      {
+        VisualPan_StopHardware();
+      }
+    }
+  }
+}
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_USART1_UART_Init();
+  MX_TIM4_Init();
+  MX_USART3_UART_Init();
+  MX_TIM3_Init();
+  MX_USART2_UART_Init();
+  MX_SPI1_Init();
+  MX_I2C1_Init();
+  MX_I2S2_Init();
+  /* IWDG 由 SafetyTask 在确认任务创建成功后启动；不能在调度器启动前
+   * 提前开启，否则任务创建失败时无人刷新看门狗，会形成复位死循环。 */
+  /* USER CODE BEGIN 2 */
+  AudioPlayer_Init();
+  {
+    const char *audio_probe = "AUDIO ES8388 probe=failed\\r\\n";
+    if (Es8388_Probe() && Es8388_InitPlayback())
+    {
+      audio_probe = "AUDIO ES8388 init=ok\\r\\n";
+    }
+    (void)PanView_Uart1Transmit(&huart1, (uint8_t *)audio_probe,
+                            (uint16_t)strlen(audio_probe),
+                            BOOT_LOG_TIMEOUT_MS);
+  }
+  /* 这些运行时对象由 PanView_AppStep 共用，先在初始化阶段清零。 */
+  touch_last_count = 0U;
+  touch_last_x = 0U;
+  touch_last_y = 0U;
+  last_heartbeat_log_ms = HAL_GetTick();
+  key_scan_count = 0U;
+  status_task_count = 0U;
+  heartbeat_count = 0U;
+  last_pan_view_step_tick = HAL_GetTick();
+  safety_fault_latched = PANVIEW_SAFETY_CLEAR;
+
+  /* KEY0 为低有效：读到 RESET 表示已按下。 */
+  DebouncedButton_Init(&key0_button,
+                       HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4) == GPIO_PIN_RESET);
+  DebouncedButton_Init(&key1_button,
+                       HAL_GPIO_ReadPin(BOARD_KEY1_GPIO_Port, BOARD_KEY1_Pin) ==
+                           GPIO_PIN_RESET);
+  DebouncedButton_Init(&key2_button,
+                       HAL_GPIO_ReadPin(BOARD_KEY2_GPIO_Port, BOARD_KEY2_Pin) ==
+                           GPIO_PIN_RESET);
+  DebouncedButton_Init(&key_up_button,
+                       HAL_GPIO_ReadPin(BOARD_KEY_UP_GPIO_Port,
+                                        BOARD_KEY_UP_Pin) == GPIO_PIN_SET);
+  PeriodicTask_Init(&key_scan_task, KEY_SCAN_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&status_task, STATUS_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&motor_feedback_task, MOTOR_FEEDBACK_PERIOD_MS,
+                    HAL_GetTick());
+  PeriodicTask_Init(&heartbeat_task, HEARTBEAT_PERIOD_MS, HAL_GetTick());
+  PeriodicTask_Init(&k230_uart_log_task, K230_UART_LOG_PERIOD_MS,
+                    HAL_GetTick());
+  PeriodicTask_Init(&touch_poll_task, TOUCH_POLL_PERIOD_MS, HAL_GetTick());
+  UartRxFrame_Init(&uart_rx_frame);
+  UartRxFrame_Init(&k230_uart_rx_frame);
+  UartTextLineAccumulator_Init(&k230_uart_line_accumulator);
+  VisionFrameParser_Init(&vision_frame_parser);
+  CommunicationWatchdog_Init(&communication_watchdog, COMMUNICATION_TIMEOUT_MS);
+  FrameSequenceTracker_Init(&frame_sequence_tracker);
+  MotorPulseLab_Init(&motor_pulse_lab);
+  horizontal_motion_limits = MotionLimits_HorizontalDefault();
+  RelativePositionTracker_Init(&relative_position_tracker);
+  visual_pan_running = false;
+  visual_pan_direction_sign = 0;
+  visual_pitch_running = false;
+  visual_pitch_direction_sign = 0;
+  last_k230_valid_tick = 0U;
+  MotorPulseLab_StopHardware();
+  Pitch_DisableHardware();
+  if (MotorTtlProbe())
+  {
+    MotorTtlReadOption();
+    MotorTtlReadPositionAndError();
+    MotorTtlReadSystemStatus();
+  }
+  StartUartRxDma();
+  StartK230UartRxDma();
+  if (ILI9341_Init())
+  {
+    tft_ready = true;
+    uint8_t tft_id[4] = {0U};
+    char tft_id_message[64];
+
+    {
+      uint8_t touch_chip_id = 0U;
+      uint8_t touch_chip_high = 0U;
+      uint8_t touch_vendor = 0U;
+      uint8_t touch_count = 0U;
+      char touch_message[96];
+      touch_ready = FT6336G_Init();
+      bool touch_id_ok = touch_ready && FT6336G_ReadChipId(&touch_chip_id);
+      bool touch_diag_ok = touch_id_ok &&
+                           FT6336G_ReadRegister(0xA3U, &touch_chip_high) &&
+                           FT6336G_ReadRegister(0xA8U, &touch_vendor) &&
+                           FT6336G_ReadRegister(0x02U, &touch_count);
+      int touch_length = snprintf(
+          touch_message, sizeof(touch_message),
+          "TOUCH probe=%s id_low=%02X id_high=%02X vendor=%02X points=%u\r\n",
+          touch_diag_ok ? "ok" : (touch_ready ? "id_read_failed" : "failed"),
+          touch_chip_id, touch_chip_high, touch_vendor,
+          (unsigned int)touch_count);
+      if ((touch_length > 0) &&
+          (touch_length < (int)sizeof(touch_message)))
+      {
+        (void)PanView_Uart1Transmit(&huart1, (uint8_t *)touch_message,
+                                (uint16_t)touch_length,
+                                BOOT_LOG_TIMEOUT_MS);
+      }
+    }
+
+    if (ILI9341_ReadId(tft_id))
+    {
+      int tft_id_length = snprintf(tft_id_message, sizeof(tft_id_message),
+                                   "TFT ID=%02X %02X %02X %02X\r\n",
+                                   tft_id[0], tft_id[1], tft_id[2], tft_id[3]);
+      if ((tft_id_length > 0) &&
+          (tft_id_length < (int)sizeof(tft_id_message)))
+      {
+        (void)PanView_Uart1Transmit(&huart1, (uint8_t *)tft_id_message,
+                                (uint16_t)tft_id_length, BOOT_LOG_TIMEOUT_MS);
+      }
+    }
+
+    PanViewUi_Init(UI_LANGUAGE_ZH);
+  }
+  /* 所有外设初始化完成后发送启动日志；失败则进入统一错误处理。 */
+  if (PanView_Uart1Transmit(&huart1, boot_message,
+                        sizeof(boot_message) - 1U,
+                        BOOT_LOG_TIMEOUT_MS) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  VisualState_Set(VISUAL_STATE_SEARCH, "boot");
+  {
+    PanViewUiData initial_ui_data = MainUiData();
+    PanViewUi_Refresh(&initial_ui_data, HAL_GetTick());
+  }
+  /* USER CODE END 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in cmsis_os2.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
   /* USER CODE END 3 */
 }
 
@@ -2391,9 +2573,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
