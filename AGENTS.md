@@ -24,7 +24,7 @@
 
 ## GitHub 协作
 
-- 远端仓库：jiang-zexuan/panview-tracker，Git URL 为 https://github.com/jiang-zexuan/panview-tracker.git，远端名为 origin。
+- 远端仓库：jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal，Git URL 为 https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal.git，远端名为 origin。
 - 默认分支为 main；当前开发分支按 feature/功能、experiment/主题、fix/问题 命名。不要直接在 main 上开展功能开发。
 - 每次开始前依次检查仓库根目录、当前分支、git status 和远端跟踪关系；工作树干净时再获取远端最新提交。
 - 每次提交前运行 git diff --check；提交后推送当前分支。推送被拒绝时先获取远端变化并记录冲突，不擅自覆盖远端或强推。
