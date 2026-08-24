@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PanView UI 方案预览</title>
+  <style>
+    :root { color-scheme: dark; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #101417; color: #d8e2e2; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 360px) minmax(300px, 1fr); gap: 32px; width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0; }
+    .intro { align-self: start; padding-top: 10px; }
+    h1 { margin: 0 0 10px; font-size: 25px; letter-spacing: .04em; color: #f3b63f; }
+    p { margin: 0 0 24px; color: #91a4a5; line-height: 1.7; }
+    .choice-list { display: grid; gap: 10px; }
+    .choice { width: 100%; padding: 13px 14px; border: 1px solid #344448; border-radius: 4px; background: #1a2225; color: #b9c8c8; text-align: left; cursor: pointer; }
+    .choice:hover, .choice.active { border-color: #43d5d0; color: #fff; background: #202c2e; }
+    .choice strong { display: block; color: #e8f0ef; margin-bottom: 4px; }
+    .choice small { color: #84999a; }
+    .notes { margin-top: 24px; border-top: 1px solid #2a383b; padding-top: 16px; color: #84999a; font-size: 13px; line-height: 1.7; }
+    .preview-area { display: grid; justify-items: center; gap: 14px; }
+    .device-label { width: 240px; color: #778c8e; font: 12px ui-monospace, Consolas, monospace; text-align: center; }
+    .device { width: 240px; height: 320px; overflow: hidden; position: relative; border: 4px solid #344044; border-radius: 6px; box-shadow: 0 10px 30px #0008; }
+    .screen { width: 240px; height: 320px; overflow: hidden; position: relative; }
+    .screen::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .08; background: radial-gradient(circle at 80% 15%, #ffffff 0 1px, transparent 2px), radial-gradient(circle at 12% 70%, #ffffff 0 1px, transparent 2px); }
+    .screen-a { background: linear-gradient(145deg, #242b3a, #594126 58%, #1a202b); color: #fff0c8; }
+    .screen-b { background: linear-gradient(145deg, #172449, #482677 52%, #12314d); color: #f2fbff; }
+    .screen-c { background: linear-gradient(145deg, #22262b, #697078 54%, #292d33); color: #ffffff; }
+    .screen-d { background: linear-gradient(145deg, #0e2519, #20613c 52%, #0d2117); color: #e5ffed; }
+    .topbar { height: 35px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; border-bottom: 1px solid #527273; background: #263437; position: relative; }
+    .brand { font: 700 16px ui-monospace, Consolas, monospace; letter-spacing: .08em; }
+    .badge { padding: 4px 6px; font: 700 9px ui-monospace, Consolas, monospace; background: #f0a92e; color: #171a19; opacity: .55; }
+    .screen-b .badge { background: #66d1c2; }
+    .screen-c .badge { background: #ee8d36; }
+    .screen-a .topbar { background: #272219; border-color: #a17b31; }
+    .screen-b .topbar { background: #1d1e4b; border-color: #6b66ff; }
+    .screen-c .topbar { background: #41464d; border-color: #e1e5e8; }
+    .screen-d .topbar { background: #102b1c; border-color: #68ff9b; }
+    .screen-a .badge { background: #d9a934; color: #1b170e; border-radius: 9px; }
+    .screen-b .badge { background: #e556ff; color: #fff; border-radius: 9px; }
+    .screen-c .badge { background: #ffffff; color: #202225; border-radius: 9px; }
+    .screen-d .badge { background: #63ff91; color: #061108; border-radius: 9px; }
+    .status-focus { position: absolute; left: 60px; width: 120px; bottom: 78px; height: 25px; display: flex; align-items: center; justify-content: center; border: 1px solid #d9a934; background: #332816; color: #ffd567; border-radius: 8px; font: 700 11px ui-monospace, Consolas, monospace; letter-spacing: .08em; }
+    .screen-a .status-search { border-color: #52e4e4; background: #163a3d; color: #72ffff; }
+    .screen-a .status-tracking { border-color: #d9a934; background: #332816; color: #ffd567; }
+    .screen-a .status-locked { border-color: #5ce18a; background: #173d27; color: #82ffa9; }
+    .screen-a .status-lost { border-color: #ff704b; background: #4a211b; color: #ff9b7f; }
+    .screen-b .status-search { border-color: #69ebff; background: #163955; color: #94f3ff; }
+    .screen-b .status-tracking { border-color: #e556ff; background: #3f1e55; color: #ff9fff; }
+    .screen-b .status-locked { border-color: #62f19c; background: #17462e; color: #8dffb7; }
+    .screen-b .status-lost { border-color: #ff765e; background: #54251e; color: #ffac9a; }
+    .screen-c .status-search { border-color: #d8faff; background: #555e67; color: #ffffff; }
+    .screen-c .status-tracking { border-color: #ffffff; background: #5b626a; color: #ffffff; }
+    .screen-c .status-locked { border-color: #9ff2bd; background: #3e6650; color: #d8ffe5; }
+    .screen-c .status-lost { border-color: #ffb4a3; background: #73443b; color: #ffe0d8; }
+    .screen-d .status-search { border-color: #65e8ff; background: #15434b; color: #8effff; }
+    .screen-d .status-tracking { border-color: #72ff9b; background: #17472a; color: #a1ffbb; }
+    .screen-d .status-locked { border-color: #d9ff5f; background: #3a4c16; color: #edff9c; }
+    .screen-d .status-lost { border-color: #ff8c4b; background: #552a17; color: #ffc096; }
+    .content { position: relative; padding: 8px 9px 0; }
+    .target { height: 35px; border-bottom: 1px solid #3b5a5b; font: 700 10px ui-monospace, Consolas, monospace; line-height: 16px; }
+    .target .ok { color: #56d4c3; }
+    .screen-a .target .ok { color: #f2c24c; }
+    .screen-b .target .ok { color: #69ebff; }
+    .screen-c .target .ok { color: #fff; }
+    .screen-d .target .ok { color: #6dff9b; }
+    .metrics { margin-top: 8px; border: 1px solid #3f595b; position: relative; }
+    .metric { height: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 7px; border-bottom: 1px solid #314648; font: 10px ui-monospace, Consolas, monospace; }
+    .metric:last-child { border-bottom: 0; }
+    .metric label { color: #8ca7a6; }
+    .metric value { color: #62dad1; }
+    .screen-a .metrics { border-color: #8f6d2b; border-radius: 8px; background: #2b2417; }
+    .screen-b .metrics { border-color: #665bd2; border-radius: 8px; background: #1d1d42; }
+    .screen-c .metrics { border-color: #b9c0c7; border-radius: 8px; background: #3a3f45; }
+    .screen-d .metrics { border-color: #3fbd70; border-radius: 8px; background: #102619; }
+    .screen-a .metric { border-color: #58451e; }
+    .screen-b .metric { border-color: #3b3872; }
+    .screen-c .metric { border-color: #697079; }
+    .screen-d .metric { border-color: #205d38; }
+    .screen-a .metric value { color: #ffd567; }
+    .screen-b .metric value { color: #69ebff; }
+    .screen-c .metric value { color: #ffffff; text-shadow: 0 0 5px #ffffff55; }
+    .screen-d .metric value { color: #71ff9a; }
+    .screen-a .metric label { color: #bda96f; }
+    .screen-b .metric label { color: #a9a6e2; }
+    .screen-c .metric label { color: #e0e4e7; }
+    .screen-d .metric label { color: #9ac7aa; }
+    .link { margin-top: 8px; color: #849d9e; font: 9px ui-monospace, Consolas, monospace; }
+    .actions { position: absolute; left: 9px; right: 9px; bottom: 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .action { height: 34px; border: 1px solid #e1a22f; background: #293134; color: #f2b43c; font: 700 10px ui-monospace, Consolas, monospace; display: grid; place-items: center; }
+    .action.alt { border-color: #4dc9c5; color: #66d6d0; }
+    .footer { position: absolute; bottom: 9px; left: 0; width: 240px; text-align: center; color: #8ba0a0; font: 9px ui-monospace, Consolas, monospace; letter-spacing: .02em; white-space: nowrap; }
+    .screen-a .footer { color: #c6a75b; }
+    .screen-b .footer { color: #a99cff; }
+    .screen-c .footer { color: #f2f4f5; }
+    .screen-d .footer { color: #79ffa1; }
+    .screen-a .target, .screen-b .target, .screen-c .target, .screen-d .target { height: 43px; padding: 4px 6px; border-radius: 8px; }
+    .screen-a .target { border: 1px solid #8f6d2b; background: #2b2417; }
+    .screen-b .target { border: 1px solid #665bd2; background: #1d1d42; }
+    .screen-c .target { border: 1px solid #b9c0c7; background: #3a3f45; }
+    .screen-d .target { border: 1px solid #3fbd70; background: #102619; }
+    .screen-a .link { color: #bda96f; }
+    .screen-b .link { color: #a9a6e2; }
+    .screen-c .link { color: #e0e4e7; }
+    .screen-d .link { color: #9ac7aa; }
+    .screen-a .action { border-color: #d9a934; color: #ffd567; background: #332816; border-radius: 7px; }
+    .screen-a .action.alt { border-color: #b99b52; color: #e6c36d; }
+    .screen-b .action { border-color: #e556ff; color: #ff9fff; background: #29204c; border-radius: 7px; }
+    .screen-b .action.alt { border-color: #69ebff; color: #86f0ff; }
+    .screen-c .action { border-color: #ffffff; color: #fff; background: #4c525a; border-radius: 7px; }
+    .screen-c .action.alt { border-color: #d6dbe0; color: #ffffff; }
+    .screen-d .action { border-color: #63ff91; color: #91ffb0; background: #153721; border-radius: 7px; }
+    .screen-d .action.alt { border-color: #4abf76; color: #83e8a4; }
+    .scheme-note { color: #839798; font-size: 13px; text-align: center; }
+    @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; width: min(420px, calc(100% - 28px)); } .intro { padding-top: 0; } }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <section class="intro">
+      <h1>PanView UI 方案预览</h1>
+      <p>按真实 TFT 尺寸预览。先选视觉方向，再把选定方案落到 F407 固件。</p>
+      <div class="choice-list">
+        <button class="choice active" data-scheme="a"><strong>A · 黑金</strong><small>黑色底，金色状态和边框，稳重、设备感强。</small></button>
+        <button class="choice" data-scheme="b"><strong>B · 霓虹</strong><small>深蓝紫底，青紫高光，科技感最强。</small></button>
+        <button class="choice" data-scheme="c"><strong>C · 极简黑白灰</strong><small>低刺激、高辨识度，适合长期观察。</small></button>
+        <button class="choice" data-scheme="d"><strong>D · 黑荧光绿</strong><small>深绿黑底，荧光绿状态，偏设备监控风格。</small></button>
+      </div>
+      <div class="notes">预览重点：页脚完整显示、数据面板保持静态、只替换数值内容，避免整块 SPI 重绘造成闪烁。</div>
+    </section>
+    <section class="preview-area">
+      <div class="device-label">TFT PREVIEW · 240 × 320 px</div>
+      <div class="device"><div id="screen" class="screen screen-a">
+        <div class="topbar"><span class="brand">PANVIEW</span></div>
+        <div class="content">
+          <div class="target">TARGET <span class="ok">DETECTED</span><br>ERR X <span id="errx">-120</span> · ERR Y <span id="erry">+046</span></div>
+          <div class="metrics">
+            <div class="metric"><label>PAN POSITION</label><value id="pan">+0120</value></div>
+            <div class="metric"><label>PITCH POSITION</label><value id="pitch">-0040</value></div>
+            <div class="metric"><label>PAN SPEED</label><value id="panspeed">0320</value></div>
+            <div class="metric"><label>PITCH SPEED</label><value id="pitchspeed">0180</value></div>
+          </div>
+          <div class="link">LINK · RX 1842 · DROP 0 · POS OK</div>
+        </div>
+        <div id="status-focus" class="status-focus status-tracking">TRACKING</div>
+        <div class="actions"><div class="action">START / STOP</div><div class="action alt">SET</div></div>
+        <div class="footer">Designed by JZX</div>
+      </div></div>
+      <div id="scheme-note" class="scheme-note">方案 A：强工业感，边框和网格清晰。</div>
+    </section>
+  </main>
+  <script>
+    const screen = document.querySelector('#screen');
+    const note = document.querySelector('#scheme-note');
+    const notes = {
+      a: '黑金：稳重、硬朗，适合设备状态长期显示。',
+      b: '霓虹：青紫高光明显，科技感和视觉冲击力最强。',
+      c: '极简黑白灰：对比度清楚，最不容易疲劳。',
+      d: '黑荧光绿：监控感强，状态变化非常醒目。'
+    };
+    document.querySelectorAll('.choice').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.choice').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      const scheme = button.dataset.scheme;
+      screen.className = `screen screen-${scheme}`;
+      note.textContent = notes[scheme];
+    }));
+    let tick = 0;
+    const statuses = [
+      ['SEARCH', 'status-search'], ['TRACKING', 'status-tracking'],
+      ['LOCKED', 'status-locked'], ['LOST', 'status-lost']
+    ];
+    setInterval(() => {
+      tick += 1;
+      document.querySelector('#pan').textContent = `+${String(120 + tick % 18).padStart(4, '0')}`;
+      document.querySelector('#panspeed').textContent = String(320 + tick % 24).padStart(4, '0');
+      document.querySelector('#errx').textContent = `${-120 + tick % 9}`;
+      const [status, className] = statuses[tick % statuses.length];
+      const statusNode = document.querySelector('#status-focus');
+      statusNode.textContent = status;
+      statusNode.className = `status-focus ${className}`;
+    }, 500);
+  </script>
+</body>
+</html>

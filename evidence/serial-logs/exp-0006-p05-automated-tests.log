@@ -1,0 +1,10 @@
+P05 automated verification evidence
+date=2026-08-21
+command=gcc -std=c11 -Wall -Wextra -Werror motor_pulse_lab_test.c motor_pulse_lab.c
+result=motor_pulse_lab_test: PASS
+command=gcc -std=c11 -Wall -Wextra -Werror relative_position_tracker_test.c relative_position_tracker.c
+result=relative_position_tracker_test: PASS
+command=STM32CubeIDE bundled arm-none-eabi-gcc changed-source compilation
+result=Profile-motion STM32 source compile: PASS
+result=Relative-position STM32 source compile: PASS
+scope=host state-machine tests and changed-source compilation; not a substitute for oscilloscope waveform evidence

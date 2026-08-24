@@ -1,0 +1,797 @@
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+t=55000 dt=5000 heartbeat=11 scans=5495 status=550 link=waiting
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+t=60000 dt=5000 heartbeat=12 scans=5995 status=600 link=waiting
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+52.59 deg raw=00002567 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11737mV current=5mA encoder=27816 target=+52.61deg speed=+0RPM position=+52.53deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P01 boot
+KEY_UP pressed
+POSITION theory=+0.0deg pulses=0 reason=manual_zero
+PITCH zero=accepted position=0 limit=plus_or_minus_45deg
+t=5000 dt=5000 heartbeat=1 scans=496 status=50 link=waiting
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+t=10000 dt=5000 heartbeat=2 scans=996 status=100 link=waiting
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+t=20000 dt=5000 heartbeat=4 scans=1994 status=199 link=waiting
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+t=25000 dt=5000 heartbeat=5 scans=2494 status=249 link=waiting
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+DUAL state=running pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+DUAL command rejected: zero_or_limit_or_busy
+t=30000 dt=5000 heartbeat=6 scans=2993 status=299 link=waiting
+t=35000 dt=5000 heartbeat=7 scans=3493 status=349 link=waiting
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL state=running dir=negative pan_pulses=100 pitch_pulses=100
+DUAL command rejected: zero_or_limit_or_busy
+t=40000 dt=5000 heartbeat=8 scans=3992 status=399 link=waiting
+‘‘n“Óo½©?MOTOR TTL probe=timeout_or_bad_frame status=3 raw=00 00 00 00
+PanView P01 boot
+t=5000 dt=5000 heartbeat=1 scans=490 status=49 link=waiting
+t=10000 dt=5000 heartbeat=2 scans=990 status=99 link=waiting
+t=15000 dt=5000 heartbeat=3 scans=1490 status=149 link=waiting
+?1n“Óo½¿?MOTOR TTL probe=timeout_or_bad_frame status=3 raw=00 00 00 00
+PanView P08 boot
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+t=5000 dt=5000 heartbeat=1 scans=490 status=49 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+t=10000 dt=5000 heartbeat=2 scans=989 status=99 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=42 drop=1 text_ok=20 text_err=22 last_size=110 target=1 count=1 cx=949 cy=656
+t=15000 dt=5000 heartbeat=3 scans=1488 status=149 link=waiting
+K230 RX frames=120 drop=1 text_ok=24 text_err=96 last_size=111 target=1 count=1 cx=1130 cy=623
+K230 RX frames=159 drop=1 text_ok=41 text_err=118 last_size=111 target=1 count=1 cx=1066 cy=615
+K230 RX frames=192 drop=2 text_ok=66 text_err=126 last_size=14 target=1 count=1 cx=0 cy=0
+K230 RX frames=237 drop=2 text_ok=84 text_err=153 last_size=16 target=1 count=1 cx=1113 cy=748
+K230 RX frames=278 drop=6 text_ok=102 text_err=176 last_size=68 target=0 count=0 cx=0 cy=0
+t=20000 dt=5000 heartbeat=4 scans=1986 status=199 link=waiting
+K230 RX frames=310 drop=6 text_ok=128 text_err=182 last_size=68 target=0 count=0 cx=0 cy=0
+K230 RX frames=342 drop=10 text_ok=151 text_err=191 last_size=112 target=1 count=1 cx=1269 cy=580
+K230 RX frames=384 drop=10 text_ok=168 text_err=216 last_size=19 target=1 count=1 cx=0 cy=0
+K230 RX frames=422 drop=13 text_ok=189 text_err=233 last_size=110 target=1 count=1 cx=931 cy=527
+K230 RX frames=453 drop=13 text_ok=216 text_err=237 last_size=110 target=1 count=1 cx=962 cy=542
+t=25000 dt=5000 heartbeat=5 scans=2485 status=249 link=waiting
+K230 RX frames=520 drop=16 text_ok=224 text_err=296 last_size=111 target=1 count=1 cx=1129 cy=616
+K230 RX frames=556 drop=18 text_ok=244 text_err=312 last_size=15 target=1 count=1 cx=0 cy=0
+K230 RX frames=589 drop=19 text_ok=267 text_err=322 last_size=110 target=1 count=1 cx=739 cy=579
+K230 RX frames=619 drop=24 text_ok=292 text_err=327 last_size=111 target=1 count=1 cx=1006 cy=527
+K230 RX frames=649 drop=26 text_ok=318 text_err=331 last_size=112 target=1 count=1 cx=1194 cy=653
+t=30000 dt=5000 heartbeat=6 scans=2982 status=299 link=waiting
+K230 RX frames=685 drop=31 text_ok=335 text_err=350 last_size=110 target=1 count=1 cx=904 cy=689
+K230 RX frames=723 drop=37 text_ok=357 text_err=366 last_size=111 target=1 count=1 cx=1002 cy=646
+K230 RX frames=762 drop=37 text_ok=376 text_err=386 last_size=24 target=1 count=1 cx=1049 cy=425
+K230 RX frames=840 drop=37 text_ok=380 text_err=460 last_size=22 target=1 count=1 cx=0 cy=0
+K230 RX frames=883 drop=39 text_ok=399 text_err=484 last_size=109 target=1 count=1 cx=1153 cy=434
+t=35000 dt=5000 heartbeat=7 scans=3481 status=349 link=waiting
+K230 RX frames=937 drop=41 text_ok=411 text_err=526 last_size=92 target=1 count=1 cx=0 cy=0
+K230 RX frames=972 drop=42 text_ok=434 text_err=538 last_size=110 target=1 count=1 cx=838 cy=559
+K230 RX frames=1009 drop=42 text_ok=454 text_err=555 last_size=110 target=1 count=1 cx=857 cy=599
+K230 RX frames=1051 drop=42 text_ok=469 text_err=582 last_size=110 target=1 count=1 cx=782 cy=687
+K230 RX frames=1120 drop=42 text_ok=476 text_err=644 last_size=35 target=1 count=1 cx=0 cy=0
+t=40000 dt=5000 heartbeat=8 scans=3979 status=399 link=waiting
+K230 RX frames=1174 drop=48 text_ok=487 text_err=687 last_size=109 target=1 count=1 cx=869 cy=550
+K230 RX frames=1207 drop=50 text_ok=509 text_err=698 last_size=110 target=1 count=1 cx=894 cy=744
+K230 RX frames=1240 drop=53 text_ok=534 text_err=706 last_size=110 target=1 count=1 cx=954 cy=681
+K230 RX frames=1274 drop=53 text_ok=557 text_err=717 last_size=110 target=1 count=1 cx=952 cy=631
+K230 RX frames=1317 drop=54 text_ok=577 text_err=740 last_size=6 target=1 count=1 cx=935 cy=449
+t=45000 dt=5000 heartbeat=9 scans=4477 status=449 link=waiting
+K230 RX frames=1384 drop=57 text_ok=582 text_err=802 last_size=110 target=1 count=1 cx=953 cy=491
+K230 RX frames=1420 drop=62 text_ok=603 text_err=817 last_size=103 target=1 count=1 cx=925 cy=782
+K230 RX frames=1485 drop=62 text_ok=611 text_err=874 last_size=45 target=1 count=1 cx=0 cy=0
+K230 RX frames=1514 drop=62 text_ok=638 text_err=876 last_size=110 target=1 count=1 cx=923 cy=473
+K230 RX frames=1555 drop=62 text_ok=658 text_err=897 last_size=41 target=1 count=1 cx=0 cy=0
+t=50000 dt=5000 heartbeat=10 scans=4974 status=499 link=waiting
+K230 RX frames=1607 drop=66 text_ok=670 text_err=937 last_size=6 target=1 count=1 cx=0 cy=0
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+t=55000 dt=5000 heartbeat=11 scans=5473 status=549 link=waiting
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+t=60000 dt=5000 heartbeat=12 scans=5972 status=599 link=waiting
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 text_ok=687 text_err=952 last_size=110 target=1 count=1 cx=928 cy=475
+K230 RX frames=1639 drop=71 textK230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+t=5000 dt=5000 heartbeat=1 scans=490 status=49 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+t=10000 dt=5000 heartbeat=2 scans=989 status=99 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+t=15000 dt=5000 heartbeat=3 scans=1488 status=149 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0
+K230 RX frames=6 drop=0 text_ok=6 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0
+K230 RX frames=33 drop=0 text_ok=33 text_err=0 last_size=109 target=1 count=1 cx=1043 cy=466
+K230 RX frames=61 drop=0 text_ok=61 text_err=0 last_size=108 target=1 count=1 cx=986 cy=549
+K230 RX frames=90 drop=0 text_ok=90 text_err=0 last_size=109 target=1 count=1 cx=1090 cy=847
+t=20000 dt=5000 heartbeat=4 scans=1986 status=199 link=waiting
+K230 RX frames=118 drop=0 text_ok=118 text_err=0 last_size=109 target=1 count=1 cx=1008 cy=756
+K230 RX frames=146 drop=0 text_ok=146 text_err=0 last_size=108 target=1 count=1 cx=973 cy=650
+K230 RX frames=172 drop=0 text_ok=172 text_err=0 last_size=109 target=1 count=1 cx=1003 cy=315
+K230 RX frames=201 drop=0 text_ok=201 text_err=0 last_size=110 target=1 count=1 cx=1232 cy=853
+K230 RX frames=229 drop=0 text_ok=229 text_err=0 last_size=109 target=1 count=1 cx=1106 cy=347
+t=25000 dt=5000 heartbeat=5 scans=2484 status=249 link=waiting
+K230 RX frames=256 drop=0 text_ok=256 text_err=0 last_size=109 target=1 count=1 cx=1024 cy=661
+K230 RX frames=284 drop=0 text_ok=284 text_err=0 last_size=110 target=1 count=1 cx=1308 cy=561
+K230 RX frames=312 drop=0 text_ok=310 text_err=2 last_size=108 target=1 count=1 cx=846 cy=757
+K230 RX frames=340 drop=0 text_ok=335 text_err=5 last_size=107 target=1 count=1 cx=0 cy=0
+K230 RX frames=368 drop=0 text_ok=360 text_err=8 last_size=110 target=1 count=1 cx=1365 cy=609
+t=30000 dt=5000 heartbeat=6 scans=2981 status=299 link=waiting
+K230 RX frames=396 drop=0 text_ok=388 text_err=8 last_size=108 target=1 count=1 cx=965 cy=499
+K230 RX frames=425 drop=0 text_ok=417 text_err=8 last_size=108 target=1 count=1 cx=1020 cy=217
+K230 RX frames=453 drop=0 text_ok=445 text_err=8 last_size=107 target=1 count=1 cx=1104 cy=209
+K230 RX frames=479 drop=0 text_ok=471 text_err=8 last_size=66 target=0 count=0 cx=0 cy=0
+K230 RX frames=507 drop=0 text_ok=499 text_err=8 last_size=66 target=0 count=0 cx=0 cy=0
+t=35000 dt=5000 heartbeat=7 scans=3480 status=349 link=waiting
+K230 RX frames=535 drop=0 text_ok=527 text_err=8 last_size=110 target=1 count=1 cx=1266 cy=949
+K230 RX frames=563 drop=0 text_ok=555 text_err=8 last_size=110 target=1 count=1 cx=1297 cy=919
+K230 RX frames=592 drop=0 text_ok=584 text_err=8 last_size=66 target=0 count=0 cx=0 cy=0
+K230 RX frames=619 drop=0 text_ok=611 text_err=8 last_size=110 target=1 count=1 cx=1195 cy=661
+K230 RX frames=648 drop=0 text_ok=640 text_err=8 last_size=107 target=1 count=1 cx=1114 cy=187
+t=40000 dt=5000 heartbeat=8 scans=3978 status=399 link=waiting
+K230 RX frames=676 drop=0 text_ok=668 text_err=8 last_size=109 target=1 count=1 cx=1069 cy=624
+K230 RX frames=703 drop=0 text_ok=695 text_err=8 last_size=109 target=1 count=1 cx=1071 cy=646
+K230 RX frames=703 drop=0 text_ok=695 text_err=8 last_size=109 target=1 count=1 cx=1071 cy=646
+K230 RX frames=703 drop=0 text_ok=695 text_err=8 last_size=109 target=1 count=1 cx=1071 cy=646
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0
+t=10000 dt=5000 heartbeat=2 scans=989 status=99 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0
+K230 RX frames=17 drop=0 text_ok=17 text_err=0 last_size=108 target=1 count=1 cx=942 cy=570 err_x=-18 err_y=30
+K230 RX frames=45 drop=0 text_ok=44 text_err=1 last_size=109 target=1 count=1 cx=1002 cy=750 err_x=42 err_y=210
+K230 RX frames=73 drop=0 text_ok=72 text_err=1 last_size=109 target=1 count=1 cx=1009 cy=793 err_x=49 err_y=253
+K230 RX frames=101 drop=0 text_ok=97 text_err=4 last_size=110 target=1 count=1 cx=1312 cy=856 err_x=352 err_y=316
+t=15000 dt=5000 heartbeat=3 scans=1488 status=149 link=waiting
+K230 RX frames=129 drop=0 text_ok=125 text_err=4 last_size=110 target=1 count=1 cx=1296 cy=859 err_x=336 err_y=319
+K230 RX frames=156 drop=0 text_ok=150 text_err=6 last_size=220 target=1 count=1 cx=1228 cy=861 err_x=268 err_y=321
+K230 RX frames=184 drop=0 text_ok=178 text_err=6 last_size=108 target=1 count=1 cx=652 cy=899 err_x=-308 err_y=359
+K230 RX frames=211 drop=0 text_ok=205 text_err=6 last_size=108 target=1 count=1 cx=791 cy=693 err_x=-169 err_y=153
+K230 RX frames=239 drop=0 text_ok=233 text_err=6 last_size=108 target=1 count=1 cx=661 cy=504 err_x=-299 err_y=-36
+t=20000 dt=5000 heartbeat=4 scans=1984 status=199 link=waiting
+K230 RX frames=267 drop=0 text_ok=261 text_err=6 last_size=108 target=1 count=1 cx=617 cy=495 err_x=-343 err_y=-45
+K230 RX frames=294 drop=0 text_ok=286 text_err=8 last_size=216 target=1 count=1 cx=806 cy=573 err_x=-154 err_y=33
+K230 RX frames=322 drop=0 text_ok=310 text_err=12 last_size=108 target=1 count=1 cx=920 cy=506 err_x=-40 err_y=-34
+K230 RX frames=350 drop=0 text_ok=332 text_err=18 last_size=108 target=1 count=1 cx=917 cy=496 err_x=-43 err_y=-44
+K230 RX frames=379 drop=0 text_ok=360 text_err=19 last_size=108 target=1 count=1 cx=939 cy=528 err_x=-21 err_y=-12
+t=25000 dt=5000 heartbeat=5 scans=2480 status=249 link=waiting
+K230 RX frames=406 drop=0 text_ok=384 text_err=22 last_size=108 target=1 count=1 cx=982 cy=565 err_x=22 err_y=25
+K230 RX frames=434 drop=0 text_ok=409 text_err=25 last_size=108 target=1 count=1 cx=966 cy=558 err_x=6 err_y=18
+K230 RX frames=462 drop=0 text_ok=437 text_err=25 last_size=106 target=1 count=1 cx=946 cy=200 err_x=-14 err_y=-340
+K230 RX frames=490 drop=0 text_ok=465 text_err=25 last_size=106 target=1 count=1 cx=948 cy=213 err_x=-12 err_y=-327
+K230 RX frames=519 drop=0 text_ok=494 text_err=25 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0
+t=30000 dt=5000 heartbeat=6 scans=2975 status=299 link=waiting
+K230 RX frames=547 drop=0 text_ok=522 text_err=25 last_size=109 target=1 count=1 cx=1068 cy=952 err_x=108 err_y=412
+K230 RX frames=575 drop=0 text_ok=549 text_err=26 last_size=109 target=1 count=1 cx=1001 cy=893 err_x=41 err_y=353
+K230 RX frames=603 drop=0 text_ok=577 text_err=26 last_size=109 target=1 count=1 cx=1041 cy=890 err_x=81 err_y=350
+K230 RX frames=632 drop=0 text_ok=606 text_err=26 last_size=108 target=1 count=1 cx=921 cy=403 err_x=-39 err_y=-137
+K230 RX frames=660 drop=0 text_ok=634 text_err=26 last_size=108 target=1 count=1 cx=965 cy=384 err_x=5 err_y=-156
+t=35000 dt=5000 heartbeat=7 scans=3470 status=349 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=40000 dt=5000 heartbeat=8 scans=3983 status=399 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=45000 dt=5000 heartbeat=9 scans=4482 status=449 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=50000 dt=5000 heartbeat=10 scans=4981 status=499 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=55000 dt=5000 heartbeat=11 scans=5480 status=549 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=60000 dt=5000 heartbeat=12 scans=5979 status=599 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=65000 dt=5000 heartbeat=13 scans=6478 status=649 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=70000 dt=5000 heartbeat=14 scans=6977 status=699 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=75000 dt=5000 heartbeat=15 scans=7476 status=749 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=80000 dt=5000 heartbeat=16 scans=7975 status=799 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=26 drop=0 text_ok=26 text_err=0 last_size=108 target=1 count=1 cx=1072 cy=929 err_x=112 err_y=389 pan_speed=144
+K230 RX frames=54 drop=0 text_ok=52 text_err=2 last_size=107 target=1 count=1 cx=945 cy=816 err_x=-15 err_y=276 pan_speed=0
+K230 RX frames=82 drop=0 text_ok=80 text_err=2 last_size=107 target=1 count=1 cx=706 cy=845 err_x=-254 err_y=305 pan_speed=-428
+K230 RX frames=111 drop=0 text_ok=109 text_err=2 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=139 drop=0 text_ok=137 text_err=2 last_size=107 target=1 count=1 cx=769 cy=847 err_x=-191 err_y=307 pan_speed=-302
+t=5000 dt=5000 heartbeat=1 scans=487 status=49 link=waiting
+K230 RX frames=166 drop=0 text_ok=163 text_err=3 last_size=107 target=1 count=1 cx=703 cy=727 err_x=-257 err_y=187 pan_speed=-434
+K230 RX frames=194 drop=0 text_ok=190 text_err=4 last_size=107 target=1 count=1 cx=714 cy=641 err_x=-246 err_y=101 pan_speed=-412
+K230 RX frames=221 drop=0 text_ok=217 text_err=4 last_size=107 target=1 count=1 cx=921 cy=618 err_x=-39 err_y=78 pan_speed=0
+K230 RX frames=249 drop=0 text_ok=245 text_err=4 last_size=107 target=1 count=1 cx=908 cy=593 err_x=-52 err_y=53 pan_speed=-24
+K230 RX frames=277 drop=0 text_ok=271 text_err=6 last_size=107 target=1 count=1 cx=880 cy=755 err_x=-80 err_y=215 pan_speed=-80
+t=10000 dt=5000 heartbeat=2 scans=982 status=99 link=waiting
+K230 RX frames=305 drop=0 text_ok=299 text_err=6 last_size=107 target=1 count=1 cx=676 cy=826 err_x=-284 err_y=286 pan_speed=-488
+K230 RX frames=333 drop=0 text_ok=327 text_err=6 last_size=109 target=1 count=1 cx=1182 cy=739 err_x=222 err_y=199 pan_speed=364
+K230 RX frames=361 drop=0 text_ok=355 text_err=6 last_size=108 target=1 count=1 cx=1095 cy=777 err_x=135 err_y=237 pan_speed=190
+K230 RX frames=390 drop=0 text_ok=383 text_err=7 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=417 drop=0 text_ok=410 text_err=7 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=15000 dt=5000 heartbeat=3 scans=1478 status=149 link=waiting
+K230 RX frames=445 drop=0 text_ok=438 text_err=7 last_size=108 target=1 count=1 cx=1100 cy=593 err_x=140 err_y=53 pan_speed=200
+K230 RX frames=472 drop=0 text_ok=465 text_err=7 last_size=108 target=1 count=1 cx=1020 cy=493 err_x=60 err_y=-47 pan_speed=40
+K230 RX frames=501 drop=0 text_ok=493 text_err=8 last_size=107 target=1 count=1 cx=919 cy=636 err_x=-41 err_y=96 pan_speed=-2
+K230 RX frames=529 drop=0 text_ok=521 text_err=8 last_size=107 target=1 count=1 cx=962 cy=532 err_x=2 err_y=-8 pan_speed=0
+K230 RX frames=557 drop=0 text_ok=548 text_err=9 last_size=107 target=1 count=1 cx=905 cy=483 err_x=-55 err_y=-57 pan_speed=-30
+t=20000 dt=5000 heartbeat=4 scans=1973 status=199 link=waiting
+K230 RX frames=586 drop=0 text_ok=577 text_err=9 last_size=107 target=1 count=1 cx=917 cy=506 err_x=-43 err_y=-34 pan_speed=-6
+K230 RX frames=614 drop=0 text_ok=605 text_err=9 last_size=107 target=1 count=1 cx=768 cy=484 err_x=-192 err_y=-56 pan_speed=-304
+K230 RX frames=642 drop=0 text_ok=633 text_err=9 last_size=107 target=1 count=1 cx=742 cy=576 err_x=-218 err_y=36 pan_speed=-356
+K230 RX frames=670 drop=0 text_ok=661 text_err=9 last_size=107 target=1 count=1 cx=777 cy=600 err_x=-183 err_y=60 pan_speed=-286
+K230 RX frames=699 drop=0 text_ok=690 text_err=9 last_size=107 target=1 count=1 cx=836 cy=560 err_x=-124 err_y=20 pan_speed=-168
+t=25000 dt=5000 heartbeat=5 scans=2468 status=249 link=waiting
+K230 RX frames=727 drop=0 text_ok=718 text_err=9 last_size=107 target=1 count=1 cx=870 cy=675 err_x=-90 err_y=135 pan_speed=-100
+K230 RX frames=755 drop=0 text_ok=746 text_err=9 last_size=107 target=1 count=1 cx=912 cy=650 err_x=-48 err_y=110 pan_speed=-16
+K230 RX frames=783 drop=0 text_ok=774 text_err=9 last_size=107 target=1 count=1 cx=782 cy=645 err_x=-178 err_y=105 pan_speed=-276
+K230 RX frames=812 drop=0 text_ok=803 text_err=9 last_size=107 target=1 count=1 cx=815 cy=464 err_x=-145 err_y=-76 pan_speed=-210
+K230 RX frames=837 drop=0 text_ok=828 text_err=9 last_size=107 target=1 count=1 cx=767 cy=565 err_x=-193 err_y=25 pan_speed=-306
+t=30000 dt=5000 heartbeat=6 scans=2963 status=299 link=waiting
+K230 RX frames=837 drop=0 text_ok=828 text_err=9 last_size=107 target=1 count=1 cx=767 cy=565 err_x=-193 err_y=25 pan_speed=-306
+K230 RX frames=837 drop=0 text_ok=828 text_err=9 last_size=107 target=1 count=1 cx=767 cy=565 err_x=-193 err_y=25 pan_speed=-306
+K230 RX frames=12 drop=0 text_ok=12 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=40 drop=0 text_ok=40 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=35000 dt=5000 heartbeat=7 scans=3489 status=350 link=waiting
+K230 RX frames=68 drop=0 text_ok=68 text_err=0 last_size=106 target=1 count=1 cx=928 cy=566 err_x=-32 err_y=26 pan_speed=0
+K230 RX frames=96 drop=0 text_ok=96 text_err=0 last_size=107 target=1 count=1 cx=881 cy=573 err_x=-79 err_y=33 pan_speed=-78
+K230 RX frames=125 drop=0 text_ok=125 text_err=0 last_size=105 target=1 count=1 cx=227 cy=681 err_x=-733 err_y=141 pan_speed=-800
+K230 RX frames=152 drop=0 text_ok=152 text_err=0 last_size=108 target=1 count=1 cx=1337 cy=381 err_x=377 err_y=-159 pan_speed=674
+K230 RX frames=180 drop=0 text_ok=179 text_err=1 last_size=108 target=1 count=1 cx=1403 cy=331 err_x=443 err_y=-209 pan_speed=800
+t=40000 dt=5000 heartbeat=8 scans=3984 status=399 link=waiting
+K230 RX frames=208 drop=0 text_ok=207 text_err=1 last_size=106 target=1 count=1 cx=273 cy=497 err_x=-687 err_y=-43 pan_speed=-800
+K230 RX frames=235 drop=0 text_ok=234 text_err=1 last_size=106 target=1 count=1 cx=272 cy=450 err_x=-688 err_y=-90 pan_speed=-800
+K230 RX frames=263 drop=0 text_ok=262 text_err=1 last_size=108 target=1 count=1 cx=1573 cy=316 err_x=613 err_y=-224 pan_speed=800
+K230 RX frames=291 drop=0 text_ok=289 text_err=2 last_size=108 target=1 count=1 cx=1582 cy=344 err_x=622 err_y=-196 pan_speed=800
+K230 RX frames=319 drop=0 text_ok=317 text_err=2 last_size=103 target=1 count=1 cx=289 cy=345 err_x=-671 err_y=-195 pan_speed=-800
+t=45000 dt=5000 heartbeat=9 scans=4479 status=449 link=waiting
+K230 RX frames=348 drop=0 text_ok=346 text_err=2 last_size=108 target=1 count=1 cx=1251 cy=390 err_x=291 err_y=-150 pan_speed=502
+K230 RX frames=375 drop=0 text_ok=373 text_err=2 last_size=108 target=1 count=1 cx=1688 cy=368 err_x=728 err_y=-172 pan_speed=800
+K230 RX frames=404 drop=0 text_ok=402 text_err=2 last_size=107 target=1 count=1 cx=1502 cy=316 err_x=542 err_y=-224 pan_speed=800
+K230 RX frames=431 drop=0 text_ok=429 text_err=2 last_size=107 target=1 count=1 cx=1032 cy=356 err_x=72 err_y=-184 pan_speed=64
+K230 RX frames=458 drop=0 text_ok=456 text_err=2 last_size=109 target=1 count=1 cx=1347 cy=493 err_x=387 err_y=-47 pan_speed=694
+t=50000 dt=5000 heartbeat=10 scans=4974 status=499 link=waiting
+K230 RX frames=487 drop=0 text_ok=485 text_err=2 last_size=109 target=1 count=1 cx=1369 cy=515 err_x=409 err_y=-25 pan_speed=738
+K230 RX frames=515 drop=0 text_ok=513 text_err=2 last_size=109 target=1 count=1 cx=1330 cy=417 err_x=370 err_y=-123 pan_speed=660
+K230 RX frames=543 drop=0 text_ok=541 text_err=2 last_size=108 target=1 count=1 cx=1103 cy=440 err_x=143 err_y=-100 pan_speed=206
+K230 RX frames=571 drop=0 text_ok=569 text_err=2 last_size=107 target=1 count=1 cx=580 cy=436 err_x=-380 err_y=-104 pan_speed=-680
+K230 RX frames=600 drop=0 text_ok=598 text_err=2 last_size=107 target=1 count=1 cx=786 cy=450 err_x=-174 err_y=-90 pan_speed=-268
+t=55000 dt=5000 heartbeat=11 scans=5469 status=549 link=waiting
+K230 RX frames=626 drop=0 text_ok=621 text_err=5 last_size=108 target=1 count=1 cx=1133 cy=449 err_x=173 err_y=-91 pan_speed=266
+K230 RX frames=654 drop=0 text_ok=649 text_err=5 last_size=108 target=1 count=1 cx=1111 cy=458 err_x=151 err_y=-82 pan_speed=222
+K230 RX frames=682 drop=0 text_ok=676 text_err=6 last_size=108 target=1 count=1 cx=1090 cy=493 err_x=130 err_y=-47 pan_speed=180
+K230 RX frames=710 drop=0 text_ok=703 text_err=7 last_size=108 target=1 count=1 cx=1107 cy=515 err_x=147 err_y=-25 pan_speed=214
+K230 RX frames=738 drop=0 text_ok=728 text_err=10 last_size=216 target=1 count=1 cx=1145 cy=548 err_x=185 err_y=8 pan_speed=290
+t=60000 dt=5000 heartbeat=12 scans=5964 status=599 link=waiting
+K230 RX frames=766 drop=0 text_ok=752 text_err=14 last_size=108 target=1 count=1 cx=1156 cy=522 err_x=196 err_y=-18 pan_speed=312
+K230 RX frames=792 drop=0 text_ok=777 text_err=15 last_size=216 target=1 count=1 cx=1160 cy=543 err_x=200 err_y=3 pan_speed=320
+K230 RX frames=820 drop=0 text_ok=805 text_err=15 last_size=108 target=1 count=1 cx=1165 cy=549 err_x=205 err_y=9 pan_speed=330
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=90000 dt=5000 heartbeat=18 scans=8953 status=899 link=waiting
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=95000 dt=5000 heartbeat=19 scans=9452 status=949 link=waiting
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=100000 dt=5000 heartbeat=20 scans=9951 status=999 link=waiting
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=934 drop=0 text_ok=916 text_err=18 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=938 drop=0 text_ok=920 text_err=18 last_size=107 target=1 count=1 cx=620 cy=676 err_x=-340 err_y=136 pan_speed=-600
+K230 RX frames=966 drop=0 text_ok=947 text_err=19 last_size=107 target=1 count=1 cx=854 cy=627 err_x=-106 err_y=87 pan_speed=-132
+K230 RX frames=994 drop=0 text_ok=975 text_err=19 last_size=107 target=1 count=1 cx=884 cy=525 err_x=-76 err_y=-15 pan_speed=-72
+t=105000 dt=5000 heartbeat=21 scans=10447 status=1049 link=waiting
+K230 RX frames=1021 drop=0 text_ok=1001 text_err=20 last_size=107 target=1 count=1 cx=938 cy=594 err_x=-22 err_y=54 pan_speed=0
+K230 RX frames=1049 drop=0 text_ok=1028 text_err=21 last_size=107 target=1 count=1 cx=448 cy=653 err_x=-512 err_y=113 pan_speed=-800
+K230 RX frames=1077 drop=0 text_ok=1055 text_err=22 last_size=106 target=1 count=1 cx=0 cy=0 err_x=-285 err_y=152 pan_speed=-490
+K230 RX frames=1106 drop=0 text_ok=1084 text_err=22 last_size=107 target=1 count=1 cx=631 cy=577 err_x=-329 err_y=37 pan_speed=-578
+K230 RX frames=1134 drop=0 text_ok=1112 text_err=22 last_size=107 target=1 count=1 cx=626 cy=637 err_x=-334 err_y=97 pan_speed=-588
+t=110000 dt=5000 heartbeat=22 scans=10942 status=1099 link=waiting
+K230 RX frames=1162 drop=0 text_ok=1136 text_err=26 last_size=107 target=1 count=1 cx=640 cy=637 err_x=-320 err_y=97 pan_speed=-560
+K230 RX frames=1190 drop=0 text_ok=1163 text_err=27 last_size=107 target=1 count=2 cx=658 cy=614 err_x=-302 err_y=74 pan_speed=-524
+K230 RX frames=1218 drop=0 text_ok=1190 text_err=28 last_size=109 target=1 count=1 cx=1328 cy=530 err_x=368 err_y=-10 pan_speed=656
+K230 RX frames=1246 drop=0 text_ok=1215 text_err=31 last_size=108 target=1 count=1 cx=0 cy=0 err_x=364 err_y=80 pan_speed=648
+K230 RX frames=1274 drop=0 text_ok=1240 text_err=34 last_size=108 target=1 count=1 cx=1372 cy=595 err_x=412 err_y=55 pan_speed=744
+t=115000 dt=5000 heartbeat=23 scans=11437 status=1149 link=waiting
+K230 RX frames=1302 drop=0 text_ok=1267 text_err=35 last_size=109 target=1 count=1 cx=1416 cy=546 err_x=456 err_y=6 pan_speed=800
+K230 RX frames=1330 drop=0 text_ok=1290 text_err=40 last_size=108 target=1 count=1 cx=1379 cy=544 err_x=419 err_y=4 pan_speed=758
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=25000 dt=5000 heartbeat=5 scans=2492 status=250 link=waiting
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=30000 dt=5000 heartbeat=6 scans=2991 status=300 link=waiting
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=35000 dt=5000 heartbeat=7 scans=3490 status=350 link=waiting
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+t=40000 dt=5000 heartbeat=8 scans=3989 status=400 link=waiting
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=64 drop=0 text_ok=64 text_err=0 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=+8.82 deg raw=00000647 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11731mV current=7mA encoder=21812 target=+8.82deg speed=+0RPM position=+8.82deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P08 boot
+K230 RX frames=27 drop=0 text_ok=26 text_err=1 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0
+K230 RX frames=55 drop=0 text_ok=54 text_err=1 last_size=106 target=1 count=1 cx=975 cy=784 err_x=15 err_y=244 pan_speed=0
+K230 RX frames=83 drop=0 text_ok=82 text_err=1 last_size=106 target=1 count=1 cx=962 cy=784 err_x=2 err_y=244 pan_speed=0
+K230 RX frames=112 drop=0 text_ok=111 text_err=1 last_size=106 target=1 count=1 cx=717 cy=874 err_x=-243 err_y=334 pan_speed=406
+K230 RX frames=139 drop=0 text_ok=138 text_err=1 last_size=106 target=1 count=1 cx=664 cy=836 err_x=-296 err_y=296 pan_speed=512
+t=5000 dt=5000 heartbeat=1 scans=492 status=50 link=waiting
+K230 RX frames=167 drop=0 text_ok=166 text_err=1 last_size=106 target=1 count=1 cx=736 cy=569 err_x=-224 err_y=29 pan_speed=368
+K230 RX frames=195 drop=0 text_ok=194 text_err=1 last_size=106 target=1 count=1 cx=734 cy=570 err_x=-226 err_y=30 pan_speed=372
+K230 RX frames=224 drop=0 text_ok=223 text_err=1 last_size=106 target=1 count=1 cx=742 cy=571 err_x=-218 err_y=31 pan_speed=356
+K230 RX frames=252 drop=0 text_ok=251 text_err=1 last_size=106 target=1 count=1 cx=740 cy=575 err_x=-220 err_y=35 pan_speed=360
+K230 RX frames=280 drop=0 text_ok=279 text_err=1 last_size=106 target=1 count=1 cx=924 cy=664 err_x=-36 err_y=124 pan_speed=0
+t=10000 dt=5000 heartbeat=2 scans=987 status=99 link=waiting
+K230 RX frames=308 drop=0 text_ok=307 text_err=1 last_size=108 target=1 count=1 cx=1460 cy=693 err_x=500 err_y=153 pan_speed=-800
+K230 RX frames=336 drop=0 text_ok=335 text_err=1 last_size=108 target=1 count=1 cx=1383 cy=536 err_x=423 err_y=-4 pan_speed=-766
+K230 RX frames=364 drop=0 text_ok=362 text_err=2 last_size=216 target=1 count=1 cx=1405 cy=537 err_x=445 err_y=-3 pan_speed=-800
+K230 RX frames=392 drop=0 text_ok=387 text_err=5 last_size=108 target=1 count=1 cx=1406 cy=547 err_x=446 err_y=7 pan_speed=-800
+K230 RX frames=421 drop=0 text_ok=413 text_err=8 last_size=108 target=1 count=1 cx=1385 cy=533 err_x=425 err_y=-7 pan_speed=-770
+t=15001 dt=5001 heartbeat=3 scans=1483 status=149 link=waiting
+K230 RX frames=448 drop=0 text_ok=437 text_err=11 last_size=108 target=1 count=1 cx=1410 cy=547 err_x=450 err_y=7 pan_speed=-800
+K230 RX frames=476 drop=0 text_ok=463 text_err=13 last_size=107 target=1 count=1 cx=1428 cy=562 err_x=468 err_y=22 pan_speed=-800
+K230 RX frames=504 drop=0 text_ok=489 text_err=15 last_size=106 target=1 count=1 cx=784 cy=550 err_x=-176 err_y=10 pan_speed=272
+K230 RX frames=532 drop=0 text_ok=517 text_err=15 last_size=106 target=1 count=1 cx=807 cy=451 err_x=-153 err_y=-89 pan_speed=226
+K230 RX frames=560 drop=0 text_ok=545 text_err=15 last_size=105 target=1 count=1 cx=1082 cy=120 err_x=122 err_y=-420 pan_speed=-164
+t=20001 dt=5000 heartbeat=4 scans=1978 status=199 link=waiting
+K230 RX frames=588 drop=0 text_ok=573 text_err=15 last_size=106 target=1 count=1 cx=1221 cy=151 err_x=261 err_y=-389 pan_speed=-442
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+t=55001 dt=5000 heartbeat=11 scans=5444 status=549 link=waiting
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+t=60001 dt=5000 heartbeat=12 scans=5939 status=599 link=waiting
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+t=65001 dt=5000 heartbeat=13 scans=6434 status=649 link=waiting
+K230 RX frames=681 drop=0 text_ok=666 text_err=15 last_size=106 target=1 count=1 cx=1196 cy=117 err_x=236 err_y=-423 pan_speed=-392
+K230 RX frames=708 drop=0 text_ok=692 text_err=16 last_size=108 target=1 count=1 cx=1248 cy=515 err_x=288 err_y=-25 pan_speed=-496
+K230 RX frames=736 drop=0 text_ok=720 text_err=16 last_size=108 target=1 count=1 cx=1264 cy=506 err_x=304 err_y=-34 pan_speed=-528
+K230 RX frames=764 drop=0 text_ok=748 text_err=16 last_size=109 target=1 count=1 cx=1299 cy=482 err_x=339 err_y=-58 pan_speed=-598
+K230 RX frames=792 drop=0 text_ok=775 text_err=17 last_size=109 target=1 count=1 cx=1318 cy=493 err_x=358 err_y=-47 pan_speed=-636
+t=70001 dt=5000 heartbeat=14 scans=6929 status=699 link=waiting
+K230 RX frames=820 drop=0 text_ok=803 text_err=17 last_size=107 target=1 count=1 cx=676 cy=630 err_x=-284 err_y=90 pan_speed=488
+K230 RX frames=848 drop=0 text_ok=831 text_err=17 last_size=107 target=1 count=1 cx=619 cy=747 err_x=-341 err_y=207 pan_speed=602
+K230 RX frames=876 drop=0 text_ok=859 text_err=17 last_size=107 target=1 count=1 cx=935 cy=578 err_x=-25 err_y=38 pan_speed=0
+K230 RX frames=905 drop=0 text_ok=888 text_err=17 last_size=107 target=1 count=1 cx=937 cy=643 err_x=-23 err_y=103 pan_speed=0
+?)yyi?=m)Ÿú©}?MOTOR TTL probe=timeout_or_bad_frame status=3 raw=00 00 00 00
+PanView P08 boot
+K230 RX frames=25 drop=0 text_ok=25 text_err=0 last_size=106 target=1 count=1 cx=818 cy=824 err_x=-142 err_y=284 pan_speed=204 visual_run=0 pan_pos=0
+K230 RX frames=53 drop=0 text_ok=53 text_err=0 last_size=106 target=1 count=1 cx=678 cy=889 err_x=-282 err_y=349 pan_speed=484 visual_run=0 pan_pos=0
+K230 RX frames=81 drop=0 text_ok=81 text_err=0 last_size=106 target=1 count=1 cx=842 cy=831 err_x=-118 err_y=291 pan_speed=156 visual_run=0 pan_pos=0
+K230 RX frames=110 drop=0 text_ok=110 text_err=0 last_size=106 target=1 count=1 cx=813 cy=804 err_x=-147 err_y=264 pan_speed=214 visual_run=0 pan_pos=0
+K230 RX frames=138 drop=0 text_ok=137 text_err=1 last_size=106 target=1 count=1 cx=880 cy=795 err_x=-80 err_y=255 pan_speed=80 visual_run=0 pan_pos=0
+t=5000 dt=5000 heartbeat=1 scans=486 status=49 link=waiting
+K230 RX frames=166 drop=0 text_ok=165 text_err=1 last_size=107 target=1 count=1 cx=1078 cy=818 err_x=118 err_y=278 pan_speed=-156 visual_run=0 pan_pos=0
+K230 RX frames=193 drop=0 text_ok=191 text_err=2 last_size=106 target=1 count=1 cx=926 cy=875 err_x=-34 err_y=335 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=221 drop=0 text_ok=219 text_err=2 last_size=106 target=1 count=1 cx=951 cy=893 err_x=-9 err_y=353 pan_speed=0 visual_run=0 pan_pos=0
+KEY_UP pressed
+POSITION theory=+0.0deg pulses=0 reason=manual_zero
+PITCH zero=accepted position=0 limit=plus_or_minus_45deg
+K230 RX frames=250 drop=0 text_ok=248 text_err=2 last_size=106 target=1 count=1 cx=900 cy=842 err_x=-60 err_y=302 pan_speed=40 visual_run=1 pan_pos=4
+K230 RX frames=278 drop=0 text_ok=275 text_err=3 last_size=106 target=1 count=1 cx=847 cy=824 err_x=-113 err_y=284 pan_speed=146 visual_run=1 pan_pos=112
+t=10000 dt=5000 heartbeat=2 scans=981 status=99 link=waiting
+K230 RX frames=305 drop=0 text_ok=301 text_err=4 last_size=106 target=1 count=1 cx=937 cy=769 err_x=-23 err_y=229 pan_speed=0 visual_run=0 pan_pos=221
+K230 RX frames=333 drop=0 text_ok=329 text_err=4 last_size=106 target=1 count=1 cx=872 cy=694 err_x=-88 err_y=154 pan_speed=96 visual_run=1 pan_pos=278
+K230 RX frames=361 drop=0 text_ok=357 text_err=4 last_size=107 target=1 count=1 cx=1222 cy=795 err_x=262 err_y=255 pan_speed=-444 visual_run=1 pan_pos=115
+K230 RX frames=389 drop=0 text_ok=385 text_err=4 last_size=107 target=1 count=1 cx=1026 cy=767 err_x=66 err_y=227 pan_speed=-52 visual_run=1 pan_pos=-222
+K230 RX frames=418 drop=0 text_ok=414 text_err=4 last_size=106 target=1 count=1 cx=551 cy=733 err_x=-409 err_y=193 pan_speed=738 visual_run=1 pan_pos=226
+t=15000 dt=5000 heartbeat=3 scans=1475 status=149 link=waiting
+K230 RX frames=446 drop=0 text_ok=442 text_err=4 last_size=106 target=1 count=1 cx=863 cy=764 err_x=-97 err_y=224 pan_speed=114 visual_run=1 pan_pos=726
+K230 RX frames=475 drop=0 text_ok=471 text_err=4 last_size=106 target=1 count=1 cx=792 cy=738 err_x=-168 err_y=198 pan_speed=256 visual_run=0 pan_pos=800
+K230 RX frames=503 drop=0 text_ok=499 text_err=4 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=531 drop=0 text_ok=527 text_err=4 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=559 drop=0 text_ok=555 text_err=4 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=800
+t=20000 dt=5000 heartbeat=4 scans=1969 status=199 link=waiting
+K230 RX frames=587 drop=0 text_ok=583 text_err=4 last_size=107 target=1 count=1 cx=1045 cy=752 err_x=85 err_y=212 pan_speed=-90 visual_run=1 pan_pos=696
+K230 RX frames=616 drop=0 text_ok=612 text_err=4 last_size=106 target=1 count=1 cx=982 cy=786 err_x=22 err_y=246 pan_speed=0 visual_run=0 pan_pos=620
+K230 RX frames=644 drop=0 text_ok=640 text_err=4 last_size=106 target=1 count=1 cx=450 cy=742 err_x=-510 err_y=202 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=672 drop=0 text_ok=666 text_err=6 last_size=106 target=1 count=1 cx=629 cy=835 err_x=-331 err_y=295 pan_speed=582 visual_run=0 pan_pos=800
+K230 RX frames=700 drop=0 text_ok=694 text_err=6 last_size=106 target=1 count=1 cx=688 cy=770 err_x=-272 err_y=230 pan_speed=464 visual_run=0 pan_pos=800
+t=25000 dt=5000 heartbeat=5 scans=2464 status=249 link=waiting
+K230 RX frames=729 drop=0 text_ok=723 text_err=6 last_size=106 target=1 count=1 cx=649 cy=749 err_x=-311 err_y=209 pan_speed=542 visual_run=0 pan_pos=800
+K230 RX frames=756 drop=0 text_ok=750 text_err=6 last_size=106 target=1 count=1 cx=652 cy=656 err_x=-308 err_y=116 pan_speed=536 visual_run=0 pan_pos=800
+K230 RX frames=784 drop=0 text_ok=778 text_err=6 last_size=106 target=1 count=1 cx=964 cy=666 err_x=4 err_y=126 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=812 drop=0 text_ok=806 text_err=6 last_size=106 target=1 count=1 cx=460 cy=655 err_x=-500 err_y=115 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=841 drop=0 text_ok=835 text_err=6 last_size=106 target=1 count=1 cx=475 cy=646 err_x=-485 err_y=106 pan_speed=800 visual_run=0 pan_pos=800
+t=30000 dt=5000 heartbeat=6 scans=2958 status=299 link=waiting
+K230 RX frames=869 drop=0 text_ok=863 text_err=6 last_size=106 target=1 count=1 cx=657 cy=665 err_x=-303 err_y=125 pan_speed=526 visual_run=0 pan_pos=800
+K230 RX frames=897 drop=0 text_ok=891 text_err=6 last_size=106 target=1 count=1 cx=779 cy=661 err_x=-181 err_y=121 pan_speed=282 visual_run=0 pan_pos=800
+K230 RX frames=925 drop=0 text_ok=918 text_err=7 last_size=106 target=1 count=1 cx=423 cy=634 err_x=-537 err_y=94 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=953 drop=0 text_ok=946 text_err=7 last_size=106 target=1 count=1 cx=779 cy=644 err_x=-181 err_y=104 pan_speed=282 visual_run=0 pan_pos=800
+t=35000 dt=5000 heartbeat=7 scans=3452 status=349 link=waiting
+K230 RX frames=981 drop=0 text_ok=974 text_err=7 last_size=106 target=1 count=1 cx=837 cy=614 err_x=-123 err_y=74 pan_speed=166 visual_run=0 pan_pos=800
+K230 RX frames=1009 drop=0 text_ok=1002 text_err=7 last_size=106 target=1 count=1 cx=689 cy=607 err_x=-271 err_y=67 pan_speed=462 visual_run=0 pan_pos=800
+K230 RX frames=1037 drop=0 text_ok=1030 text_err=7 last_size=106 target=1 count=1 cx=765 cy=597 err_x=-195 err_y=57 pan_speed=310 visual_run=0 pan_pos=800
+K230 RX frames=1066 drop=0 text_ok=1059 text_err=7 last_size=106 target=1 count=1 cx=651 cy=636 err_x=-309 err_y=96 pan_speed=538 visual_run=0 pan_pos=800
+K230 RX frames=1094 drop=0 text_ok=1086 text_err=8 last_size=106 target=1 count=1 cx=741 cy=622 err_x=-219 err_y=82 pan_speed=358 visual_run=0 pan_pos=800
+t=40000 dt=5000 heartbeat=8 scans=3947 status=399 link=waiting
+K230 RX frames=1122 drop=0 text_ok=1114 text_err=8 last_size=106 target=1 count=1 cx=750 cy=614 err_x=-210 err_y=74 pan_speed=340 visual_run=0 pan_pos=800
+K230 RX frames=1150 drop=0 text_ok=1142 text_err=8 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=1179 drop=0 text_ok=1171 text_err=8 last_size=64 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=1206 drop=0 text_ok=1198 text_err=8 last_size=106 target=1 count=1 cx=691 cy=669 err_x=-269 err_y=129 pan_speed=458 visual_run=0 pan_pos=800
+K230 RX frames=1235 drop=0 text_ok=1227 text_err=8 last_size=106 target=1 count=1 cx=660 cy=715 err_x=-300 err_y=175 pan_speed=520 visual_run=0 pan_pos=800
+t=45000 dt=5000 heartbeat=9 scans=4442 status=449 link=waiting
+K230 RX frames=1263 drop=0 text_ok=1255 text_err=8 last_size=106 target=1 count=1 cx=669 cy=720 err_x=-291 err_y=180 pan_speed=502 visual_run=0 pan_pos=800
+K230 RX frames=1291 drop=0 text_ok=1282 text_err=9 last_size=106 target=1 count=1 cx=716 cy=704 err_x=-244 err_y=164 pan_speed=408 visual_run=0 pan_pos=800
+K230 RX frames=1320 drop=0 text_ok=1311 text_err=9 last_size=106 target=1 count=1 cx=749 cy=595 err_x=-211 err_y=55 pan_speed=342 visual_run=0 pan_pos=800
+K230 RX frames=1348 drop=0 text_ok=1339 text_err=9 last_size=106 target=1 count=1 cx=684 cy=582 err_x=-276 err_y=42 pan_speed=472 visual_run=0 pan_pos=800
+K230 RX frames=1376 drop=0 text_ok=1367 text_err=9 last_size=106 target=1 count=1 cx=655 cy=624 err_x=-305 err_y=84 pan_speed=530 visual_run=0 pan_pos=800
+t=50000 dt=5000 heartbeat=10 scans=4936 status=499 link=waiting
+K230 RX frames=1404 drop=0 text_ok=1395 text_err=9 last_size=106 target=1 count=1 cx=664 cy=595 err_x=-296 err_y=55 pan_speed=512 visual_run=0 pan_pos=800
+K230 RX frames=1432 drop=0 text_ok=1423 text_err=9 last_size=106 target=1 count=1 cx=659 cy=649 err_x=-301 err_y=109 pan_speed=522 visual_run=0 pan_pos=800
+K230 RX frames=1461 drop=0 text_ok=1452 text_err=9 last_size=106 target=1 count=1 cx=800 cy=656 err_x=-160 err_y=116 pan_speed=240 visual_run=0 pan_pos=800
+K230 RX frames=1489 drop=0 text_ok=1480 text_err=9 last_size=106 target=1 count=1 cx=837 cy=652 err_x=-123 err_y=112 pan_speed=166 visual_run=0 pan_pos=800
+K230 RX frames=1517 drop=0 text_ok=1508 text_err=9 last_size=106 target=1 count=1 cx=648 cy=706 err_x=-312 err_y=166 pan_speed=544 visual_run=0 pan_pos=800
+t=55000 dt=5000 heartbeat=11 scans=5432 status=549 link=waiting
+K230 RX frames=1546 drop=0 text_ok=1537 text_err=9 last_size=106 target=1 count=1 cx=945 cy=583 err_x=-15 err_y=43 pan_speed=0 visual_run=0 pan_pos=800
+K230 RX frames=1573 drop=0 text_ok=1564 text_err=9 last_size=106 target=1 count=1 cx=895 cy=571 err_x=-65 err_y=31 pan_speed=50 visual_run=1 pan_pos=771
+K230 RX frames=1601 drop=0 text_ok=1591 text_err=10 last_size=106 target=1 count=1 cx=515 cy=660 err_x=-445 err_y=120 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=1629 drop=0 text_ok=1618 text_err=11 last_size=106 target=1 count=1 cx=677 cy=624 err_x=-283 err_y=84 pan_speed=486 visual_run=0 pan_pos=800
+K230 RX frames=1657 drop=0 text_ok=1646 text_err=11 last_size=106 target=1 count=1 cx=887 cy=469 err_x=-73 err_y=-71 pan_speed=66 visual_run=0 pan_pos=800
+t=60000 dt=5000 heartbeat=12 scans=5926 status=599 link=waiting
+K230 RX frames=1686 drop=0 text_ok=1674 text_err=12 last_size=106 target=1 count=1 cx=889 cy=590 err_x=-71 err_y=50 pan_speed=62 visual_run=0 pan_pos=800
+K230 RX frames=1714 drop=0 text_ok=1701 text_err=13 last_size=106 target=1 count=1 cx=844 cy=684 err_x=-116 err_y=144 pan_speed=152 visual_run=0 pan_pos=800
+K230 RX frames=1742 drop=0 text_ok=1728 text_err=14 last_size=106 target=1 count=1 cx=635 cy=687 err_x=-325 err_y=147 pan_speed=570 visual_run=0 pan_pos=800
+K230 RX frames=1770 drop=0 text_ok=1755 text_err=15 last_size=106 target=1 count=1 cx=556 cy=693 err_x=-404 err_y=153 pan_speed=728 visual_run=0 pan_pos=800
+K230 RX frames=1799 drop=0 text_ok=1784 text_err=15 last_size=106 target=1 count=1 cx=534 cy=721 err_x=-426 err_y=181 pan_speed=772 visual_run=0 pan_pos=800
+t=65000 dt=5000 heartbeat=13 scans=6421 status=649 link=waiting
+K230 RX frames=1827 drop=0 text_ok=1812 text_err=15 last_size=106 target=1 count=1 cx=621 cy=707 err_x=-339 err_y=167 pan_speed=598 visual_run=0 pan_pos=800
+K230 RX frames=1855 drop=0 text_ok=1840 text_err=15 last_size=107 target=1 count=1 cx=626 cy=721 err_x=-334 err_y=181 pan_speed=588 visual_run=0 pan_pos=800
+K230 RX frames=1883 drop=0 text_ok=1867 text_err=16 last_size=107 target=1 count=1 cx=633 cy=784 err_x=-327 err_y=244 pan_speed=574 visual_run=0 pan_pos=800
+K230 RX frames=1912 drop=0 text_ok=1896 text_err=16 last_size=107 target=1 count=1 cx=488 cy=789 err_x=-472 err_y=249 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=1939 drop=0 text_ok=1923 text_err=16 last_size=107 target=1 count=1 cx=333 cy=807 err_x=-627 err_y=267 pan_speed=800 visual_run=0 pan_pos=800
+t=70000 dt=5000 heartbeat=14 scans=6916 status=699 link=waiting
+K230 RX frames=1966 drop=0 text_ok=1950 text_err=16 last_size=107 target=1 count=1 cx=384 cy=822 err_x=-576 err_y=282 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=1994 drop=0 text_ok=1978 text_err=16 last_size=107 target=1 count=1 cx=389 cy=788 err_x=-571 err_y=248 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=2022 drop=0 text_ok=2005 text_err=17 last_size=107 target=1 count=1 cx=672 cy=795 err_x=-288 err_y=255 pan_speed=496 visual_run=0 pan_pos=800
+K230 RX frames=2051 drop=0 text_ok=2034 text_err=17 last_size=108 target=1 count=1 cx=1135 cy=753 err_x=175 err_y=213 pan_speed=-270 visual_run=1 pan_pos=672
+K230 RX frames=2079 drop=0 text_ok=2061 text_err=18 last_size=109 target=1 count=1 cx=1293 cy=742 err_x=333 err_y=202 pan_speed=-586 visual_run=1 pan_pos=268
+t=75000 dt=5000 heartbeat=15 scans=7411 status=749 link=waiting
+K230 RX frames=2107 drop=0 text_ok=2089 text_err=18 last_size=109 target=1 count=1 cx=1328 cy=714 err_x=368 err_y=174 pan_speed=-656 visual_run=1 pan_pos=-460
+K230 RX frames=2135 drop=0 text_ok=2113 text_err=22 last_size=107 target=1 count=1 cx=743 cy=689 err_x=-217 err_y=149 pan_speed=354 visual_run=1 pan_pos=-771
+K230 RX frames=2163 drop=0 text_ok=2141 text_err=22 last_size=107 target=1 count=1 cx=353 cy=667 err_x=-607 err_y=127 pan_speed=800 visual_run=1 pan_pos=-44
+K230 RX frames=2192 drop=0 text_ok=2170 text_err=22 last_size=107 target=1 count=1 cx=417 cy=691 err_x=-543 err_y=151 pan_speed=800 visual_run=1 pan_pos=756
+K230 RX frames=2220 drop=0 text_ok=2198 text_err=22 last_size=107 target=1 count=1 cx=452 cy=696 err_x=-508 err_y=156 pan_speed=800 visual_run=0 pan_pos=800
+t=80000 dt=5000 heartbeat=16 scans=7906 status=799 link=waiting
+K230 RX frames=2248 drop=0 text_ok=2226 text_err=22 last_size=107 target=1 count=1 cx=524 cy=704 err_x=-436 err_y=164 pan_speed=792 visual_run=0 pan_pos=800
+K230 RX frames=2277 drop=0 text_ok=2255 text_err=22 last_size=108 target=1 count=1 cx=1106 cy=671 err_x=146 err_y=131 pan_speed=-212 visual_run=1 pan_pos=777
+K230 RX frames=2305 drop=0 text_ok=2281 text_err=24 last_size=108 target=1 count=1 cx=1201 cy=698 err_x=241 err_y=158 pan_speed=-402 visual_run=1 pan_pos=537
+K230 RX frames=2333 drop=0 text_ok=2309 text_err=24 last_size=109 target=1 count=1 cx=1292 cy=679 err_x=332 err_y=139 pan_speed=-584 visual_run=1 pan_pos=48
+K230 RX frames=2361 drop=0 text_ok=2337 text_err=24 last_size=109 target=1 count=1 cx=1238 cy=707 err_x=278 err_y=167 pan_speed=-476 visual_run=1 pan_pos=-466
+t=85001 dt=5001 heartbeat=17 scans=8401 status=849 link=waiting
+K230 RX frames=2389 drop=0 text_ok=2364 text_err=25 last_size=109 target=1 count=1 cx=1231 cy=871 err_x=271 err_y=331 pan_speed=-462 visual_run=0 pan_pos=-800
+K230 RX frames=2418 drop=0 text_ok=2393 text_err=25 last_size=107 target=1 count=1 cx=555 cy=912 err_x=-405 err_y=372 pan_speed=730 visual_run=1 pan_pos=-670
+K230 RX frames=2445 drop=0 text_ok=2420 text_err=25 last_size=65 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=-92
+K230 RX frames=2473 drop=0 text_ok=2448 text_err=25 last_size=107 target=1 count=1 cx=361 cy=867 err_x=-599 err_y=327 pan_speed=800 visual_run=1 pan_pos=494
+K230 RX frames=2500 drop=0 text_ok=2475 text_err=25 last_size=108 target=1 count=1 cx=1028 cy=736 err_x=68 err_y=196 pan_speed=-56 visual_run=1 pan_pos=797
+t=90001 dt=5000 heartbeat=18 scans=8896 status=899 link=waiting
+K230 RX frames=2529 drop=0 text_ok=2501 text_err=28 last_size=109 target=1 count=1 cx=1198 cy=723 err_x=238 err_y=183 pan_speed=-396 visual_run=1 pan_pos=457
+K230 RX frames=2556 drop=0 text_ok=2527 text_err=29 last_size=109 target=1 count=1 cx=1319 cy=753 err_x=359 err_y=213 pan_speed=-638 visual_run=1 pan_pos=-37
+K230 RX frames=2584 drop=0 text_ok=2555 text_err=29 last_size=109 target=1 count=1 cx=1327 cy=757 err_x=367 err_y=217 pan_speed=-654 visual_run=1 pan_pos=-698
+K230 RX frames=2612 drop=0 text_ok=2582 text_err=30 last_size=107 target=1 count=1 cx=634 cy=741 err_x=-326 err_y=201 pan_speed=572 visual_run=1 pan_pos=-709
+K230 RX frames=2641 drop=0 text_ok=2611 text_err=30 last_size=107 target=1 count=1 cx=400 cy=788 err_x=-560 err_y=248 pan_speed=800 visual_run=1 pan_pos=-139
+t=95001 dt=5000 heartbeat=19 scans=9391 status=949 link=waiting
+K230 RX frames=2669 drop=0 text_ok=2638 text_err=31 last_size=107 target=1 count=1 cx=302 cy=826 err_x=-658 err_y=286 pan_speed=800 visual_run=1 pan_pos=661
+K230 RX frames=2697 drop=0 text_ok=2665 text_err=32 last_size=107 target=1 count=1 cx=473 cy=744 err_x=-487 err_y=204 pan_speed=800 visual_run=0 pan_pos=800
+K230 RX frames=2725 drop=0 text_ok=2692 text_err=33 last_size=107 target=1 count=1 cx=0 cy=0 err_x=238 err_y=189 pan_speed=-396 visual_run=1 pan_pos=682
+K230 RX frames=2750 drop=0 text_ok=2715 text_err=35 last_size=109 target=1 count=1 cx=1228 cy=760 err_x=268 err_y=220 pan_speed=-456 visual_run=1 pan_pos=228
+K230 RX frames=2779 drop=0 text_ok=2741 text_err=38 last_size=107 target=1 count=1 cx=906 cy=784 err_x=-54 err_y=244 pan_speed=28 visual_run=1 pan_pos=2
+t=100001 dt=5000 heartbeat=20 scans=9886 status=999 link=waiting
+K230 RX frames=2807 drop=0 text_ok=2769 text_err=38 last_size=107 target=1 count=1 cx=735 cy=643 err_x=-225 err_y=103 pan_speed=370 visual_run=1 pan_pos=171
+K230 RX frames=2823 drop=0 text_ok=2785 text_err=38 last_size=107 target=1 count=1 cx=792 cy=745 err_x=-168 err_y=205 pan_speed=256 visual_run=0 pan_pos=432
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=15000 dt=5000 heartbeat=3 scans=1482 status=150 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=20000 dt=5000 heartbeat=4 scans=1977 status=200 link=waiting
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=0 drop=0 text_ok=0 text_err=0 last_size=0 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=26 drop=0 text_ok=25 text_err=1 last_size=107 target=1 count=1 cx=800 cy=541 err_x=-160 err_y=1 pan_speed=240 visual_run=1 pan_pos=82
+K230 RX frames=53 drop=0 text_ok=51 text_err=2 last_size=107 target=1 count=1 cx=783 cy=489 err_x=-177 err_y=-51 pan_speed=274 visual_run=1 pan_pos=345
+t=25000 dt=5000 heartbeat=5 scans=2472 status=250 link=waiting
+K230 RX frames=80 drop=0 text_ok=77 text_err=3 last_size=107 target=1 count=1 cx=804 cy=558 err_x=-156 err_y=18 pan_speed=232 visual_run=1 pan_pos=607
+K230 RX frames=108 drop=0 text_ok=104 text_err=4 last_size=107 target=1 count=1 cx=924 cy=604 err_x=-36 err_y=64 pan_speed=0 visual_run=0 pan_pos=713
+K230 RX frames=136 drop=0 text_ok=130 text_err=6 last_size=107 target=1 count=1 cx=848 cy=606 err_x=-112 err_y=66 pan_speed=144 visual_run=0 pan_pos=800
+K230 RX frames=164 drop=0 text_ok=155 text_err=9 last_size=107 target=1 count=1 cx=720 cy=592 err_x=-240 err_y=52 pan_speed=400 visual_run=0 pan_pos=800
+K230 RX frames=192 drop=0 text_ok=180 text_err=12 last_size=108 target=1 count=1 cx=715 cy=669 err_x=-245 err_y=129 pan_speed=410 visual_run=0 pan_pos=800
+t=30000 dt=5000 heartbeat=6 scans=2966 status=300 link=waiting
+K230 RX frames=220 drop=0 text_ok=207 text_err=13 last_size=109 target=1 count=1 cx=1003 cy=698 err_x=43 err_y=158 pan_speed=-6 visual_run=1 pan_pos=800
+K230 RX frames=247 drop=0 text_ok=233 text_err=14 last_size=110 target=1 count=1 cx=1279 cy=764 err_x=319 err_y=224 pan_speed=-558 visual_run=1 pan_pos=474
+K230 RX frames=276 drop=0 text_ok=258 text_err=18 last_size=110 target=1 count=1 cx=1277 cy=705 err_x=317 err_y=165 pan_speed=-554 visual_run=1 pan_pos=-99
+K230 RX frames=303 drop=0 text_ok=285 text_err=18 last_size=110 target=1 count=1 cx=1279 cy=689 err_x=319 err_y=149 pan_speed=-558 visual_run=1 pan_pos=-658
+K230 RX frames=332 drop=0 text_ok=314 text_err=18 last_size=110 target=1 count=1 cx=1238 cy=688 err_x=278 err_y=148 pan_speed=-476 visual_run=0 pan_pos=-800
+t=35000 dt=5000 heartbeat=7 scans=3460 status=350 link=waiting
+K230 RX frames=359 drop=0 text_ok=340 text_err=19 last_size=108 target=1 count=1 cx=891 cy=585 err_x=-69 err_y=45 pan_speed=58 visual_run=1 pan_pos=-770
+K230 RX frames=386 drop=0 text_ok=367 text_err=19 last_size=108 target=1 count=1 cx=710 cy=526 err_x=-250 err_y=-14 pan_speed=420 visual_run=1 pan_pos=-706
+K230 RX frames=414 drop=0 text_ok=395 text_err=19 last_size=108 target=1 count=1 cx=830 cy=560 err_x=-130 err_y=20 pan_speed=180 visual_run=1 pan_pos=-307
+K230 RX frames=441 drop=0 text_ok=422 text_err=19 last_size=108 target=1 count=1 cx=794 cy=534 err_x=-166 err_y=-6 pan_speed=252 visual_run=1 pan_pos=-226
+K230 RX frames=468 drop=0 text_ok=449 text_err=19 last_size=108 target=1 count=1 cx=752 cy=558 err_x=-208 err_y=18 pan_speed=336 visual_run=1 pan_pos=92
+t=40000 dt=5000 heartbeat=8 scans=3954 status=400 link=waiting
+K230 RX frames=496 drop=0 text_ok=477 text_err=19 last_size=108 target=1 count=1 cx=955 cy=646 err_x=-5 err_y=106 pan_speed=0 visual_run=0 pan_pos=315
+K230 RX frames=524 drop=0 text_ok=503 text_err=21 last_size=108 target=1 count=1 cx=1120 cy=729 err_x=160 err_y=189 pan_speed=-240 visual_run=1 pan_pos=99
+K230 RX frames=552 drop=0 text_ok=527 text_err=25 last_size=108 target=1 count=1 cx=857 cy=661 err_x=-103 err_y=121 pan_speed=126 visual_run=1 pan_pos=38
+K230 RX frames=580 drop=0 text_ok=554 text_err=26 last_size=109 target=1 count=1 cx=1046 cy=626 err_x=86 err_y=86 pan_speed=-92 visual_run=1 pan_pos=67
+K230 RX frames=607 drop=0 text_ok=580 text_err=27 last_size=109 target=1 count=1 cx=1081 cy=636 err_x=121 err_y=96 pan_speed=-162 visual_run=1 pan_pos=-120
+t=45000 dt=5000 heartbeat=9 scans=4448 status=450 link=waiting
+K230 RX frames=635 drop=0 text_ok=608 text_err=27 last_size=109 target=1 count=1 cx=1052 cy=612 err_x=92 err_y=72 pan_speed=-104 visual_run=1 pan_pos=-248
+K230 RX frames=664 drop=0 text_ok=637 text_err=27 last_size=108 target=1 count=1 cx=966 cy=601 err_x=6 err_y=61 pan_speed=0 visual_run=0 pan_pos=-318
+K230 RX frames=692 drop=0 text_ok=665 text_err=27 last_size=108 target=1 count=1 cx=808 cy=586 err_x=-152 err_y=46 pan_speed=224 visual_run=1 pan_pos=-181
+K230 RX frames=720 drop=0 text_ok=693 text_err=27 last_size=108 target=1 count=1 cx=838 cy=639 err_x=-122 err_y=99 pan_speed=164 visual_run=1 pan_pos=33
+K230 RX frames=748 drop=0 text_ok=721 text_err=27 last_size=108 target=1 count=1 cx=933 cy=666 err_x=-27 err_y=126 pan_speed=0 visual_run=0 pan_pos=46
+t=50000 dt=5000 heartbeat=10 scans=4942 status=500 link=waiting
+K230 RX frames=776 drop=0 text_ok=749 text_err=27 last_size=108 target=1 count=1 cx=921 cy=734 err_x=-39 err_y=194 pan_speed=0 visual_run=0 pan_pos=83
+K230 RX frames=805 drop=0 text_ok=778 text_err=27 last_size=109 target=1 count=1 cx=1062 cy=780 err_x=102 err_y=240 pan_speed=-124 visual_run=1 pan_pos=-18
+K230 RX frames=833 drop=0 text_ok=806 text_err=27 last_size=108 target=1 count=1 cx=832 cy=659 err_x=-128 err_y=119 pan_speed=176 visual_run=1 pan_pos=-68
+K230 RX frames=861 drop=0 text_ok=834 text_err=27 last_size=108 target=1 count=1 cx=956 cy=921 err_x=-4 err_y=381 pan_speed=0 visual_run=0 pan_pos=36
+K230 RX frames=890 drop=0 text_ok=863 text_err=27 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=34
+t=55000 dt=5000 heartbeat=11 scans=5436 status=549 link=waiting
+K230 RX frames=918 drop=0 text_ok=891 text_err=27 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=34
+K230 RX frames=946 drop=0 text_ok=918 text_err=28 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=4
+K230 RX frames=975 drop=0 text_ok=947 text_err=28 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=4
+K230 RX frames=1003 drop=0 text_ok=975 text_err=28 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=4
+K230 RX frames=1031 drop=0 text_ok=1003 text_err=28 last_size=109 target=1 count=1 cx=1150 cy=783 err_x=190 err_y=243 pan_speed=-300 visual_run=1 pan_pos=4
+t=60000 dt=5000 heartbeat=12 scans=5931 status=599 link=waiting
+K230 RX frames=1059 drop=0 text_ok=1030 text_err=29 last_size=109 target=1 count=1 cx=1036 cy=502 err_x=76 err_y=-38 pan_speed=-72 visual_run=1 pan_pos=-131
+K230 RX frames=1086 drop=0 text_ok=1057 text_err=29 last_size=108 target=1 count=1 cx=963 cy=444 err_x=3 err_y=-96 pan_speed=0 visual_run=0 pan_pos=-141
+K230 RX frames=1114 drop=0 text_ok=1085 text_err=29 last_size=108 target=1 count=1 cx=953 cy=444 err_x=-7 err_y=-96 pan_speed=0 visual_run=0 pan_pos=-141
+K230 RX frames=1142 drop=0 text_ok=1113 text_err=29 last_size=108 target=1 count=1 cx=849 cy=452 err_x=-111 err_y=-88 pan_speed=142 visual_run=1 pan_pos=-74
+K230 RX frames=1170 drop=0 text_ok=1141 text_err=29 last_size=109 target=1 count=1 cx=1235 cy=424 err_x=275 err_y=-116 pan_speed=-470 visual_run=1 pan_pos=-150
+t=65000 dt=5000 heartbeat=13 scans=6425 status=649 link=waiting
+K230 RX frames=1199 drop=0 text_ok=1170 text_err=29 last_size=108 target=1 count=1 cx=686 cy=444 err_x=-274 err_y=-96 pan_speed=468 visual_run=1 pan_pos=-168
+K230 RX frames=1227 drop=0 text_ok=1198 text_err=29 last_size=108 target=1 count=1 cx=942 cy=527 err_x=-18 err_y=-13 pan_speed=0 visual_run=0 pan_pos=-1
+K230 RX frames=1255 drop=0 text_ok=1226 text_err=29 last_size=109 target=1 count=1 cx=1178 cy=450 err_x=218 err_y=-90 pan_speed=-356 visual_run=1 pan_pos=-235
+K230 RX frames=1284 drop=0 text_ok=1250 text_err=34 last_size=107 target=1 count=1 cx=0 cy=0 err_x=18 err_y=-87 pan_speed=0 visual_run=0 pan_pos=-281
+K230 RX frames=1311 drop=0 text_ok=1277 text_err=34 last_size=108 target=1 count=1 cx=925 cy=456 err_x=-35 err_y=-84 pan_speed=0 visual_run=0 pan_pos=-284
+t=70000 dt=5000 heartbeat=14 scans=6920 status=699 link=waiting
+K230 RX frames=1340 drop=0 text_ok=1306 text_err=34 last_size=109 target=1 count=1 cx=1081 cy=494 err_x=121 err_y=-46 pan_speed=-162 visual_run=1 pan_pos=6
+K230 RX frames=1368 drop=0 text_ok=1334 text_err=34 last_size=108 target=1 count=1 cx=685 cy=465 err_x=-275 err_y=-75 pan_speed=470 visual_run=1 pan_pos=-358
+K230 RX frames=1396 drop=0 text_ok=1362 text_err=34 last_size=109 target=1 count=1 cx=1168 cy=641 err_x=208 err_y=101 pan_speed=-336 visual_run=1 pan_pos=-137
+K230 RX frames=1423 drop=0 text_ok=1389 text_err=34 last_size=108 target=1 count=1 cx=968 cy=452 err_x=8 err_y=-88 pan_speed=0 visual_run=0 pan_pos=-223
+K230 RX frames=1449 drop=0 text_ok=1414 text_err=35 last_size=107 target=1 count=1 cx=931 cy=322 err_x=-29 err_y=-218 pan_speed=0 visual_run=0 pan_pos=-232
+t=75000 dt=5000 heartbeat=15 scans=7414 status=749 link=waiting
+K230 RX frames=1475 drop=0 text_ok=1440 text_err=35 last_size=108 target=1 count=1 cx=858 cy=512 err_x=-102 err_y=-28 pan_speed=124 visual_run=1 pan_pos=-192
+K230 RX frames=1504 drop=0 text_ok=1469 text_err=35 last_size=109 target=1 count=1 cx=1200 cy=474 err_x=240 err_y=-66 pan_speed=-400 visual_run=1 pan_pos=-114
+K230 RX frames=1532 drop=0 text_ok=1497 text_err=35 last_size=108 target=1 count=1 cx=733 cy=447 err_x=-227 err_y=-93 pan_speed=374 visual_run=1 pan_pos=-276
+K230 RX frames=1561 drop=0 text_ok=1526 text_err=35 last_size=109 target=1 count=1 cx=1117 cy=473 err_x=157 err_y=-67 pan_speed=-234 visual_run=1 pan_pos=-120
+K230 RX frames=1589 drop=0 text_ok=1554 text_err=35 last_size=109 target=1 count=1 cx=1111 cy=712 err_x=151 err_y=172 pan_speed=-222 visual_run=1 pan_pos=-500
+t=80000 dt=5000 heartbeat=16 scans=7909 status=799 link=waiting
+K230 RX frames=1617 drop=0 text_ok=1582 text_err=35 last_size=108 target=1 count=1 cx=615 cy=446 err_x=-345 err_y=-94 pan_speed=610 visual_run=1 pan_pos=-357
+K230 RX frames=1645 drop=0 text_ok=1610 text_err=35 last_size=108 target=1 count=1 cx=963 cy=561 err_x=3 err_y=21 pan_speed=0 visual_run=0 pan_pos=-31
+K230 RX frames=1671 drop=0 text_ok=1636 text_err=35 last_size=109 target=1 count=1 cx=1142 cy=405 err_x=182 err_y=-135 pan_speed=-284 visual_run=1 pan_pos=-308
+K230 RX frames=1700 drop=0 text_ok=1665 text_err=35 last_size=108 target=1 count=1 cx=689 cy=398 err_x=-271 err_y=-142 pan_speed=462 visual_run=1 pan_pos=-252
+K230 RX frames=1728 drop=0 text_ok=1693 text_err=35 last_size=109 target=1 count=1 cx=1045 cy=525 err_x=85 err_y=-15 pan_speed=-90 visual_run=1 pan_pos=-76
+t=85000 dt=5000 heartbeat=17 scans=8403 status=849 link=waiting
+K230 RX frames=1756 drop=0 text_ok=1721 text_err=35 last_size=108 target=1 count=1 cx=968 cy=523 err_x=8 err_y=-17 pan_speed=0 visual_run=0 pan_pos=-343
+K230 RX frames=1785 drop=0 text_ok=1750 text_err=35 last_size=108 target=1 count=1 cx=957 cy=456 err_x=-3 err_y=-84 pan_speed=0 visual_run=0 pan_pos=-200
+K230 RX frames=1812 drop=0 text_ok=1773 text_err=39 last_size=108 target=1 count=1 cx=931 cy=430 err_x=-29 err_y=-110 pan_speed=0 visual_run=0 pan_pos=-354
+K230 RX frames=1840 drop=0 text_ok=1801 text_err=39 last_size=108 target=1 count=1 cx=956 cy=523 err_x=-4 err_y=-17 pan_speed=0 visual_run=0 pan_pos=-145
+K230 RX frames=1868 drop=0 text_ok=1829 text_err=39 last_size=109 target=1 count=1 cx=1036 cy=513 err_x=76 err_y=-27 pan_speed=-72 visual_run=1 pan_pos=-220
+t=90000 dt=5000 heartbeat=18 scans=8897 status=899 link=waiting
+K230 RX frames=1896 drop=0 text_ok=1857 text_err=39 last_size=108 target=1 count=1 cx=970 cy=597 err_x=10 err_y=57 pan_speed=0 visual_run=0 pan_pos=-226
+K230 RX frames=1923 drop=0 text_ok=1882 text_err=41 last_size=109 target=1 count=1 cx=1016 cy=638 err_x=56 err_y=98 pan_speed=-32 visual_run=1 pan_pos=-238
+K230 RX frames=1951 drop=0 text_ok=1910 text_err=41 last_size=109 target=1 count=1 cx=1017 cy=631 err_x=57 err_y=91 pan_speed=-34 visual_run=1 pan_pos=-252
+K230 RX frames=1979 drop=0 text_ok=1937 text_err=42 last_size=107 target=1 count=1 cx=0 cy=0 err_x=31 err_y=61 pan_speed=0 visual_run=0 pan_pos=-267
+t=95000 dt=5000 heartbeat=19 scans=9392 status=949 link=waiting
+K230 RX frames=2007 drop=0 text_ok=1965 text_err=42 last_size=108 target=1 count=1 cx=998 cy=616 err_x=38 err_y=76 pan_speed=0 visual_run=0 pan_pos=-275
+K230 RX frames=2035 drop=0 text_ok=1993 text_err=42 last_size=109 target=1 count=1 cx=1149 cy=579 err_x=189 err_y=39 pan_speed=-298 visual_run=1 pan_pos=-319
+K230 RX frames=2062 drop=0 text_ok=2020 text_err=42 last_size=216 target=1 count=1 cx=823 cy=517 err_x=-137 err_y=-23 pan_speed=194 visual_run=1 pan_pos=-472
+K230 RX frames=2089 drop=0 text_ok=2047 text_err=42 last_size=108 target=1 count=1 cx=957 cy=462 err_x=-3 err_y=-78 pan_speed=0 visual_run=0 pan_pos=-46
+K230 RX frames=2117 drop=0 text_ok=2074 text_err=43 last_size=109 target=1 count=1 cx=1169 cy=530 err_x=209 err_y=-10 pan_speed=-338 visual_run=1 pan_pos=-413
+t=100000 dt=5000 heartbeat=20 scans=9887 status=999 link=waiting
+K230 RX frames=2145 drop=0 text_ok=2102 text_err=43 last_size=108 target=1 count=1 cx=661 cy=442 err_x=-299 err_y=-98 pan_speed=518 visual_run=1 pan_pos=-228
+K230 RX frames=2172 drop=0 text_ok=2128 text_err=44 last_size=109 target=1 count=1 cx=1162 cy=462 err_x=202 err_y=-78 pan_speed=-324 visual_run=1 pan_pos=-82
+K230 RX frames=2200 drop=0 text_ok=2155 text_err=45 last_size=109 target=1 count=1 cx=1049 cy=540 err_x=89 err_y=0 pan_speed=-98 visual_run=1 pan_pos=-465
+K230 RX frames=2228 drop=0 text_ok=2181 text_err=47 last_size=108 target=1 count=1 cx=718 cy=452 err_x=-242 err_y=-88 pan_speed=404 visual_run=1 pan_pos=-210
+K230 RX frames=2256 drop=0 text_ok=2208 text_err=48 last_size=110 target=1 count=1 cx=1281 cy=426 err_x=321 err_y=-114 pan_speed=-562 visual_run=1 pan_pos=-216
+t=105000 dt=5000 heartbeat=21 scans=10382 status=1049 link=waiting
+K230 RX frames=2284 drop=0 text_ok=2236 text_err=48 last_size=108 target=1 count=1 cx=821 cy=427 err_x=-139 err_y=-113 pan_speed=198 visual_run=1 pan_pos=-425
+K230 RX frames=2312 drop=0 text_ok=2261 text_err=51 last_size=108 target=1 count=1 cx=887 cy=469 err_x=-73 err_y=-71 pan_speed=66 visual_run=1 pan_pos=-103
+K230 RX frames=2340 drop=0 text_ok=2286 text_err=54 last_size=109 target=1 count=1 cx=1056 cy=549 err_x=96 err_y=9 pan_speed=-112 visual_run=1 pan_pos=-168
+K230 RX frames=2368 drop=0 text_ok=2314 text_err=54 last_size=108 target=1 count=1 cx=999 cy=552 err_x=39 err_y=12 pan_speed=0 visual_run=0 pan_pos=-206
+K230 RX frames=2396 drop=0 text_ok=2342 text_err=54 last_size=108 target=1 count=1 cx=958 cy=437 err_x=-2 err_y=-103 pan_speed=0 visual_run=0 pan_pos=-244
+t=110000 dt=5000 heartbeat=22 scans=10877 status=1099 link=waiting
+K230 RX frames=2424 drop=0 text_ok=2370 text_err=54 last_size=108 target=1 count=1 cx=925 cy=407 err_x=-35 err_y=-133 pan_speed=0 visual_run=0 pan_pos=-231
+K230 RX frames=2452 drop=0 text_ok=2397 text_err=55 last_size=108 target=1 count=1 cx=855 cy=500 err_x=-105 err_y=-40 pan_speed=130 visual_run=1 pan_pos=-268
+K230 RX frames=2481 drop=0 text_ok=2426 text_err=55 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=-222
+K230 RX frames=2507 drop=0 text_ok=2452 text_err=55 last_size=108 target=1 count=1 cx=988 cy=575 err_x=28 err_y=35 pan_speed=0 visual_run=0 pan_pos=-214
+K230 RX frames=2535 drop=0 text_ok=2479 text_err=56 last_size=108 target=1 count=1 cx=966 cy=606 err_x=6 err_y=66 pan_speed=0 visual_run=0 pan_pos=-235
+t=115000 dt=5000 heartbeat=23 scans=11372 status=1149 link=waiting
+K230 RX frames=2562 drop=0 text_ok=2505 text_err=57 last_size=107 target=1 count=1 cx=908 cy=523 err_x=-52 err_y=-17 pan_speed=24 visual_run=1 pan_pos=-208
+K230 RX frames=2590 drop=0 text_ok=2529 text_err=61 last_size=108 target=1 count=1 cx=955 cy=567 err_x=-5 err_y=27 pan_speed=0 visual_run=0 pan_pos=-204
+K230 RX frames=2618 drop=0 text_ok=2556 text_err=62 last_size=108 target=1 count=1 cx=947 cy=586 err_x=-13 err_y=46 pan_speed=0 visual_run=0 pan_pos=-192
+K230 RX frames=2646 drop=0 text_ok=2583 text_err=63 last_size=108 target=1 count=1 cx=995 cy=620 err_x=35 err_y=80 pan_speed=0 visual_run=0 pan_pos=-190
+K230 RX frames=2673 drop=0 text_ok=2609 text_err=64 last_size=108 target=1 count=1 cx=961 cy=643 err_x=1 err_y=103 pan_speed=0 visual_run=0 pan_pos=-174
+t=120000 dt=5000 heartbeat=24 scans=11868 status=1199 link=waiting
+K230 RX frames=2701 drop=0 text_ok=2634 text_err=67 last_size=108 target=1 count=1 cx=1013 cy=480 err_x=53 err_y=-60 pan_speed=-26 visual_run=1 pan_pos=-196
+K230 RX frames=2729 drop=0 text_ok=2662 text_err=67 last_size=108 target=1 count=1 cx=1027 cy=442 err_x=67 err_y=-98 pan_speed=-54 visual_run=1 pan_pos=-338
+K230 RX frames=2757 drop=0 text_ok=2690 text_err=67 last_size=106 target=1 count=1 cx=967 cy=384 err_x=7 err_y=-156 pan_speed=0 visual_run=0 pan_pos=-402
+K230 RX frames=2784 drop=0 text_ok=2717 text_err=67 last_size=106 target=1 count=1 cx=840 cy=312 err_x=-120 err_y=-228 pan_speed=160 visual_run=1 pan_pos=-301
+K230 RX frames=2813 drop=0 text_ok=2745 text_err=68 last_size=107 target=1 count=1 cx=936 cy=341 err_x=-24 err_y=-199 pan_speed=0 visual_run=0 pan_pos=-257
+MOTOR TTL probe=ok id=1 raw=01 15 01 6B
+MOTOR CFG option=ok flags=0006 motor=1.8deg fw=Emm mode=closed dir=CW
+MOTOR FB position=-16.12 deg raw=00000B77 error=+0.00 deg raw=00000000
+MOTOR SYS bus=11732mV current=6mA encoder=15060 target=-16.16deg speed=+0RPM position=-16.12deg error=+0.00deg home=0x03(cal=ready,enc=ready,homing=idle,protect=clear) state=0x02(reached=yes,enabled=no,stall=clear,left=low,right=low)
+PanView P09 boot
+K230 RX frames=27 drop=0 text_ok=26 text_err=1 last_size=109 target=1 count=1 cx=1018 cy=508 err_x=58 err_y=-32 pan_speed=-36 visual_run=0 pan_pos=0
+K230 RX frames=55 drop=0 text_ok=54 text_err=1 last_size=106 target=1 count=1 cx=942 cy=159 err_x=-18 err_y=-381 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=82 drop=0 text_ok=81 text_err=1 last_size=108 target=1 count=1 cx=993 cy=572 err_x=33 err_y=32 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=110 drop=0 text_ok=108 text_err=2 last_size=105 target=1 count=1 cx=0 cy=0 err_x=-114 err_y=-292 pan_speed=148 visual_run=0 pan_pos=0
+K230 RX frames=138 drop=0 text_ok=136 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=5000 dt=5000 heartbeat=1 scans=492 status=50 link=waiting
+K230 RX frames=167 drop=0 text_ok=165 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=195 drop=0 text_ok=193 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=223 drop=0 text_ok=221 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=251 drop=0 text_ok=249 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=280 drop=0 text_ok=278 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=10000 dt=5000 heartbeat=2 scans=987 status=100 link=waiting
+K230 RX frames=308 drop=0 text_ok=306 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=336 drop=0 text_ok=334 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=364 drop=0 text_ok=362 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=392 drop=0 text_ok=390 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=421 drop=0 text_ok=419 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=15000 dt=5000 heartbeat=3 scans=1482 status=150 link=waiting
+K230 RX frames=449 drop=0 text_ok=447 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=477 drop=0 text_ok=475 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=505 drop=0 text_ok=503 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=534 drop=0 text_ok=532 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=561 drop=0 text_ok=559 text_err=2 last_size=106 target=1 count=1 cx=669 cy=257 err_x=-291 err_y=-283 pan_speed=502 visual_run=0 pan_pos=0
+t=20000 dt=5000 heartbeat=4 scans=1977 status=200 link=waiting
+K230 RX frames=590 drop=0 text_ok=588 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=618 drop=0 text_ok=616 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=647 drop=0 text_ok=645 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=675 drop=0 text_ok=673 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=703 drop=0 text_ok=701 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=25000 dt=5000 heartbeat=5 scans=2472 status=250 link=waiting
+K230 RX frames=731 drop=0 text_ok=729 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=759 drop=0 text_ok=757 text_err=2 last_size=109 target=1 count=1 cx=1081 cy=653 err_x=121 err_y=113 pan_speed=-162 visual_run=0 pan_pos=0
+K230 RX frames=788 drop=0 text_ok=786 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=816 drop=0 text_ok=814 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=844 drop=0 text_ok=842 text_err=2 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=30000 dt=5000 heartbeat=6 scans=2967 status=300 link=waiting
+K230 RX frames=871 drop=0 text_ok=869 text_err=2 last_size=108 target=1 count=1 cx=987 cy=546 err_x=27 err_y=6 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=899 drop=0 text_ok=897 text_err=2 last_size=108 target=1 count=1 cx=1139 cy=310 err_x=179 err_y=-230 pan_speed=-278 visual_run=0 pan_pos=0
+K230 RX frames=928 drop=0 text_ok=925 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=956 drop=0 text_ok=953 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=984 drop=0 text_ok=981 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+t=35000 dt=5000 heartbeat=7 scans=3461 status=350 link=waiting
+K230 RX frames=1012 drop=0 text_ok=1009 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=1041 drop=0 text_ok=1038 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=1069 drop=0 text_ok=1066 text_err=3 last_size=66 target=0 count=0 cx=0 cy=0 err_x=0 err_y=0 pan_speed=0 visual_run=0 pan_pos=0
+K230 RX frames=1096 drop=0 text_ok=1093 text_err=3 last_size=109 target=1 count=1 cx=1199 cy=681 err_x=239 err_y=141 pan_speed=-398 visual_run=0 pan_pos=0
+K230 RX frames=1124 drop=0 text_ok=1121 text_err=3 last_size=108 target=1 count=1 cx=923 cy=863 err_x=-37 err_y=323 pan_speed=0 visual_run=0 pan_pos=0
+t=40000 dt=5000 heartbeat=8 scans=3956 status=400 link=waiting
+KEY_UP pressed
+POSITION theory=+0.0deg pulses=0 reason=manual_zero
+PITCH zero=accepted position=0 limit=plus_or_minus_45deg
+K230 RX frames=1151 drop=0 text_ok=1148 text_err=3 last_size=107 target=1 count=1 cx=1063 cy=231 err_x=103 err_y=-309 pan_speed=-126 visual_run=1 pan_pos=-5
+K230 RX frames=1179 drop=0 text_ok=1174 text_err=5 last_size=106 target=1 count=1 cx=0 cy=0 err_x=-49 err_y=-243 pan_speed=18 visual_run=1 pan_pos=-31
+K230 RX frames=1206 drop=0 text_ok=1201 text_err=5 last_size=108 target=1 count=1 cx=979 cy=444 err_x=19 err_y=-96 pan_speed=0 visual_run=0 pan_pos=193
+K230 RX frames=1234 drop=0 text_ok=1229 text_err=5 last_size=107 target=1 count=1 cx=894 cy=312 err_x=-66 err_y=-228 pan_speed=52 visual_run=1 pan_pos=53
+K230 RX frames=1262 drop=0 text_ok=1256 text_err=6 last_size=107 target=1 count=1 cx=939 cy=321 err_x=-21 err_y=-219 pan_speed=0 visual_run=0 pan_pos=78
+t=45000 dt=5000 heartbeat=9 scans=4450 status=450 link=waiting

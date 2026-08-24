@@ -16,6 +16,21 @@ build/
 *.o
 *.d
 
+# Keil MDK generated build artefacts and local IDE state
+*.axf
+*.crf
+*.htm
+*.lnp
+*.dep
+*.uvoptx
+*.uvguix.*
+firmware/stm32f407/PanViewF407/MDK-ARM/PanViewF407/
+firmware/stm32f407/PanViewF407/MDK-ARM/DebugConfig/
+firmware/stm32f407/PanViewF407/MDK-ARM/RTE/
+firmware/stm32f407/PanViewF407/MDK-ARM/*.log
+firmware/stm32f407/PanViewF407/MDK-ARM/startup_stm32f407xx.*
+firmware/stm32f407/Tests/*.exe
+
 # Python and K230 local output
 __pycache__/
 *.py[cod]
@@ -32,5 +47,6 @@ evidence/serial-logs/raw/
 
 # Local worktrees and temporary files
 .worktrees/
+.superpowers/
 *.tmp
 *.bak

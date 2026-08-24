@@ -1,0 +1,5 @@
+P06 horizontal motion limits software evidence
+date=2026-08-21
+command=gcc -std=c11 -Wall -Wextra -Werror -IPanViewF407/Core/Inc Tests/motion_limits_test.c PanViewF407/Core/Src/motion_limits.c
+motion_limits_test: PASS
+arm_build=CubeIDE Debug build: 0 errors, 0 warnings
