@@ -8,7 +8,9 @@
 | Git 远端名 | origin |
 | Git URL | https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal.git |
 | 默认分支 | main |
-| 当前开发分支 | feature/f407-board-bringup |
+| 当前稳定分支 | main |
+| 最近收尾分支 | feature/f407-p11-freertos-fault-management |
+| 最近主分支提交 | 459d08c |
 | 提交身份 | Jiang Zexuan <314187437+jiang-zexuan@users.noreply.github.com> |
 
 以上信息可以写入仓库，便于新 agent 接手；访问令牌、密码、SSH 私钥和系统凭据不能写入仓库。
