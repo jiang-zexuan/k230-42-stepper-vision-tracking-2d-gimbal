@@ -69,8 +69,8 @@
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-/* P11 任务包含 TFT 刷新、触摸、遥测和独立安全任务；15 KiB 不足以
- * 同时容纳各任务栈、TCB、互斥锁和消息队列。 */
+/* P12 增加 TFT、触摸、主题 UI 与安全任务后，15 KiB 无法容纳全部栈、TCB、
+ * 互斥锁和消息队列；保持 P11 已实测通过的 32 KiB 配置。 */
 #define configTOTAL_HEAP_SIZE                    ((size_t)32768)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1
