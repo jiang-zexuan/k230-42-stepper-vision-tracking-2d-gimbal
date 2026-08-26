@@ -2,7 +2,7 @@
 
 PanView：基于 K230 视觉模块与 42 步进电机的视觉跟踪二维云台学习项目。K230 负责视觉检测，STM32F407 负责通信、运动控制和安全保护。
 
-当前状态：P01-P11 已完成阶段性实测并留存记录，P11 已完成 FreeRTOS 任务拆分、故障管理和 IWDG 正常运行验收；P05 的 STEP 波形和温度数值、P06/P07 的部分机械余量仍待补测。后续大模型训练、部署和系统交付测试作为 P12 附加内容推进。
+当前状态：P01-P11 已完成阶段性实测并留存记录，P11 已完成 FreeRTOS 任务拆分、故障管理和 IWDG 正常运行验收；P12 已完成自定义目标模型接入、TFT 控制台 UI、主题切换、俯仰 ±90° 软件限位和视觉锁定滞回调参。P12 最新现场日志需单独归档后再作为本轮硬件证据。
 
 ## 系统边界
 
@@ -30,4 +30,5 @@ K230 摄像头检测结果经 UART 发送给 F407；F407 以 STEP/DIR 控制两�
 - [物料清单](hardware/bom/bom.md)
 - [实验记录规则](docs/06-experiments/experiment-template.md)
 - [P11 FreeRTOS 与故障管理复盘](docs/05-learning-log/p11-freertos-fault-management-review.md)
+- [P12 自定义模型与控制台复盘](docs/05-learning-log/p12-custom-model-and-ui-review.md)
 - [网页版 UI 方案预览](ui-demo/index.html)

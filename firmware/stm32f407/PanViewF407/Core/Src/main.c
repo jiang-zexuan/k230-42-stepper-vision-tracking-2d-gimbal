@@ -151,7 +151,9 @@ enum {
   /* 单位：ms；控制任务超过此时间没有打心跳就执行独立安全停机。 */
   SAFETY_CONTROL_STALE_TIMEOUT_MS = 200U,
   /* 单位：ms；目标误差同时落入死区并持续此时间，才进入 LOCKED。 */
-  VISUAL_LOCK_HOLD_MS = 500U,
+  VISUAL_LOCK_HOLD_MS = 250U,
+  /* 单位：像素；进入 LOCKED 后允许视觉框在此范围内抖动而不重新启动电机。 */
+  VISUAL_LOCK_EXIT_DEADZONE_PIXELS = 60U,
   /* 单位：ms；命中音效最短间隔，避免锁定状态抖动造成重复播放。 */
   VISUAL_AUDIO_COOLDOWN_MS = 500U,
   /* 单位：ms；仅局部覆盖变化字段后的 TFT 遥测刷新周期。 */
@@ -179,8 +181,8 @@ enum {
   /* P07 第一阶段只验证俯仰链路，100 脉冲约 11.25 度（16 细分）。 */
   PITCH_TEST_PULSES = 100U,
   PITCH_TEST_PRESCALER = 3199U,
-  /* 当前 MStep=16：3200 脉冲/圈，±45°对应 ±400 脉冲。 */
-  PITCH_LIMIT_PULSES = 400U,
+  /* 当前 MStep=16：3200 脉冲/圈，±90°对应 ±800 脉冲。 */
+  PITCH_LIMIT_PULSES = 800U,
   DUAL_TEST_PULSES = 100U
 };
 
@@ -199,7 +201,7 @@ static uint8_t k230_uart_rx_dma_buffer[UART_RX_FRAME_CAPACITY];
 static UartRxFrame k230_uart_rx_frame;
 static UartTextLineAccumulator k230_uart_line_accumulator;
 static char uart_rx_log_message[128];
-static char k230_uart_log_message[320];
+static char k230_uart_log_message[384];
 static uint16_t k230_uart_last_frame_size;
 static VisionTextResult latest_k230_result;
 static VisionError latest_k230_error;
@@ -213,6 +215,16 @@ static int32_t latest_pitch_speed_target;
 static bool latest_k230_result_valid;
 static uint32_t k230_text_valid_count;
 static uint32_t k230_text_error_count;
+static volatile uint32_t k230_uart_error_count;
+static volatile uint32_t k230_uart_last_error_code;
+static volatile bool k230_uart_rx_restart_pending;
+/* 启动诊断：区分 DMA 已挂起但无波形，和 DMA/IDLE 回调没有建立。 */
+static volatile uint32_t k230_uart_arm_attempts;
+static volatile uint32_t k230_uart_arm_successes;
+static volatile uint32_t k230_uart_rx_event_count;
+static volatile uint16_t k230_uart_last_rx_event_size;
+static volatile uint32_t k230_uart_last_arm_status;
+static volatile uint32_t k230_uart_last_hal_state;
 /* 触摸 MODE 按钮控制的视觉跟踪总开关，默认保持 P09 行为。 */
 static bool visual_tracking_enabled = true;
 static uint8_t uart_pong_message[] = "PONG\r\n";
@@ -224,9 +236,9 @@ static uint8_t pitch_busy_message[] = "PITCH command ignored: running\r\n";
 static uint8_t pitch_not_zeroed_message[] =
     "PITCH command rejected: press KEY_UP at mechanical center\r\n";
 static uint8_t pitch_zero_message[] =
-    "PITCH zero=accepted position=0 limit=plus_or_minus_45deg\r\n";
+    "PITCH zero=accepted position=0 limit=plus_or_minus_90deg\r\n";
 static uint8_t pitch_limit_message[] =
-    "PITCH command rejected: soft_limit_plus_or_minus_45deg\r\n";
+    "PITCH command rejected: soft_limit_plus_or_minus_90deg\r\n";
 static uint8_t pitch_rezero_message[] =
     "PITCH stop interrupted move: press KEY_UP to re-zero\r\n";
 static uint8_t dual_test_message[] =
@@ -386,7 +398,29 @@ static void MainUi_HandleEvent(UiEvent event)
         ExecuteManualZeroStart();
       }
       break;
-    case UI_EVENT_OPEN_SETTINGS:
+    case UI_EVENT_START:
+      if (!control_takeover_active)
+      {
+        ExecuteManualZeroStart();
+      }
+      break;
+    case UI_EVENT_STOP:
+      if (control_takeover_active)
+      {
+        TouchUi_StopAllMotion();
+        visual_tracking_enabled = false;
+      }
+      break;
+    case UI_EVENT_THEME_NEXT:
+    {
+      UiTheme next_theme = (UiTheme)(PanViewUi_GetTheme() + 1U);
+      if (next_theme > UI_THEME_FLUORESCENT_GREEN)
+      {
+        next_theme = UI_THEME_BLACK_GOLD;
+      }
+      PanViewUi_SetTheme(next_theme);
+      break;
+    }    case UI_EVENT_OPEN_SETTINGS:
       TouchUi_StopAllMotion(); visual_tracking_enabled = false;
       PanViewUi_Navigate(UI_PAGE_SETTINGS);
       break;
@@ -764,28 +798,37 @@ static const char *FrameSequenceResultText(FrameSequenceResult result)
   }
 }
 
-static void StartUartRxDma(void)
+static bool StartUartRxDma(void)
 {
   if (HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart_rx_dma_buffer,
                                    sizeof(uart_rx_dma_buffer)) != HAL_OK)
   {
-    Error_Handler();
+    return false;
   }
 
   /* P03 以 IDLE 或缓冲区写满作为一段数据结束，不处理半满通知。 */
   __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
+  return true;
 }
 
-static void StartK230UartRxDma(void)
+static bool StartK230UartRxDma(void)
 {
-  if (HAL_UARTEx_ReceiveToIdle_DMA(&huart2, k230_uart_rx_dma_buffer,
-                                   sizeof(k230_uart_rx_dma_buffer)) != HAL_OK)
+  HAL_StatusTypeDef start_status;
+
+  k230_uart_arm_attempts++;
+  start_status = HAL_UARTEx_ReceiveToIdle_DMA(
+      &huart2, k230_uart_rx_dma_buffer, sizeof(k230_uart_rx_dma_buffer));
+  k230_uart_last_arm_status = (uint32_t)start_status;
+  k230_uart_last_hal_state = (uint32_t)HAL_UART_GetState(&huart2);
+  if (start_status != HAL_OK)
   {
-    Error_Handler();
+    return false;
   }
 
   /* K230 由 IDLE 标记一段发送结束，不需要半满中断。 */
   __HAL_DMA_DISABLE_IT(huart2.hdmarx, DMA_IT_HT);
+  k230_uart_arm_successes++;
+  return true;
 }
 
 /*
@@ -797,14 +840,38 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
   if (huart == &huart1)
   {
     (void)UartRxFrame_Store(&uart_rx_frame, uart_rx_dma_buffer, size);
-    StartUartRxDma();
+    (void)StartUartRxDma();
   }
   else if (huart == &huart2)
   {
+    k230_uart_rx_event_count++;
+    k230_uart_last_rx_event_size = size;
     (void)UartTextLineAccumulator_Consume(
         &k230_uart_line_accumulator, &k230_uart_rx_frame,
         k230_uart_rx_dma_buffer, size);
-    StartK230UartRxDma();
+    (void)StartK230UartRxDma();
+  }
+}
+
+/*
+ * K230 上电晚于 F407 时，RX 线上可能先出现帧/噪声/溢出错误。
+ * HAL 会在 DMA 错误后结束本次接收；这里把错误变成可恢复事件，
+ * 不允许一次启动时序差异永久卡死整个应用。
+ */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == &huart2)
+  {
+    k230_uart_error_count++;
+    k230_uart_last_error_code = huart->ErrorCode;
+    k230_uart_last_hal_state = (uint32_t)HAL_UART_GetState(huart);
+    /* DMA abort callbacks run in IRQ context; restart from the application
+     * context so HAL state transitions cannot be re-entered from the IRQ. */
+    k230_uart_rx_restart_pending = true;
+  }
+  else if (huart == &huart1)
+  {
+    (void)StartUartRxDma();
   }
 }
 
@@ -1361,7 +1428,8 @@ static void VisualState_Set(VisualState next_state, const char *reason)
   }
 }
 
-/* P10 状态机：通信先判 LOST，安全条件再判 FAULT，误差稳定 500 ms 才 LOCKED。 */
+/* P10 状态机：通信先判 LOST，安全条件再判 FAULT，误差稳定 250 ms 才 LOCKED。
+ * LOCKED 使用更宽的退出死区，避免检测框的像素抖动触发反复启停。 */
 static void VisualState_Update(uint32_t current_tick)
 {
   bool target_present = latest_k230_result_valid &&
@@ -1378,6 +1446,15 @@ static void VisualState_Update(uint32_t current_tick)
                        visual_track_config.deadzone_pixels) &&
                   (latest_k230_error.error_y >=
                        -visual_track_config.deadzone_pixels);
+  bool locked_within_hysteresis = target_present &&
+                                  (latest_k230_error.error_x <=
+                                       (int16_t)VISUAL_LOCK_EXIT_DEADZONE_PIXELS) &&
+                                  (latest_k230_error.error_x >=
+                                       -(int16_t)VISUAL_LOCK_EXIT_DEADZONE_PIXELS) &&
+                                  (latest_k230_error.error_y <=
+                                       (int16_t)VISUAL_LOCK_EXIT_DEADZONE_PIXELS) &&
+                                  (latest_k230_error.error_y >=
+                                       -(int16_t)VISUAL_LOCK_EXIT_DEADZONE_PIXELS);
   VisualState next_state;
   const char *reason;
 
@@ -1406,6 +1483,15 @@ static void VisualState_Update(uint32_t current_tick)
     next_state = VISUAL_STATE_FAULT;
     reason = "position_not_zeroed";
   }
+  else if ((visual_state == VISUAL_STATE_LOCKED) &&
+           locked_within_hysteresis)
+  {
+    /* LOCKED 时电机已停止，滞回区内的 PID 输出不会实际执行，
+     * 因此不能用它触发软件限位故障。 */
+    visual_lock_candidate_tick = 0U;
+    next_state = VISUAL_STATE_LOCKED;
+    reason = "locked_within_hysteresis";
+  }
   else if (VisualState_AtLimitFault())
   {
     visual_lock_candidate_tick = 0U;
@@ -1433,7 +1519,7 @@ static void VisualState_Update(uint32_t current_tick)
     if ((current_tick - visual_lock_candidate_tick) >= VISUAL_LOCK_HOLD_MS)
     {
       next_state = VISUAL_STATE_LOCKED;
-      reason = "centered_for_500ms";
+      reason = "centered_for_250ms";
     }
     else
     {
@@ -1650,6 +1736,10 @@ void PanView_AppStep(void)
 {
     uint32_t current_tick = HAL_GetTick();
     last_pan_view_step_tick = current_tick;
+    if (k230_uart_rx_restart_pending && StartK230UartRxDma())
+    {
+      k230_uart_rx_restart_pending = false;
+    }
     PanView_RtosProcessUiEvents();
 
     /* P10：处理 K230 有效结果，同时生成水平和俯仰速度目标。 */
@@ -2182,12 +2272,20 @@ void PanView_TelemetryStep(uint32_t current_tick)
     {
       int k230_log_length = snprintf(
           k230_uart_log_message, sizeof(k230_uart_log_message),
-          "K230 state=%s safety=%s RX frames=%lu drop=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
+          "K230 state=%s safety=%s RX frames=%lu drop=%lu uart_err=%lu last_err=0x%08lX arm=%lu/%lu rx_evt=%lu rx_size=%u arm_status=%lu hal_state=%lu text_ok=%lu text_err=%lu last_size=%u target=%u count=%u cx=%d cy=%d err_x=%d err_y=%d pan_speed=%ld pitch_speed=%ld pan_run=%u pitch_run=%u pan_pos=%ld pitch_pos=%ld\r\n",
           VisualStateText(visual_state),
         PanView_SafetyFaultText(safety_fault_latched),
-          (unsigned long)k230_uart_rx_frame.received_count,
-          (unsigned long)k230_uart_rx_frame.dropped_count,
-          (unsigned long)k230_text_valid_count,
+           (unsigned long)k230_uart_rx_frame.received_count,
+           (unsigned long)k230_uart_rx_frame.dropped_count,
+           (unsigned long)k230_uart_error_count,
+           (unsigned long)k230_uart_last_error_code,
+           (unsigned long)k230_uart_arm_attempts,
+           (unsigned long)k230_uart_arm_successes,
+           (unsigned long)k230_uart_rx_event_count,
+           (unsigned int)k230_uart_last_rx_event_size,
+           (unsigned long)k230_uart_last_arm_status,
+           (unsigned long)k230_uart_last_hal_state,
+           (unsigned long)k230_text_valid_count,
           (unsigned long)k230_text_error_count,
           (unsigned int)k230_uart_last_frame_size,
           (unsigned int)(latest_k230_result_valid &&
@@ -2397,8 +2495,8 @@ int main(void)
   MX_SPI1_Init();
   MX_I2C1_Init();
   MX_I2S2_Init();
-  /* IWDG 由 SafetyTask 在确认任务创建成功后启动；不能在调度器启动前
-   * 提前开启，否则任务创建失败时无人刷新看门狗，会形成复位死循环。 */
+  /* IWDG 由 SafetyTask 在调度器启动后负责启动和刷新。
+   * 初始化阶段不能提前开启，否则 SafetyTask 尚未运行时会触发复位循环。 */
   /* USER CODE BEGIN 2 */
   AudioPlayer_Init();
   {
@@ -2458,14 +2556,19 @@ int main(void)
   last_k230_valid_tick = 0U;
   MotorPulseLab_StopHardware();
   Pitch_DisableHardware();
+  /* Arm both receive paths before optional blocking diagnostics.  This keeps
+   * the K230 link alive even when the vision board is powered later. */
+  (void)StartUartRxDma();
+  if (!StartK230UartRxDma())
+  {
+    k230_uart_rx_restart_pending = true;
+  }
   if (MotorTtlProbe())
   {
     MotorTtlReadOption();
     MotorTtlReadPositionAndError();
     MotorTtlReadSystemStatus();
   }
-  StartUartRxDma();
-  StartK230UartRxDma();
   if (ILI9341_Init())
   {
     tft_ready = true;

@@ -3,183 +3,200 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PanView UI 方案预览</title>
+  <title>PanView P12 主页预览</title>
   <style>
-    :root { color-scheme: dark; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+    :root { color-scheme: dark; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; --page-bg:#0b0e10; --panel-bg:#151a1d; --panel-line:#2d393d; }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: #101417; color: #d8e2e2; }
-    .workspace { display: grid; grid-template-columns: minmax(280px, 360px) minmax(300px, 1fr); gap: 32px; width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0; }
-    .intro { align-self: start; padding-top: 10px; }
-    h1 { margin: 0 0 10px; font-size: 25px; letter-spacing: .04em; color: #f3b63f; }
-    p { margin: 0 0 24px; color: #91a4a5; line-height: 1.7; }
-    .choice-list { display: grid; gap: 10px; }
-    .choice { width: 100%; padding: 13px 14px; border: 1px solid #344448; border-radius: 4px; background: #1a2225; color: #b9c8c8; text-align: left; cursor: pointer; }
-    .choice:hover, .choice.active { border-color: #43d5d0; color: #fff; background: #202c2e; }
-    .choice strong { display: block; color: #e8f0ef; margin-bottom: 4px; }
-    .choice small { color: #84999a; }
-    .notes { margin-top: 24px; border-top: 1px solid #2a383b; padding-top: 16px; color: #84999a; font-size: 13px; line-height: 1.7; }
-    .preview-area { display: grid; justify-items: center; gap: 14px; }
-    .device-label { width: 240px; color: #778c8e; font: 12px ui-monospace, Consolas, monospace; text-align: center; }
-    .device { width: 240px; height: 320px; overflow: hidden; position: relative; border: 4px solid #344044; border-radius: 6px; box-shadow: 0 10px 30px #0008; }
-    .screen { width: 240px; height: 320px; overflow: hidden; position: relative; }
-    .screen::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .08; background: radial-gradient(circle at 80% 15%, #ffffff 0 1px, transparent 2px), radial-gradient(circle at 12% 70%, #ffffff 0 1px, transparent 2px); }
-    .screen-a { background: linear-gradient(145deg, #242b3a, #594126 58%, #1a202b); color: #fff0c8; }
-    .screen-b { background: linear-gradient(145deg, #172449, #482677 52%, #12314d); color: #f2fbff; }
-    .screen-c { background: linear-gradient(145deg, #22262b, #697078 54%, #292d33); color: #ffffff; }
-    .screen-d { background: linear-gradient(145deg, #0e2519, #20613c 52%, #0d2117); color: #e5ffed; }
-    .topbar { height: 35px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; border-bottom: 1px solid #527273; background: #263437; position: relative; }
-    .brand { font: 700 16px ui-monospace, Consolas, monospace; letter-spacing: .08em; }
-    .badge { padding: 4px 6px; font: 700 9px ui-monospace, Consolas, monospace; background: #f0a92e; color: #171a19; opacity: .55; }
-    .screen-b .badge { background: #66d1c2; }
-    .screen-c .badge { background: #ee8d36; }
-    .screen-a .topbar { background: #272219; border-color: #a17b31; }
-    .screen-b .topbar { background: #1d1e4b; border-color: #6b66ff; }
-    .screen-c .topbar { background: #41464d; border-color: #e1e5e8; }
-    .screen-d .topbar { background: #102b1c; border-color: #68ff9b; }
-    .screen-a .badge { background: #d9a934; color: #1b170e; border-radius: 9px; }
-    .screen-b .badge { background: #e556ff; color: #fff; border-radius: 9px; }
-    .screen-c .badge { background: #ffffff; color: #202225; border-radius: 9px; }
-    .screen-d .badge { background: #63ff91; color: #061108; border-radius: 9px; }
-    .status-focus { position: absolute; left: 60px; width: 120px; bottom: 78px; height: 25px; display: flex; align-items: center; justify-content: center; border: 1px solid #d9a934; background: #332816; color: #ffd567; border-radius: 8px; font: 700 11px ui-monospace, Consolas, monospace; letter-spacing: .08em; }
-    .screen-a .status-search { border-color: #52e4e4; background: #163a3d; color: #72ffff; }
-    .screen-a .status-tracking { border-color: #d9a934; background: #332816; color: #ffd567; }
-    .screen-a .status-locked { border-color: #5ce18a; background: #173d27; color: #82ffa9; }
-    .screen-a .status-lost { border-color: #ff704b; background: #4a211b; color: #ff9b7f; }
-    .screen-b .status-search { border-color: #69ebff; background: #163955; color: #94f3ff; }
-    .screen-b .status-tracking { border-color: #e556ff; background: #3f1e55; color: #ff9fff; }
-    .screen-b .status-locked { border-color: #62f19c; background: #17462e; color: #8dffb7; }
-    .screen-b .status-lost { border-color: #ff765e; background: #54251e; color: #ffac9a; }
-    .screen-c .status-search { border-color: #d8faff; background: #555e67; color: #ffffff; }
-    .screen-c .status-tracking { border-color: #ffffff; background: #5b626a; color: #ffffff; }
-    .screen-c .status-locked { border-color: #9ff2bd; background: #3e6650; color: #d8ffe5; }
-    .screen-c .status-lost { border-color: #ffb4a3; background: #73443b; color: #ffe0d8; }
-    .screen-d .status-search { border-color: #65e8ff; background: #15434b; color: #8effff; }
-    .screen-d .status-tracking { border-color: #72ff9b; background: #17472a; color: #a1ffbb; }
-    .screen-d .status-locked { border-color: #d9ff5f; background: #3a4c16; color: #edff9c; }
-    .screen-d .status-lost { border-color: #ff8c4b; background: #552a17; color: #ffc096; }
-    .content { position: relative; padding: 8px 9px 0; }
-    .target { height: 35px; border-bottom: 1px solid #3b5a5b; font: 700 10px ui-monospace, Consolas, monospace; line-height: 16px; }
-    .target .ok { color: #56d4c3; }
-    .screen-a .target .ok { color: #f2c24c; }
-    .screen-b .target .ok { color: #69ebff; }
-    .screen-c .target .ok { color: #fff; }
-    .screen-d .target .ok { color: #6dff9b; }
-    .metrics { margin-top: 8px; border: 1px solid #3f595b; position: relative; }
-    .metric { height: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 7px; border-bottom: 1px solid #314648; font: 10px ui-monospace, Consolas, monospace; }
-    .metric:last-child { border-bottom: 0; }
-    .metric label { color: #8ca7a6; }
-    .metric value { color: #62dad1; }
-    .screen-a .metrics { border-color: #8f6d2b; border-radius: 8px; background: #2b2417; }
-    .screen-b .metrics { border-color: #665bd2; border-radius: 8px; background: #1d1d42; }
-    .screen-c .metrics { border-color: #b9c0c7; border-radius: 8px; background: #3a3f45; }
-    .screen-d .metrics { border-color: #3fbd70; border-radius: 8px; background: #102619; }
-    .screen-a .metric { border-color: #58451e; }
-    .screen-b .metric { border-color: #3b3872; }
-    .screen-c .metric { border-color: #697079; }
-    .screen-d .metric { border-color: #205d38; }
-    .screen-a .metric value { color: #ffd567; }
-    .screen-b .metric value { color: #69ebff; }
-    .screen-c .metric value { color: #ffffff; text-shadow: 0 0 5px #ffffff55; }
-    .screen-d .metric value { color: #71ff9a; }
-    .screen-a .metric label { color: #bda96f; }
-    .screen-b .metric label { color: #a9a6e2; }
-    .screen-c .metric label { color: #e0e4e7; }
-    .screen-d .metric label { color: #9ac7aa; }
-    .link { margin-top: 8px; color: #849d9e; font: 9px ui-monospace, Consolas, monospace; }
-    .actions { position: absolute; left: 9px; right: 9px; bottom: 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-    .action { height: 34px; border: 1px solid #e1a22f; background: #293134; color: #f2b43c; font: 700 10px ui-monospace, Consolas, monospace; display: grid; place-items: center; }
-    .action.alt { border-color: #4dc9c5; color: #66d6d0; }
-    .footer { position: absolute; bottom: 9px; left: 0; width: 240px; text-align: center; color: #8ba0a0; font: 9px ui-monospace, Consolas, monospace; letter-spacing: .02em; white-space: nowrap; }
-    .screen-a .footer { color: #c6a75b; }
-    .screen-b .footer { color: #a99cff; }
-    .screen-c .footer { color: #f2f4f5; }
-    .screen-d .footer { color: #79ffa1; }
-    .screen-a .target, .screen-b .target, .screen-c .target, .screen-d .target { height: 43px; padding: 4px 6px; border-radius: 8px; }
-    .screen-a .target { border: 1px solid #8f6d2b; background: #2b2417; }
-    .screen-b .target { border: 1px solid #665bd2; background: #1d1d42; }
-    .screen-c .target { border: 1px solid #b9c0c7; background: #3a3f45; }
-    .screen-d .target { border: 1px solid #3fbd70; background: #102619; }
-    .screen-a .link { color: #bda96f; }
-    .screen-b .link { color: #a9a6e2; }
-    .screen-c .link { color: #e0e4e7; }
-    .screen-d .link { color: #9ac7aa; }
-    .screen-a .action { border-color: #d9a934; color: #ffd567; background: #332816; border-radius: 7px; }
-    .screen-a .action.alt { border-color: #b99b52; color: #e6c36d; }
-    .screen-b .action { border-color: #e556ff; color: #ff9fff; background: #29204c; border-radius: 7px; }
-    .screen-b .action.alt { border-color: #69ebff; color: #86f0ff; }
-    .screen-c .action { border-color: #ffffff; color: #fff; background: #4c525a; border-radius: 7px; }
-    .screen-c .action.alt { border-color: #d6dbe0; color: #ffffff; }
-    .screen-d .action { border-color: #63ff91; color: #91ffb0; background: #153721; border-radius: 7px; }
-    .screen-d .action.alt { border-color: #4abf76; color: #83e8a4; }
-    .scheme-note { color: #839798; font-size: 13px; text-align: center; }
-    @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; width: min(420px, calc(100% - 28px)); } .intro { padding-top: 0; } }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 78% 12%, #26383b 0, transparent 34%), var(--page-bg); color:#e9f0ef; }
+    .workspace { display:grid; grid-template-columns:minmax(260px,330px) minmax(300px,1fr); align-items:start; gap:34px; width:min(960px,calc(100% - 40px)); margin:0 auto; padding:34px 0; }
+    .intro { padding-top:8px; }
+    h1 { margin:0 0 10px; color:#e6b44a; font-size:25px; letter-spacing:.04em; }
+    .lead { margin:0 0 23px; color:#9aa9aa; line-height:1.7; }
+    .control-group { margin-top:22px; }
+    .control-title { margin-bottom:9px; color:#718285; font:700 11px ui-monospace,Consolas,monospace; letter-spacing:.1em; }
+    .choice-list,.status-list { display:grid; gap:8px; }
+    button { font:inherit; }
+    .choice,.status-choice { width:100%; border:1px solid var(--panel-line); border-radius:3px; background:var(--panel-bg); color:#b6c3c3; cursor:pointer; text-align:left; transition:border-color .15s ease-out,background .15s ease-out,color .15s ease-out; }
+    .choice { padding:11px 13px; }
+    .choice:hover,.choice.active,.status-choice:hover,.status-choice.active { border-color:#55d7d2; background:#1e2b2e; color:#f5ffff; }
+    .choice strong { display:block; margin-bottom:3px; color:#e9f1f0; }
+    .choice small { color:#849396; }
+    .status-list { grid-template-columns:repeat(4,1fr); }
+    .status-choice { padding:9px 5px; text-align:center; font-size:13px; }
+    .notes { margin-top:25px; padding-top:15px; border-top:1px solid #293437; color:#849396; font-size:12px; line-height:1.65; }
+    .preview-area { display:grid; justify-items:center; gap:14px; }
+    .device-label { width:240px; color:#718285; font:12px ui-monospace,Consolas,monospace; text-align:center; }
+    .device { width:240px; height:320px; overflow:hidden; position:relative; border:4px solid #394548; border-radius:6px; box-shadow:0 15px 35px #000b; }
+    .screen { width:240px; height:320px; overflow:hidden; position:relative; background:#20292c; color:#ebf3f2; isolation:isolate; }
+    .screen::before { content:""; position:absolute; z-index:-1; inset:0; opacity:.15; background-image:linear-gradient(#ffffff17 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px); background-size:16px 16px; pointer-events:none; }
+    .topbar { height:37px; display:flex; align-items:center; padding:0 12px; border-bottom:1px solid #5d6c6e; background:#222c2f; }
+    .brand { font:700 17px ui-monospace,Consolas,monospace; letter-spacing:.12em; }
+    .content { padding:16px 14px 0; }
+    .uptime-label,.axis-label { color:#a6b5b5; font:700 10px ui-monospace,Consolas,monospace; letter-spacing:.08em; }
+    .uptime { margin-top:4px; color:#f2c35e; font:700 25px ui-monospace,Consolas,monospace; letter-spacing:.04em; }
+    .target-block { margin-top:18px; display:grid; gap:9px; }
+    .axis-row { display:flex; align-items:baseline; justify-content:space-between; padding-bottom:6px; border-bottom:1px solid #445255; }
+    .axis-value { color:#65e2db; font:700 22px ui-monospace,Consolas,monospace; }
+    .axis-unit { margin-left:3px; color:#96a8a8; font:10px ui-monospace,Consolas,monospace; }
+    .status-focus { position:absolute; left:60px; bottom:102px; width:120px; height:31px; display:flex; align-items:center; justify-content:center; border:1px solid #62e2db; background:#183a3c; color:#76fff8; font:700 15px "Microsoft YaHei",sans-serif; letter-spacing:.12em; }
+    .status-search { border-color:#62e2db; background:#183a3c; color:#76fff8; }
+    .status-tracking { border-color:#f2bf52; background:#493719; color:#ffd979; }
+    .status-locked { border-color:#6df19a; background:#1a452b; color:#9affba; }
+    .actions { position:absolute; left:13px; right:13px; bottom:52px; display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .action { height:36px; border:1px solid #d6a33d; background:#292d2d; color:#f4c45f; cursor:pointer; font:700 11px ui-monospace,Consolas,monospace; letter-spacing:.06em; transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out; }
+    .action:active,.action.active { background:#f0b83f; border-color:#ffe19a; color:#1a1b18; }
+    .action.end { border-color:#708083; color:#b9c7c8; }
+    .action.end:active,.action.end.active { background:#d95b46; border-color:#ffb1a2; color:#fff; }
+    .footer { position:absolute; bottom:15px; left:0; width:240px; color:#869899; text-align:center; font:9px ui-monospace,Consolas,monospace; letter-spacing:.02em; white-space:nowrap; }
+    .screen-a { background:linear-gradient(145deg,#242a2c,#493a22 68%,#1c2527); }
+    .screen-a .topbar { background:#272219; border-color:#a17b31; }
+    .screen-a .uptime { color:#ffd567; }
+    .screen-a .axis-value { color:#74e5de; }
+    .screen-a .footer { color:#c6a75b; }
+    .screen-b { background:linear-gradient(145deg,#172344,#3d2459 67%,#122f45); }
+    .screen-b .topbar { background:#1b2049; border-color:#716bff; }
+    .screen-b .uptime { color:#ff9fff; }
+    .screen-b .axis-value { color:#69ebff; }
+    .screen-b .footer { color:#b7aaff; }
+    .screen-b .status-tracking { border-color:#f16aff; background:#432054; color:#ffafff; }
+    .screen-c { background:linear-gradient(145deg,#3b4248,#707980 67%,#30363b); }
+    .screen-c .topbar { background:#454c53; border-color:#e1e5e8; }
+    .screen-c .uptime,.screen-c .axis-value { color:#fff; }
+    .screen-c .footer { color:#f2f4f5; }
+    .screen-c .status-tracking { border-color:#fff; background:#59636b; color:#fff; }
+    .screen-d { background:linear-gradient(145deg,#0e2519,#1d5836 67%,#0d2117); }
+    .screen-d .topbar { background:#102b1c; border-color:#68ff9b; }
+    .screen-d .uptime { color:#d9ff5f; }
+    .screen-d .axis-value { color:#8dffae; }
+    .screen-d .footer { color:#79ffa1; }
+    .screen-d .status-tracking { border-color:#72ff9b; background:#17472a; color:#a1ffbb; }
+    .scheme-note { color:#839798; font-size:13px; text-align:center; }
+    /* The preview below is a native 240x320 framebuffer, scaled 2x only for viewing. */
+    .device { width:492px; height:652px; border-width:6px; border-radius:4px; }
+    .pixel-screen { display:block; width:480px; height:640px; image-rendering:pixelated; image-rendering:crisp-edges; }
+    .device-label { width:492px; }
+    .preview-actions { display:flex; gap:10px; }
+    .preview-actions .action { width:118px; }
+    .pixel-note { max-width:480px; color:#738487; font-size:12px; line-height:1.55; text-align:center; }
+    @media (max-width:720px) { .workspace { grid-template-columns:1fr; width:min(420px,calc(100% - 28px)); } .intro { padding-top:0; } }
   </style>
 </head>
 <body>
   <main class="workspace">
     <section class="intro">
-      <h1>PanView UI 方案预览</h1>
-      <p>按真实 TFT 尺寸预览。先选视觉方向，再把选定方案落到 F407 固件。</p>
-      <div class="choice-list">
-        <button class="choice active" data-scheme="a"><strong>A · 黑金</strong><small>黑色底，金色状态和边框，稳重、设备感强。</small></button>
-        <button class="choice" data-scheme="b"><strong>B · 霓虹</strong><small>深蓝紫底，青紫高光，科技感最强。</small></button>
-        <button class="choice" data-scheme="c"><strong>C · 极简黑白灰</strong><small>低刺激、高辨识度，适合长期观察。</small></button>
-        <button class="choice" data-scheme="d"><strong>D · 黑荧光绿</strong><small>深绿黑底，荧光绿状态，偏设备监控风格。</small></button>
+      <h1>PanView P12 主页预览</h1>
+      <p class="lead">按真实 TFT 240 × 320 像素预览。主页只呈现运行时最需要快速读取的信息。</p>
+      <div class="control-group">
+        <div class="control-title">THEME / 主题演示</div>
+        <div class="choice-list">
+          <button class="choice active" data-scheme="a"><strong>A · 黑金</strong><small>稳重、硬朗，突出运行状态。</small></button>
+          <button class="choice" data-scheme="b"><strong>B · 霓虹</strong><small>青紫高光，科技感明显。</small></button>
+          <button class="choice" data-scheme="c"><strong>C · 提亮黑白灰</strong><small>明亮、克制，适合长期观察。</small></button>
+          <button class="choice" data-scheme="d"><strong>D · 黑荧光绿</strong><small>监控感强，状态辨识度高。</small></button>
+        </div>
       </div>
-      <div class="notes">预览重点：页脚完整显示、数据面板保持静态、只替换数值内容，避免整块 SPI 重绘造成闪烁。</div>
+      <div class="control-group">
+        <div class="control-title">STATUS / 状态演示</div>
+        <div class="status-list">
+          <button class="status-choice" data-status="search">SEARCHING</button>
+          <button class="status-choice active" data-status="tracking">TRACKING</button>
+          <button class="status-choice" data-status="locked">HIT</button>
+          <button class="status-choice" data-status="fault">FAULT</button>
+        </div>
+      </div>
+      <div class="notes">屏幕内容不包含速度、位置、通信统计、设置入口等未要求信息。开始/结束按钮仅用于演示停止与运行时的颜色反馈。</div>
     </section>
     <section class="preview-area">
-      <div class="device-label">TFT PREVIEW · 240 × 320 px</div>
-      <div class="device"><div id="screen" class="screen screen-a">
-        <div class="topbar"><span class="brand">PANVIEW</span></div>
-        <div class="content">
-          <div class="target">TARGET <span class="ok">DETECTED</span><br>ERR X <span id="errx">-120</span> · ERR Y <span id="erry">+046</span></div>
-          <div class="metrics">
-            <div class="metric"><label>PAN POSITION</label><value id="pan">+0120</value></div>
-            <div class="metric"><label>PITCH POSITION</label><value id="pitch">-0040</value></div>
-            <div class="metric"><label>PAN SPEED</label><value id="panspeed">0320</value></div>
-            <div class="metric"><label>PITCH SPEED</label><value id="pitchspeed">0180</value></div>
-          </div>
-          <div class="link">LINK · RX 1842 · DROP 0 · POS OK</div>
-        </div>
-        <div id="status-focus" class="status-focus status-tracking">TRACKING</div>
-        <div class="actions"><div class="action">START / STOP</div><div class="action alt">SET</div></div>
-        <div class="footer">Designed by JZX</div>
-      </div></div>
-      <div id="scheme-note" class="scheme-note">方案 A：强工业感，边框和网格清晰。</div>
+      <div class="device-label">ILI9341 FRAMEBUFFER · 240 × 320 · 2× VIEW</div>
+      <div class="device"><canvas id="screen" class="pixel-screen" width="240" height="320" aria-label="SPI 屏幕像素预览"></canvas></div>
+      <div class="preview-actions"><button id="start" class="action">开始</button><button id="end" class="action end">结束</button></div>
+      <div class="pixel-note">画布内部始终是 240×320 像素；颜色按固件 RGB565 主题值转换，文字按固件 5×7 / 16×16 字模绘制。可直接点击屏幕内的 START / STOP。</div>
+      <div id="scheme-note" class="scheme-note">黑金：稳重、硬朗，突出运行状态。</div>
     </section>
   </main>
   <script>
-    const screen = document.querySelector('#screen');
-    const note = document.querySelector('#scheme-note');
-    const notes = {
-      a: '黑金：稳重、硬朗，适合设备状态长期显示。',
-      b: '霓虹：青紫高光明显，科技感和视觉冲击力最强。',
-      c: '极简黑白灰：对比度清楚，最不容易疲劳。',
-      d: '黑荧光绿：监控感强，状态变化非常醒目。'
+    const screen=document.querySelector('#screen'), ctx=screen.getContext('2d'), note=document.querySelector('#scheme-note');
+    const schemeNotes={a:'黑金：稳重、硬朗，突出运行状态。',b:'霓虹：青紫高光，科技感明显。',c:'提亮黑白灰：明亮、克制，适合长期观察。',d:'黑荧光绿：监控感强，状态辨识度高。'};
+    const palettes={
+      a:{bg:0x2121,panel:0x39c5,line:0x7be0,cyan:0xfea0,amber:0xfd20,gray:0xc5b1,green:0x07e0},
+      b:{bg:0x190f,panel:0x3147,line:0x74bf,cyan:0x7dff,amber:0xf81f,gray:0xa5b9,green:0x07e0},
+      c:{bg:0x39c7,panel:0x5aeb,line:0xbdf7,cyan:0xffff,amber:0xffff,gray:0xef7d,green:0x07e0},
+      d:{bg:0x1183,panel:0x1ac5,line:0x5efa,cyan:0x87ff,amber:0x87f0,gray:0xa6d7,green:0x07e0}
     };
-    document.querySelectorAll('.choice').forEach(button => button.addEventListener('click', () => {
-      document.querySelectorAll('.choice').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-      const scheme = button.dataset.scheme;
-      screen.className = `screen screen-${scheme}`;
-      note.textContent = notes[scheme];
-    }));
-    let tick = 0;
-    const statuses = [
-      ['SEARCH', 'status-search'], ['TRACKING', 'status-tracking'],
-      ['LOCKED', 'status-locked'], ['LOST', 'status-lost']
-    ];
-    setInterval(() => {
-      tick += 1;
-      document.querySelector('#pan').textContent = `+${String(120 + tick % 18).padStart(4, '0')}`;
-      document.querySelector('#panspeed').textContent = String(320 + tick % 24).padStart(4, '0');
-      document.querySelector('#errx').textContent = `${-120 + tick % 9}`;
-      const [status, className] = statuses[tick % statuses.length];
-      const statusNode = document.querySelector('#status-focus');
-      statusNode.textContent = status;
-      statusNode.className = `status-focus ${className}`;
-    }, 500);
+    const statusMap={search:['SEARCHING','status-search'],tracking:['TRACKING','status-tracking'],locked:['HIT','status-locked'],fault:['FAULT','status-fault']};
+    const statusGlyphs={
+      '搜索':[0x641c,0x7d22], '追踪':[0x8ddf,0x8e2a], '锁定':[0x9501,0x5b9a]
+    };
+    /* Same 5x7 bitmap convention as Tft_Font5x7() in ili9341.c. */
+    const glyphs={
+      ' ':[0,0,0,0,0,0,0],'-':[0,0,0,31,0,0,0],':':[0,4,0,0,4,0,0],
+      'A':[14,17,17,31,17,17,17],'B':[30,17,17,30,17,17,30],'C':[15,16,16,16,16,16,15],
+      'D':[30,17,17,17,17,17,30],'E':[31,16,16,30,16,16,31],'F':[31,16,16,30,16,16,16],
+      'G':[15,16,16,23,17,17,15],'H':[17,17,17,31,17,17,17],'I':[31,4,4,4,4,4,31],
+      'K':[17,18,20,24,20,18,17],'L':[16,16,16,16,16,16,31],
+      'M':[17,27,21,21,17,17,17],'N':[17,25,21,19,17,17,17],'O':[14,17,17,17,17,17,14],
+      'P':[30,17,17,30,16,16,16],'R':[30,17,17,30,20,18,17],'S':[15,16,16,14,1,1,30],
+      'T':[31,4,4,4,4,4,4],'U':[17,17,17,17,17,17,14],'V':[17,17,17,17,17,10,4],
+      'J':[1,1,1,1,1,17,14],
+      'W':[17,17,17,21,21,21,10],'X':[17,17,10,4,10,17,17],'Y':[17,17,10,4,4,4,4],
+      'Z':[31,1,2,4,8,16,31],
+      '0':[14,17,19,21,25,17,14],'1':[4,12,4,4,4,4,14],'2':[14,17,1,2,4,8,31],
+      '3':[30,1,1,14,1,1,30],'4':[2,6,10,18,31,2,2],'5':[31,16,16,30,1,1,30],
+      '6':[14,16,16,30,17,17,14],'7':[31,1,2,4,8,8,8],'8':[14,17,17,14,17,17,14],
+      '9':[14,17,17,15,1,1,14],'+':[0,4,4,31,4,4,0]
+    };
+    const glyph16={
+      0x641c:[16,32,48,224,51,254,51,38,127,174,51,38,51,102,51,254,60,32,120,96,115,252,49,140,48,248,48,248,119,222,0,0],
+      0x7d22:[1,128,1,128,127,254,1,128,127,254,99,6,102,38,12,96,31,192,15,24,63,252,57,134,13,176,25,152,113,142,39,132],
+      0x8ddf:[0,96,96,96,51,252,19,12,3,12,3,252,115,0,51,0,19,252,19,4,19,4,19,4,27,252,60,0,103,254,0,0],
+      0x8e2a:[0,32,124,48,109,254,101,6,101,2,124,252,24,0,24,0,126,0,127,254,120,48,120,180,125,182,127,54,115,50,0,96],
+      0x9501:[16,48,49,182,62,180,96,188,64,180,125,254,25,134,25,182,25,182,127,182,25,182,25,166,29,228,28,220,59,142,3,2],
+      0x5b9a:[1,0,1,128,127,254,127,254,96,6,111,246,31,248,1,128,25,128,25,128,25,248,25,128,61,128,55,128,99,254,64,126],
+      /* “中”沿用 panview_font_16.c 的固件字模。 */
+      0x4e2d:[1,0,1,0,1,0,63,248,33,8,33,8,33,8,33,8,33,8,63,248,33,8,1,0,1,0,1,0,0,0,0,0],
+      /* 以下新增字模按 16 行、8 位高字节在前生成，顶部没有额外空白。 */
+      0x6b63:[63,252,127,254,0,128,0,128,0,128,24,128,24,252,24,252,24,128,24,128,24,128,127,254,127,254,0,0,0,0,0,0],
+      0x5728:[2,0,2,0,127,254,127,254,12,0,12,96,24,96,56,96,123,252,120,96,88,96,24,96,24,96,31,254,19,254,0,0],
+      0x8ffd:[0,96,96,96,51,252,19,12,3,12,3,252,115,0,51,0,19,252,19,4,19,4,19,4,27,252,60,0,103,254,0,0],
+      0x5df2:[127,248,63,248,0,8,48,8,48,8,48,8,63,248,63,248,48,0,48,0,48,2,48,6,31,252,7,240,0,0,0,0],
+      0x547d:[0,0,0,128,1,128,7,192,14,112,60,60,127,238,0,0,62,252,54,204,34,196,34,196,54,204,62,220,32,192,32,192],
+      0x6545:[16,64,16,64,16,128,254,254,17,8,18,136,16,136,124,136,68,80,68,80,68,32,68,80,124,136,69,4,2,2,0,0],
+      0x969c:[125,252,68,136,72,80,75,254,80,0,73,252,73,4,69,252,69,4,69,252,104,32,83,254,64,32,64,32,64,32,0,0]
+    };
+    let scheme='a', visualState='tracking', running=false, seconds=768, errx=-120, erry=46;
+    const rgb565=value=>{const r=((value>>11)&31)*255/31,g=((value>>5)&63)*255/63,b=(value&31)*255/31;return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;};
+    const fill=(x,y,w,h,color)=>{ctx.fillStyle=rgb565(color);ctx.fillRect(x,y,w,h);};
+    function text(x,y,value,color,bg,scale=1){fill(x,y,value.length*6*scale,7*scale,bg);ctx.fillStyle=rgb565(color);for(let i=0;i<value.length;i++){const g=glyphs[value[i]]||glyphs[' '];for(let row=0;row<7;row++)for(let col=0;col<5;col++)if(g[row]&(16>>col))fill(x+i*6*scale+col*scale,y+row*scale,scale,scale,color);}}
+    function text16(x,y,codes,color,bg){fill(x,y,codes.length*16,16,bg);codes.forEach((code,index)=>{const g=glyph16[code];if(!g)return;for(let row=0;row<16;row++)for(let col=0;col<16;col++)if((g[row*2+(col>7?1:0)]&(128>>(col&7)))!==0)fill(x+index*16+col,y+row,1,1,color);});}
+    function border(x,y,w,h,color){fill(x,y,w,1,color);fill(x,y+h-1,w,1,color);fill(x,y,1,h,color);fill(x+w-1,y,1,h,color);}
+    function render(){
+      const p=palettes[scheme]; ctx.imageSmoothingEnabled=false; fill(0,0,240,320,p.bg);
+      fill(0,0,240,32,p.panel); fill(0,32,240,1,p.line); text(6,8,'PANVIEW',p.cyan,p.panel,2);
+      border(8,42,224,104,p.line); text(16,52,'UPTIME',p.gray,p.panel,1); text(16,66,formatTime(seconds),p.amber,p.panel,2);
+      text(16,96,'TARGET X',p.gray,p.panel,1); text(132,96,(errx<0?'-':'+')+String(Math.abs(errx)).padStart(3,'0'),p.cyan,p.panel,1);
+      text(16,114,'TARGET Y',p.gray,p.panel,1); text(132,114,(erry<0?'-':'+')+String(Math.abs(erry)).padStart(3,'0'),p.cyan,p.panel,1);
+      const stateColor=visualState==='tracking'?p.amber:visualState==='locked'?p.green:visualState==='fault'?0xf800:p.cyan;
+      const stateText=statusMap[visualState][0];
+      const stateWidth=stateText.length*12;
+      fill(48,202,144,36,p.panel); border(48,202,144,36,stateColor); text((240-stateWidth)/2,211,stateText,stateColor,p.panel,2);
+      const startColor=running?p.amber:p.gray, endColor=running?p.gray:p.amber;
+      fill(8,242,108,36,p.panel); border(8,242,108,36,startColor); text(30,256,'START',startColor,p.panel,1);
+      fill(124,242,108,36,p.panel); border(124,242,108,36,endColor); text(152,256,'STOP',endColor,p.panel,1);
+      text(72,300,'DESIGNED BY JZX',p.gray,p.bg,1);
+    }
+    const formatTime=value=>{const h=String(Math.floor(value/3600)).padStart(2,'0'),m=String(Math.floor(value%3600/60)).padStart(2,'0'),s=String(value%60).padStart(2,'0');return `${h}:${m}:${s}`;};
+    document.querySelectorAll('.choice').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.choice').forEach(item=>item.classList.remove('active'));button.classList.add('active');scheme=button.dataset.scheme;note.textContent=schemeNotes[scheme];render();}));
+    document.querySelectorAll('.status-choice').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.status-choice').forEach(item=>item.classList.remove('active'));button.classList.add('active');visualState=button.dataset.status;render();}));
+    document.querySelector('#start').addEventListener('click',()=>{running=true;render();});
+    document.querySelector('#end').addEventListener('click',()=>{running=false;render();});
+    screen.addEventListener('click',event=>{
+      const rect=screen.getBoundingClientRect();
+      const x=(event.clientX-rect.left)*240/rect.width;
+      const y=(event.clientY-rect.top)*320/rect.height;
+      if(y>=242&&y<278){running=x<120;render();}
+    });
+    setInterval(()=>{if(!running)return;seconds+=1;const phase=seconds%12;errx=-120+phase*4;erry=46+phase*2;render();},1000);
+    render();
   </script>
 </body>
 </html>
