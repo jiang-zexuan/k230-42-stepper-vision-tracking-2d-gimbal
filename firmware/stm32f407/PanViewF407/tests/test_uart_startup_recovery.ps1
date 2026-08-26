@@ -5,7 +5,7 @@ $ioc = Get-Content (Join-Path $projectRoot 'PanViewF407.ioc') -Raw
 $usart = Get-Content (Join-Path $projectRoot 'Core/Src/usart.c') -Raw
 $main = Get-Content (Join-Path $projectRoot 'Core/Src/main.c') -Raw
 
-if ($ioc -notmatch '(?m)^PA3\.GPIO_PuPd=GPIO_PULLUP$') {
+if ($ioc -notmatch '(?m)^PA3\.GPIO_PuPd=GPIO_PULLUP\r?$') {
     throw 'PA3 must be configured with an internal pull-up in the CubeMX source of truth.'
 }
 
