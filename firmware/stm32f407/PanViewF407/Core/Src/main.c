@@ -73,6 +73,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+typedef enum
+{
+  PANVIEW_SAFETY_CLEAR = 0,
+  PANVIEW_SAFETY_VISION_TIMEOUT,
+  PANVIEW_SAFETY_LIMIT,
+  PANVIEW_SAFETY_CONTROL_STALE
+} PanViewSafetyFault;
+
+static volatile PanViewSafetyFault safety_fault_latched = PANVIEW_SAFETY_CLEAR;
+
 /* 启动后通过 USART1 输出，作为串口链路可用的第一条证据。 */
 static uint8_t boot_message[] = "PanView P10 boot\r\n";
 static uint8_t motor_ttl_probe_request[] = {0x00U, 0x15U, 0x6BU};
@@ -109,16 +119,6 @@ enum {
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-typedef enum
-{
-  PANVIEW_SAFETY_CLEAR = 0,
-  PANVIEW_SAFETY_VISION_TIMEOUT,
-  PANVIEW_SAFETY_LIMIT,
-  PANVIEW_SAFETY_CONTROL_STALE
-} PanViewSafetyFault;
-
-static volatile PanViewSafetyFault safety_fault_latched = PANVIEW_SAFETY_CLEAR;
-
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
@@ -128,6 +128,8 @@ static void PublishRelativePosition(const char *reason);
 static void Pitch_EnableHold(void);
 static const char *PanView_SafetyFaultText(PanViewSafetyFault fault);
 static void PanView_SafetyStop(PanViewSafetyFault fault);
+static void HitIndicator_Off(void);
+static void HitIndicator_Service(void);
 
 /* USER CODE END PFP */
 
@@ -311,6 +313,7 @@ static bool visual_state_initialized;
 static uint32_t visual_lock_candidate_tick;
 static uint32_t visual_audio_last_tick;
 static bool visual_audio_played;
+static bool hit_indicator_active;
 static bool tft_ready;
 static bool touch_ready;
 static uint16_t ui_touch_raw_x;
@@ -1361,9 +1364,12 @@ static bool VisualState_PlayHitAudio(uint32_t current_tick)
 
   if (!AudioPlayer_Play(PANVIEW_AUDIO_HIT))
   {
+    HitIndicator_Off();
     return false;
   }
 
+  HAL_GPIO_WritePin(HIT_INDICATOR_GPIO_Port, HIT_INDICATOR_Pin, GPIO_PIN_SET);
+  hit_indicator_active = true;
   visual_audio_last_tick = current_tick;
   visual_audio_played = true;
   length = snprintf(message, sizeof(message), "AUDIO effect=hit\\r\\n");
@@ -1373,6 +1379,20 @@ static bool VisualState_PlayHitAudio(uint32_t current_tick)
                             BOOT_LOG_TIMEOUT_MS);
   }
   return true;
+}
+
+static void HitIndicator_Off(void)
+{
+  HAL_GPIO_WritePin(HIT_INDICATOR_GPIO_Port, HIT_INDICATOR_Pin, GPIO_PIN_RESET);
+  hit_indicator_active = false;
+}
+
+static void HitIndicator_Service(void)
+{
+  if (hit_indicator_active && !AudioPlayer_IsBusy())
+  {
+    HitIndicator_Off();
+  }
 }
 
 static bool VisualState_AtLimitFault(void)
@@ -1549,6 +1569,7 @@ static void VisualState_Update(uint32_t current_tick)
 
 static void TouchUi_StopAllMotion(void)
 {
+  HitIndicator_Off();
   VisualPan_StopHardware();
   VisualPitch_StopHardware();
   if (dual_test_running)
@@ -1596,6 +1617,7 @@ static void PanView_SafetyStop(PanViewSafetyFault fault)
   }
 
   safety_fault_latched = fault;
+  HitIndicator_Off();
   VisualPan_StopHardware();
   VisualPitch_StopHardware();
   if (dual_test_running)
@@ -1736,6 +1758,7 @@ void PanView_AppStep(void)
 {
     uint32_t current_tick = HAL_GetTick();
     last_pan_view_step_tick = current_tick;
+    HitIndicator_Service();
     if (k230_uart_rx_restart_pending && StartK230UartRxDma())
     {
       k230_uart_rx_restart_pending = false;
@@ -2519,6 +2542,8 @@ int main(void)
   heartbeat_count = 0U;
   last_pan_view_step_tick = HAL_GetTick();
   safety_fault_latched = PANVIEW_SAFETY_CLEAR;
+  hit_indicator_active = false;
+  HitIndicator_Off();
 
   /* KEY0 为低有效：读到 RESET 表示已按下。 */
   DebouncedButton_Init(&key0_button,

@@ -22,13 +22,13 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include "iwdg.h"
 #include "usart.h"
 #include <stdio.h>
 #include <stdbool.h>
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
@@ -183,6 +183,7 @@ void MX_FREERTOS_Init(void) {
   safetyTaskHandle = osThreadNew(SafetyTask, NULL, &safetyTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
+  /* USER CODE BEGIN RTOS_EVENTS */
   /* 任务创建失败时不要静默进入半启动状态；这条日志用于区分堆不足、
    * 调度器未启动和任务运行异常。 */
   {
@@ -201,8 +202,6 @@ void MX_FREERTOS_Init(void) {
                               (uint16_t)length, 100U);
     }
   }
-
-  /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
@@ -235,12 +234,12 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_StartTask02 */
 void StartTask02(void *argument)
 {
+  /* USER CODE BEGIN StartTask02 */
   uint32_t heartbeat = 0U;
   uint32_t previous_pan_view_step_count = 0U;
   char message[360];
 
   (void)argument;
-  /* USER CODE BEGIN StartTask02 */
   for(;;)
   {
     uint32_t current_pan_view_step_count = pan_view_step_count;
@@ -312,6 +311,8 @@ void StartTask02(void *argument)
   /* USER CODE END StartTask02 */
 }
 
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
 HAL_StatusTypeDef PanView_Uart1Transmit(UART_HandleTypeDef *huart,
                                         uint8_t *data,
                                         uint16_t size,
@@ -338,8 +339,6 @@ HAL_StatusTypeDef PanView_Uart1Transmit(UART_HandleTypeDef *huart,
   return transmit_status;
 }
 
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
 void PanViewTask(void *argument)
 {
   (void)argument;

@@ -99,6 +99,8 @@ void PanView_RtosProcessUiEvents(void);
 #define TFT_LCD_CS_GPIO_Port GPIOC
 #define BOARD_STATUS_LED_Pin GPIO_PIN_9
 #define BOARD_STATUS_LED_GPIO_Port GPIOF
+#define HIT_INDICATOR_Pin GPIO_PIN_10
+#define HIT_INDICATOR_GPIO_Port GPIOF
 #define BOARD_KEY_UP_Pin GPIO_PIN_0
 #define BOARD_KEY_UP_GPIO_Port GPIOA
 #define TFT_LCD_DC_Pin GPIO_PIN_5
