@@ -17,9 +17,9 @@ PanView 是一套基于 K230 视觉模块与 42 步进电机的视觉跟踪二�
 
 ### 整机演示视频
 
-> **▶ 点击播放 / 下载整机演示视频**
+> **⬇ 点击下载整机演示视频文件**
 >
-> [![播放 PanView 整机演示视频](https://img.shields.io/badge/▶_播放整机演示视频-FFB000?style=for-the-badge&logo=github&logoColor=111111)](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/raw/refs/heads/main/docs/assets/panview-demo.mp4)
+> [![下载 PanView 整机演示视频文件](https://img.shields.io/badge/⬇_下载整机演示视频文件-FFB000?style=for-the-badge&logo=github&logoColor=111111)](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/raw/refs/heads/main/docs/assets/panview-demo.mp4)
 >
 > 如果浏览器不直接播放，可使用备用入口：[在 GitHub 文件页打开视频](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-demo.mp4)
 
