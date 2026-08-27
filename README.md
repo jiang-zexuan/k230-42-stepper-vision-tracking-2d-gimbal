@@ -8,12 +8,12 @@ PanView 是一套基于 K230 视觉模块与 42 步进电机的视觉跟踪二�
 
 | 整机与控制台 | 云台与目标跟踪 |
 | --- | --- |
-| ![PanView 整机总览](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-assembly-overview.jpg) | ![PanView 目标跟踪](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-target-tracking.jpg) |
-| ![PanView 控制板与显示界面](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-controller-and-display.jpg) | ![PanView 命中状态界面](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-tft-hit-screen.jpg) |
+| ![PanView 整机总览](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-assembly-overview.jpg?raw=true) | ![PanView 目标跟踪](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-target-tracking.jpg?raw=true) |
+| ![PanView 控制板与显示界面](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-controller-and-display.jpg?raw=true) | ![PanView 命中状态界面](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-tft-hit-screen.jpg?raw=true) |
 
 | 结构细节 | 最终装配 |
 | --- | --- |
-| ![PanView 云台正面](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-gimbal-front.jpg) | ![PanView 最终装配](https://raw.githubusercontent.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/main/docs/assets/panview-final-assembly.jpg) |
+| ![PanView 云台正面](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-gimbal-front.jpg?raw=true) | ![PanView 最终装配](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-final-assembly.jpg?raw=true) |
 
 [查看整机演示视频（MP4）](docs/assets/panview-demo.mp4)
 
