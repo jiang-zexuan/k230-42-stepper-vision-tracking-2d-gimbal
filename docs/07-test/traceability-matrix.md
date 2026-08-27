@@ -22,5 +22,5 @@
 | REQ-003 | `vision_text_result_parser.c`、`main.c` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | K230 无目标帧和目标帧均可进入状态机；实际帧率待本轮记录 |
 | REQ-004 | `main.c`：`VISUAL_TARGET_TIMEOUT_MS`、`VisualState_Update()` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | 设计为 300 ms 超时进入 `LOST`；精确现场时延待验证 |
 | REQ-006 | `main.c`：`visual_lock_candidate_tick`、`VISUAL_LOCK_HOLD_MS` | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志、TFT 状态 | 设计为中心 500 ms 后进入 `LOCKED`；实测待补录 |
-| REQ-007 | `ili9341.c`、`main.c` | `docs/07-test/TEST-0010-p10-f407-tft-pure-color.md`、`TEST-0012-p10-dual-axis-visual-state-machine.md` | TFT 纯色记录、P10 状态机日志 | 以屏幕颜色提示状态，不使用主动光学发射器 |
+| REQ-007 | `ili9341.c`、`main.c`、音频与 PF10 控制代码 | `docs/07-test/TEST-0010-p10-f407-tft-pure-color.md`、`TEST-0012-p10-dual-axis-visual-state-machine.md` | TFT、命中特效音和光学指示实测日志 | 命中期间开启 PF10 指示，音效结束或安全停止时关闭 |
 | REQ-008 | `main.c`：`VIS state=...`、K230 汇总日志 | `docs/07-test/TEST-0012-p10-dual-axis-visual-state-machine.md` | 待保存 P10 状态机日志 | 状态、通信计数和错误原因均有日志路径，长时间运行待验证 |

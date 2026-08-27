@@ -5,7 +5,7 @@
 | 层 | 职责 |
 | --- | --- |
 | BSP | GPIO、UART、DMA、定时器、步进脉冲。 |
-| Drivers | TMC2209、K230 协议、日志接口。 |
+| Drivers | X42S STEP/DIR/EN、K230 协议、日志接口。 |
 | Services | 运动规划、位置估算、目标跟踪、故障管理。 |
 | App | FreeRTOS 任务与系统状态机。 |
 

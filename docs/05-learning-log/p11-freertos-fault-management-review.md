@@ -276,7 +276,7 @@ InputTask 拆分已通过本轮现场验收：任务创建成功、触摸事件�
 
 - `PanViewTask` 超过 200 ms 没有更新控制心跳：`control_task_stale`；
 - K230 有效结果超过 300 ms 没有到达：`vision_timeout`；
-- 下一步位置将越过水平 ±90° 或俯仰 ±45° 软件限位：`software_limit`。
+- 下一步位置将越过水平或俯仰 ±90° 软件限位：`software_limit`（早期记录中的俯仰 ±45° 已由 P12 更新）。
 
 触发后直接停止两路 STEP、释放两路 EN、清除位置有效标志、复位跟踪控制器，并锁存 `FAULT` 状态。再次启动前必须重新人工回中；故障原因由 `TelemetryTask` 在 `K230 state=... safety=...` 中输出。`configTOTAL_HEAP_SIZE` 已从 20480 增加到 24576 字节，为新增任务保留创建空间。
 

@@ -15,7 +15,11 @@ PanView 是一套基于 K230 视觉模块与 42 步进电机的视觉跟踪二�
 | --- | --- |
 | ![PanView 云台正面](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-gimbal-front.jpg?raw=true) | ![PanView 最终装配](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-final-assembly.jpg?raw=true) |
 
-[查看整机演示视频（MP4）](docs/assets/panview-demo.mp4)
+### 整机演示视频
+
+> **▶ 点击播放 / 下载整机演示视频**
+>
+> [![播放 PanView 整机演示视频](https://img.shields.io/badge/▶_播放整机演示视频-FFB000?style=for-the-badge&logo=github&logoColor=111111)](https://github.com/jiang-zexuan/k230-42-stepper-vision-tracking-2d-gimbal/blob/main/docs/assets/panview-demo.mp4?raw=true)
 
 ## 功能概览
 
@@ -28,9 +32,9 @@ PanView 是一套基于 K230 视觉模块与 42 步进电机的视觉跟踪二�
 
 ## 系统边界
 
-K230 摄像头检测结果经 UART 发送给 F407；F407 以 STEP/DIR 控制两路闭环步进电机。X42S 驱动器内部带磁编码器和 FOC 闭环，当前 F407 已通过 USART3 TTL 读取水平轴反馈用于诊断，控制坐标仍按人工回中后的脉冲累计。当前装配约束下，水平轴软件范围设计为 -90 到 +90 度；俯仰轴数值范围尚待机械行程核验，不能据此假设无限旋转。零点先由人工回中建立，位置可信度丢失后必须重新回中。
+K230 摄像头检测结果经 UART 发送给 F407；F407 以 STEP/DIR 控制两路闭环步进电机。X42S 驱动器内部带磁编码器和 FOC 闭环，当前 F407 已通过 USART3 TTL 读取水平轴反馈用于诊断，控制坐标仍按人工回中后的脉冲累计。当前最终装配下，水平轴和俯仰轴软件范围均为 -90 到 +90 度；该范围是软件安全边界，不等同于允许机械无限旋转。零点先由人工回中建立，位置可信度丢失后必须重新回中。
 
-第一版只提供屏幕准星、LED 或蜂鸣器锁定提示，不包含主动光学发射器。
+系统提供屏幕、音效和受控光学指示模块等命中反馈；光学指示模块由 PF10 控制，仅在命中提示期间开启，并在音效结束、停止、故障或复位时关闭。项目不涉及激光瞄准、危险光源或自主安全决策。
 
 ## 当前基线
 
