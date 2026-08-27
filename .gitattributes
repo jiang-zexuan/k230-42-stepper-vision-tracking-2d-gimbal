@@ -9,3 +9,6 @@ firmware/stm32f407/PanViewF407/Core/Inc/usart.h whitespace=-blank-at-eof
 # Preserve CanMV IDE prompts in raw P04 evidence without treating their final space as an error.
 evidence/serial-logs/exp-0005-p04-k230-confidence-check.log whitespace=-trailing-space
 evidence/serial-logs/exp-0005-p04-k230-lcd-result.log whitespace=-trailing-space
+firmware/stm32f407/PanViewF407/Drivers/** whitespace=-trailing-space,-space-before-tab,-blank-at-eof
+firmware/stm32f407/PanViewF407/Middlewares/** whitespace=-trailing-space,-space-before-tab,-blank-at-eof
+firmware/stm32f407/PanViewF407/startup_stm32f407xx.s whitespace=-trailing-space,-space-before-tab,-blank-at-eof

@@ -1,8 +1,30 @@
 # 基于 K230 视觉模块与 42 步进电机的视觉跟踪二维云台
 
-PanView：基于 K230 视觉模块与 42 步进电机的视觉跟踪二维云台学习项目。K230 负责视觉检测，STM32F407 负责通信、运动控制和安全保护。
+PanView 是一套基于 K230 视觉模块与 42 步进电机的视觉跟踪二维云台。K230 负责自定义目标检测，STM32F407 负责通信、双轴运动控制、界面交互与安全保护。
 
-当前状态：P01-P11 已完成阶段性实测并留存记录，P11 已完成 FreeRTOS 任务拆分、故障管理和 IWDG 正常运行验收；P12 已完成自定义目标模型接入、TFT 控制台 UI、主题切换、俯仰 ±90° 软件限位和视觉锁定滞回调参。P12 最新现场日志需单独归档后再作为本轮硬件证据。
+当前版本已完成自定义目标检测、UART 通信、双轴视觉跟踪、TFT 触摸控制台、音效与命中指示等功能，并保留各阶段的设计、实验和调试记录。
+
+## 实物展示
+
+| 整机与控制台 | 云台与目标跟踪 |
+| --- | --- |
+| ![PanView 整机总览](docs/assets/panview-assembly-overview.jpg) | ![PanView 目标跟踪](docs/assets/panview-target-tracking.jpg) |
+| ![PanView 控制板与显示界面](docs/assets/panview-controller-and-display.jpg) | ![PanView 命中状态界面](docs/assets/panview-tft-hit-screen.jpg) |
+
+| 结构细节 | 最终装配 |
+| --- | --- |
+| ![PanView 云台正面](docs/assets/panview-gimbal-front.jpg) | ![PanView 最终装配](docs/assets/panview-final-assembly.jpg) |
+
+[查看整机演示视频（MP4）](docs/assets/panview-demo.mp4)
+
+## 功能概览
+
+- K230 运行自定义训练的目标检测模型，并通过模块专用 UART 接口向 F407 输出目标位置。
+- F407 采用 FreeRTOS 分任务处理通信、视觉状态、双轴运动、TFT/触摸和安全看门狗。
+- 两路 X42S 闭环步进电机使用 STEP/DIR/EN 控制：水平轴与俯仰轴均采用 ±90° 软件限位。
+- 跟踪控制包含 PID、速度斜率限制、死区与锁定滞回，降低目标到位后的往复抖动。
+- 2.8 英寸 SPI TFT 提供运行状态、目标 X/Y 误差、运行时间、启动/停止和主题切换。
+- 命中状态触发提示音，并以 PF10 控制普通光线指示模块；音效结束后自动关闭指示。
 
 ## 系统边界
 
