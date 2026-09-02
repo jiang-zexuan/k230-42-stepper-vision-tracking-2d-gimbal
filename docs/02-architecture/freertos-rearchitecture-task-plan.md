@@ -3,7 +3,8 @@
 - 项目：基于 K230 视觉模块与 42 步进电机的视觉跟踪二维云台（PanView）
 - 规划日期：2026-09-02
 - 开发分支：`feature/freertos-rearchitecture`
-- 新工程目录：`E:\Fluushbonading\FreeRTOS\Project\PanView`
+- 新工程工作区：`E:\Fluushbonading\FreeRTOS\Project\PanView`
+- CubeMX/CMake 工程目录：`E:\Fluushbonading\FreeRTOS\Project\PanView\PanView`
 - 旧工程目录：`firmware/stm32f407/PanViewF407`
 - 规划状态：设计草案，待逐节实施和验收
 
@@ -35,7 +36,7 @@
 
 ### 新工程：逐步重建（E 盘独立工程）
 
-新工程路径为 `E:\Fluushbonading\FreeRTOS\Project\PanView`，由 CubeMX 生成基础 HAL/FreeRTOS 工程，CLion 使用 CMake 构建。应用代码按以下边界组织：
+新工程工作区为 `E:\Fluushbonading\FreeRTOS\Project\PanView`，当前 CubeMX/CMake 工程位于其下的 `PanView` 子目录，由 CubeMX 生成基础 HAL/FreeRTOS 工程，CLion 使用 CMake 构建。应用代码按以下边界组织：
 
 ```text
 Core/                 CubeMX 启动代码和底层入口
@@ -94,7 +95,7 @@ SafetyTask -> 事件标志、直接停机、健康时刷新 IWDG
 工作内容：
 
 - 在 `feature/freertos-rearchitecture` 分支工作。
-- 在 `E:\Fluushbonading\FreeRTOS\Project\PanView` 生成新的 `.ioc`、CMake 和启动工程。
+- 在 `E:\Fluushbonading\FreeRTOS\Project\PanView\PanView` 生成新的 `.ioc`、CMake 和启动工程。
 - 复制或配置必要的 HAL/FreeRTOS 依赖，但不复制旧 `main.c` 业务逻辑。
 - 记录芯片、时钟、UART、DMA、TIM、IWDG 和调试下载配置。
 
@@ -211,4 +212,4 @@ API 重点：`HAL_UARTEx_ReceiveToIdle_DMA`、`osThreadFlagsSet` 或任务通知
 
 ## 7. 当前下一步
 
-规划书确认后，从 T00 开始：在 `E:\Fluushbonading\FreeRTOS\Project\PanView` 生成新 CubeMX 工程和 CLion/CMake 构建骨架，完成一次空应用编译和下载，不迁移业务代码。
+规划书确认后，从 T00 开始：在 `E:\Fluushbonading\FreeRTOS\Project\PanView\PanView` 生成新 CubeMX 工程和 CLion/CMake 构建骨架，完成一次空应用编译和下载，不迁移业务代码。
