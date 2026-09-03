@@ -31,6 +31,9 @@
 #include "panview_task_heartbeat.h"
 #include "panview_messages.h"
 #include "panview_message_bus.h"
+#include "panview_uart_rx.h"
+#include "usart.h"
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -270,6 +273,9 @@ void MX_FREERTOS_Init(void) {
 
   /* 初始化消息总线；本步暂不由任务发送或读取视觉结果。 */
   (void)PanView_MessageBus_Init();
+  /* 初始化并启动 K230 串口接收。 */
+  PanView_UartRx_Init();
+  (void)PanView_UartRx_Start();
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -404,10 +410,20 @@ void StartVisionRxTask(void *argument)
 
   /* 保存下一轮视觉接收任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  uint8_t received_data[PANVIEW_UART_RX_BUFFER_SIZE];
 
   /* Infinite loop */
   for(;;)
   {
+    /* 暂时只消费串口通知，真正的文本解析放到后续步骤。 */
+    (void)osThreadFlagsWait(PANVIEW_UART_RX_FLAG_DATA_READY, osFlagsWaitAny, 0U);
+
+    /* 把环形缓冲区中当前积压的字节全部取走。 */
+    while (PanView_UartRx_Read(received_data, sizeof(received_data)) > 0U)
+    {
+      /* T04 只验证传输链路，T05 再解析这些字节。 */
+    }
+
     /* 执行一次视觉接收任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_VISION_RX,
                                  HAL_GetTick());
@@ -602,6 +618,8 @@ void StartTelemetryTask(void *argument)
 
   /* 保存下一轮遥测任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  uint8_t uart_log_divider = 0U;
+  char uart_log[160];
 
   /* Infinite loop */
   for(;;)
@@ -615,6 +633,34 @@ void StartTelemetryTask(void *argument)
     /* 执行一次遥测任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_TELEMETRY,
                                  HAL_GetTick());
+
+    /* TelemetryTask 每 500 ms 运行一次，两次循环输出一条 T04 状态。 */
+    uart_log_divider++;
+    if (uart_log_divider >= 2U)
+    {
+      PanViewUartRxBuffer *uart_rx = PanView_UartRx_GetBuffer();
+      int uart_log_length;
+
+      uart_log_divider = 0U;
+      uart_log_length = snprintf(uart_log, sizeof(uart_log),
+                                 "T04 chunks=%lu bytes=%lu used=%u dropped=%lu uart_err=%lu len=%u arm=%lu/%lu start=%lu\r\n",
+                                 (unsigned long)uart_rx->chunk_count,
+                                 (unsigned long)uart_rx->received_byte_count,
+                                 (unsigned int)PanView_RingBuffer_GetUsed(&uart_rx->ring_buffer),
+                                 (unsigned long)uart_rx->dropped_byte_count,
+                                 (unsigned long)uart_rx->error_count,
+                                 (unsigned int)uart_rx->last_length,
+                                 (unsigned long)uart_rx->start_success_count,
+                                 (unsigned long)uart_rx->start_attempt_count,
+                                 (unsigned long)uart_rx->last_start_status);
+
+      /* 日志从 USART1 输出，最长等待 20 ms，避免长期阻塞遥测任务。 */
+      if ((uart_log_length > 0) && (uart_log_length < (int)sizeof(uart_log)))
+      {
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)uart_log,
+                                (uint16_t)uart_log_length, 20U);
+      }
+    }
 
     /* 计算下一轮的计划时刻，保持低优先级遥测按较低频率运行。 */
     next_wake_tick += TELEMETRY_TASK_PERIOD_TICKS;

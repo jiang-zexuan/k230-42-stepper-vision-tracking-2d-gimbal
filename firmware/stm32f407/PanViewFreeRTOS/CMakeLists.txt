@@ -46,6 +46,8 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/panview_task_heartbeat.c
     App/Src/panview_message_bus.c
+    App/Src/panview_uart_rx.c
+    App/Src/panview_ring_buffer.c
 )
 
 # Add include paths

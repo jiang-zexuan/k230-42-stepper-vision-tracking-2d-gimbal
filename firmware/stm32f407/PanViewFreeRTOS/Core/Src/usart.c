@@ -19,6 +19,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
+#include "panview_uart_rx.h"
+#include "cmsis_os.h"
+
+extern osThreadId_t VisionRxTaskHandle;
 
 /* USER CODE BEGIN 0 */
 
@@ -317,5 +321,28 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+  if (huart == &huart2)
+  {
+    /* 只处理来自 K230 的 USART2 数据。 */
+    PanView_UartRx_OnReceive(Size);
+    /* 告诉 VisionRxTask：缓冲区里有一段新数据。 */
+    (void)osThreadFlagsSet(VisionRxTaskHandle, PANVIEW_UART_RX_FLAG_DATA_READY);
+    /* 一段数据处理完后，立即准备接收下一段。 */
+    (void)PanView_UartRx_Start();
+  }
+}
+
+/* UART 出现帧错误、噪声或溢出时，记录错误并重新开始接收。 */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == &huart2)
+  {
+    PanView_UartRx_OnError(huart->ErrorCode);
+    (void)PanView_UartRx_Start();
+  }
+}
 
 /* USER CODE END 1 */
