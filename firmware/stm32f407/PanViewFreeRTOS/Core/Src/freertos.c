@@ -34,8 +34,10 @@
 #include "panview_uart_rx.h"
 #include "panview_text_line.h"
 #include "panview_pv04_parser.h"
+#include "panview_motion.h"
 #include "usart.h"
 #include <stdio.h>
+#include <string.h>
 
 /* 栈溢出时由 FreeRTOS 钩子写入，调试器可直接查看。 */
 volatile uint32_t panview_stack_overflow_marker = 0U;
@@ -446,6 +448,8 @@ void StartVisionRxTask(void *argument)
         {
           if (PanView_Pv04_Parse(line, &vision_result) != 0U)
           {
+            vision_result.received_tick_ms = HAL_GetTick();
+            (void)PanView_MessageBus_PublishVisionResult(&vision_result);
             uint32_t now = HAL_GetTick();
             if ((uint32_t)(now - last_log_tick) >= 500U)
             {
@@ -510,10 +514,64 @@ void StartMotionTask(void *argument)
 
   /* 保存下一轮运动任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  VisionResult latest_vision;
+  MotionCommand target_command;
+  MotionCommand shadow_command;
+  int16_t error_x_px;
+  int16_t error_y_px;
+  uint8_t target_locked = 0U;
+  uint32_t last_shadow_log_tick = 0U;
+
+  (void)memset(&latest_vision, 0, sizeof(latest_vision));
+  (void)memset(&target_command, 0, sizeof(target_command));
+  (void)memset(&shadow_command, 0, sizeof(shadow_command));
 
   /* Infinite loop */
   for(;;)
   {
+    /* 如果队列中有新结果，就替换 latest_vision；没有则继续使用最新值。 */
+    (void)PanView_MessageBus_ReadVisionResult(&latest_vision);
+
+    PanView_Motion_CalculateError(&latest_vision, &error_x_px, &error_y_px);
+    target_locked = PanView_Motion_UpdateLock(
+        latest_vision.target_present, error_x_px, error_y_px, target_locked);
+    PanView_Motion_CreateCommand(&latest_vision, HAL_GetTick(),
+                                 &target_command);
+
+    /* 锁定表示目标已在中心附近，因此本轮目标速度设为零。 */
+    if (target_locked != 0U)
+    {
+      target_command.pan_speed_steps_per_second = 0;
+      target_command.pitch_speed_steps_per_second = 0;
+    }
+
+    /* 根据上一轮 shadow_command，限制本轮速度的最大变化量。 */
+    PanView_Motion_ApplySlewRate(&target_command, &shadow_command,
+                                 &shadow_command);
+
+    /* T06-4 验证期每 100 ms 打印一次，便于看见速度逐步接近目标。 */
+    if ((uint32_t)(HAL_GetTick() - last_shadow_log_tick) >= 100U)
+    {
+      char motion_log[128];
+      int motion_log_length = snprintf(
+          motion_log, sizeof(motion_log),
+          "T06_SHADOW target=%u locked=%u err_x=%d err_y=%d "
+          "target_pan=%ld pan=%ld "
+          "target_pitch=%ld pitch=%ld\r\n",
+          latest_vision.target_present, target_locked, error_x_px, error_y_px,
+          (long)target_command.pan_speed_steps_per_second,
+          (long)shadow_command.pan_speed_steps_per_second,
+          (long)target_command.pitch_speed_steps_per_second,
+          (long)shadow_command.pitch_speed_steps_per_second);
+      last_shadow_log_tick = HAL_GetTick();
+      if ((motion_log_length > 0) &&
+          (motion_log_length < (int)sizeof(motion_log)))
+      {
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)motion_log,
+                                (uint16_t)motion_log_length, 20U);
+      }
+    }
+
     /* 执行一次运动任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_MOTION,
                                  HAL_GetTick());
