@@ -48,6 +48,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/panview_message_bus.c
     App/Src/panview_uart_rx.c
     App/Src/panview_ring_buffer.c
+    App/Src/panview_text_line.c
+    App/Src/panview_pv04_parser.c
 )
 
 # Add include paths

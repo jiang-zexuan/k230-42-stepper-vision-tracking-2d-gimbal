@@ -44,6 +44,13 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 
+/* HardFault 发生后保留故障信息，调试器可直接观察这些变量。 */
+volatile uint32_t panview_hardfault_marker = 0U;
+volatile uint32_t panview_hardfault_cfsr = 0U;
+volatile uint32_t panview_hardfault_hfsr = 0U;
+volatile uint32_t panview_hardfault_bfar = 0U;
+volatile uint32_t panview_hardfault_mmfar = 0U;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +99,14 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+
+  /* HFLT 标记表示程序确实进入了 HardFault_Handler。 */
+  panview_hardfault_marker = 0x48464C54U;
+  panview_hardfault_cfsr = SCB->CFSR;
+  panview_hardfault_hfsr = SCB->HFSR;
+  panview_hardfault_bfar = SCB->BFAR;
+  panview_hardfault_mmfar = SCB->MMFAR;
+  __disable_irq();
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)

@@ -52,6 +52,15 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
+/* 调试标记：发生 HardFault 或任务栈溢出时由处理函数写入。 */
+extern volatile uint32_t panview_hardfault_marker;
+extern volatile uint32_t panview_hardfault_cfsr;
+extern volatile uint32_t panview_hardfault_hfsr;
+extern volatile uint32_t panview_hardfault_bfar;
+extern volatile uint32_t panview_hardfault_mmfar;
+extern volatile uint32_t panview_stack_overflow_marker;
+extern volatile const char *panview_stack_overflow_task_name;
+
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

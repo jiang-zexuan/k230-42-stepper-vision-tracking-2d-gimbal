@@ -32,8 +32,14 @@
 #include "panview_messages.h"
 #include "panview_message_bus.h"
 #include "panview_uart_rx.h"
+#include "panview_text_line.h"
+#include "panview_pv04_parser.h"
 #include "usart.h"
 #include <stdio.h>
+
+/* 栈溢出时由 FreeRTOS 钩子写入，调试器可直接查看。 */
+volatile uint32_t panview_stack_overflow_marker = 0U;
+volatile const char *panview_stack_overflow_task_name = 0;
 
 /* USER CODE END Includes */
 
@@ -130,7 +136,8 @@ const osThreadAttr_t StepperTask_attributes = {
 osThreadId_t VisionRxTaskHandle;
 const osThreadAttr_t VisionRxTask_attributes = {
   .name = "VisionRxTask",
-  .stack_size = 512 * 4,
+  /* 完整 PV04 解析路径需要更大的临时调用栈，先保证任务稳定运行。 */
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for MotionTask */
@@ -411,6 +418,12 @@ void StartVisionRxTask(void *argument)
   /* 保存下一轮视觉接收任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
   uint8_t received_data[PANVIEW_UART_RX_BUFFER_SIZE];
+  PanViewTextLineAccumulator line_accumulator;
+  char line[PANVIEW_TEXT_LINE_CAPACITY];
+  VisionResult vision_result;
+  uint32_t last_log_tick = 0U;
+
+  PanView_TextLine_Init(&line_accumulator);
 
   /* Infinite loop */
   for(;;)
@@ -419,10 +432,54 @@ void StartVisionRxTask(void *argument)
     (void)osThreadFlagsWait(PANVIEW_UART_RX_FLAG_DATA_READY, osFlagsWaitAny, 0U);
 
     /* 把环形缓冲区中当前积压的字节全部取走。 */
-    while (PanView_UartRx_Read(received_data, sizeof(received_data)) > 0U)
+    uint16_t received_length;
+
+    while ((received_length = PanView_UartRx_Read(
+                received_data, sizeof(received_data))) > 0U)
     {
-      /* T04 只验证传输链路，T05 再解析这些字节。 */
+      uint16_t i;
+
+      for (i = 0U; i < received_length; i++)
+      {
+        if (PanView_TextLine_FeedByte(&line_accumulator, received_data[i],
+                                      line, sizeof(line)) != 0U)
+        {
+          if (PanView_Pv04_Parse(line, &vision_result) != 0U)
+          {
+            uint32_t now = HAL_GetTick();
+            if ((uint32_t)(now - last_log_tick) >= 500U)
+            {
+              char uart_log[160];
+              int log_length;
+              PanViewUartRxBuffer *uart_rx = PanView_UartRx_GetBuffer();
+
+              last_log_tick = now;
+              log_length = snprintf(
+                  uart_log, sizeof(uart_log),
+                  "PV05_OK t_ms=%lu target=%u count=%u cx=%d cy=%d rx_chunks=%lu rx_bytes=%lu\r\n",
+                  (unsigned long)vision_result.source_timestamp_ms,
+                  vision_result.target_present,
+                  vision_result.target_count,
+                  (int)vision_result.center_x_px,
+                  (int)vision_result.center_y_px,
+                  (unsigned long)uart_rx->chunk_count,
+                  (unsigned long)uart_rx->received_byte_count);
+
+              if ((log_length > 0) && (log_length < (int)sizeof(uart_log)))
+              {
+                (void)HAL_UART_Transmit(&huart1, (uint8_t *)uart_log,
+                                        (uint16_t)log_length, 20U);
+              }
+            }
+          }
+        }
+      }
     }
+
+    /* 记录 VisionRxTask 历史最低剩余栈空间，单位是 Words。 */
+    PanView_TaskHeartbeat_UpdateStack(
+        PANVIEW_HEARTBEAT_VISION_RX,
+        (uint32_t)uxTaskGetStackHighWaterMark(NULL));
 
     /* 执行一次视觉接收任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_VISION_RX,
@@ -639,11 +696,13 @@ void StartTelemetryTask(void *argument)
     if (uart_log_divider >= 2U)
     {
       PanViewUartRxBuffer *uart_rx = PanView_UartRx_GetBuffer();
+      const volatile PanViewHeartbeatRecord *vision_heartbeat =
+          PanView_TaskHeartbeat_Get(PANVIEW_HEARTBEAT_VISION_RX);
       int uart_log_length;
 
       uart_log_divider = 0U;
       uart_log_length = snprintf(uart_log, sizeof(uart_log),
-                                 "T04 chunks=%lu bytes=%lu used=%u dropped=%lu uart_err=%lu len=%u arm=%lu/%lu start=%lu\r\n",
+                                 "T04 chunks=%lu bytes=%lu used=%u dropped=%lu uart_err=%lu len=%u arm=%lu/%lu start=%lu vision_stack=%luW\r\n",
                                  (unsigned long)uart_rx->chunk_count,
                                  (unsigned long)uart_rx->received_byte_count,
                                  (unsigned int)PanView_RingBuffer_GetUsed(&uart_rx->ring_buffer),
@@ -652,7 +711,10 @@ void StartTelemetryTask(void *argument)
                                  (unsigned int)uart_rx->last_length,
                                  (unsigned long)uart_rx->start_success_count,
                                  (unsigned long)uart_rx->start_attempt_count,
-                                 (unsigned long)uart_rx->last_start_status);
+                                 (unsigned long)uart_rx->last_start_status,
+                                 (unsigned long)(vision_heartbeat != 0
+                                                     ? vision_heartbeat->stack_high_water_mark_words
+                                                     : 0U));
 
       /* 日志从 USART1 输出，最长等待 20 ms，避免长期阻塞遥测任务。 */
       if ((uart_log_length > 0) && (uart_log_length < (int)sizeof(uart_log)))
@@ -687,6 +749,25 @@ static void ArchitectureHeartbeat_RunOnce(void)
   /* 翻转状态灯，表示任务仍在正常运行。 */
   HAL_GPIO_TogglePin(BOARD_STATUS_LED_GPIO_Port,
                      BOARD_STATUS_LED_Pin);
+}
+
+/*
+ * FreeRTOS 栈溢出回调。
+ * configCHECK_FOR_STACK_OVERFLOW=2 时，检测到任务栈溢出会进入这里。
+ * 调试器中查看 marker 和 task_name，即可知道是否溢出以及哪个任务溢出。
+ */
+void vApplicationStackOverflowHook(TaskHandle_t task_handle,
+                                   char *task_name)
+{
+  (void)task_handle;
+  panview_stack_overflow_marker = 0x53544B4FU; /* ASCII: STKO */
+  panview_stack_overflow_task_name = task_name;
+  __disable_irq();
+
+  while (1)
+  {
+    /* 故意停在这里，方便调试器定位现场。 */
+  }
 }
 
 /* USER CODE END Application */
