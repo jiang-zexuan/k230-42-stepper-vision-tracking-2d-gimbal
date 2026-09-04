@@ -61,6 +61,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/ft6336g.c
     App/Src/audio_player.c
     App/Src/es8388.c
+    App/Src/panview_telemetry.c
     App/Src/hit.c
     Core/Src/iwdg.c
 )

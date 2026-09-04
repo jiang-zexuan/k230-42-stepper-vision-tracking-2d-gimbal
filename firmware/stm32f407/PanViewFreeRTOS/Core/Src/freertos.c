@@ -42,6 +42,7 @@
 #include "panview_ui.h"
 #include "ft6336g.h"
 #include "audio_player.h"
+#include "panview_telemetry.h"
 #include "tim.h"
 #include "iwdg.h"
 #include "usart.h"
@@ -53,9 +54,9 @@ volatile uint32_t panview_stack_overflow_marker = 0U;
 volatile const char *panview_stack_overflow_task_name = 0;
 
 /* MotionTask 写入、UiTask 读取的最新视觉显示数据。 */
-static volatile uint8_t panview_ui_target_present = 0U;
-static volatile int16_t panview_ui_error_x_px = 0;
-static volatile int16_t panview_ui_error_y_px = 0;
+volatile uint8_t panview_ui_target_present = 0U;
+volatile int16_t panview_ui_error_x_px = 0;
+volatile int16_t panview_ui_error_y_px = 0;
 
 /* USER CODE END Includes */
 
@@ -451,7 +452,7 @@ void StartStepperTask(void *argument)
     PanView_Stepper_Execute(&latest_command);
     PanView_Stepper_GetStatus(&stepper_status);
 
-    if ((uint32_t)(HAL_GetTick() - last_stepper_log_tick) >= 500U)
+    if (0 && ((uint32_t)(HAL_GetTick() - last_stepper_log_tick) >= 500U))
     {
       char stepper_log[128];
       int32_t pan_angle_deg =
@@ -539,7 +540,7 @@ void StartVisionRxTask(void *argument)
             vision_result.received_tick_ms = HAL_GetTick();
             (void)PanView_MessageBus_PublishVisionResult(&vision_result);
             uint32_t now = HAL_GetTick();
-            if ((uint32_t)(now - last_log_tick) >= 500U)
+            if (0 && ((uint32_t)(now - last_log_tick) >= 500U))
             {
               char uart_log[160];
               int log_length;
@@ -631,7 +632,8 @@ void StartMotionTask(void *argument)
      * 同一行同时保留输入坐标、计算误差和输出命令，便于判断突变
      * 最先发生在视觉输入、运动计算还是电机执行之前。
      */
-    if (vision_read_result == 0)
+    /* 暂时关闭 VISION_NEW 串口诊断输出，保留后续排查代码。 */
+    if (0 && (vision_read_result == 0))
     {
       int vision_log_length = snprintf(
           vision_log, sizeof(vision_log),
@@ -932,12 +934,13 @@ void StartTelemetryTask(void *argument)
   /* 保存下一轮遥测任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
   uint8_t uart_log_divider = 0U;
-  char uart_log[160];
+  char uart_log[512];
 
   /* Infinite loop */
   for(;;)
   {
     /* 读取当前 FreeRTOS 尚未使用的堆空间，供调试器观察。 */
+    PanViewTelemetrySnapshot telemetry;
     telemetry_free_heap_bytes = xPortGetFreeHeapSize();
 
     /* 由心跳模块统一读取所有任务的栈余量和 RTOS 状态。 */
@@ -951,26 +954,11 @@ void StartTelemetryTask(void *argument)
     uart_log_divider++;
     if (uart_log_divider >= 2U)
     {
-      PanViewUartRxBuffer *uart_rx = PanView_UartRx_GetBuffer();
-      const volatile PanViewHeartbeatRecord *vision_heartbeat =
-          PanView_TaskHeartbeat_Get(PANVIEW_HEARTBEAT_VISION_RX);
       int uart_log_length;
 
       uart_log_divider = 0U;
-      uart_log_length = snprintf(uart_log, sizeof(uart_log),
-                                 "T04 chunks=%lu bytes=%lu used=%u dropped=%lu uart_err=%lu len=%u arm=%lu/%lu start=%lu vision_stack=%luW\r\n",
-                                 (unsigned long)uart_rx->chunk_count,
-                                 (unsigned long)uart_rx->received_byte_count,
-                                 (unsigned int)PanView_RingBuffer_GetUsed(&uart_rx->ring_buffer),
-                                 (unsigned long)uart_rx->dropped_byte_count,
-                                 (unsigned long)uart_rx->error_count,
-                                 (unsigned int)uart_rx->last_length,
-                                 (unsigned long)uart_rx->start_success_count,
-                                 (unsigned long)uart_rx->start_attempt_count,
-                                 (unsigned long)uart_rx->last_start_status,
-                                 (unsigned long)(vision_heartbeat != 0
-                                                     ? vision_heartbeat->stack_high_water_mark_words
-                                                     : 0U));
+      PanView_Telemetry_Collect(&telemetry);
+      uart_log_length = PanView_Telemetry_Format(&telemetry, uart_log, sizeof(uart_log));
 
       /* 日志从 USART1 输出，最长等待 20 ms，避免长期阻塞遥测任务。 */
       if ((uart_log_length > 0) && (uart_log_length < (int)sizeof(uart_log)))
