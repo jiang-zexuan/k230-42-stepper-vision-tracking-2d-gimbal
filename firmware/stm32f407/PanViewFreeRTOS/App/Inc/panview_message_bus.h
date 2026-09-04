@@ -21,4 +21,10 @@ int PanView_MessageBus_PublishVisionResult(const VisionResult *result);
 /* 非阻塞读取最新视觉结果；当前没有新结果时返回 -1。 */
 int PanView_MessageBus_ReadVisionResult(VisionResult *result);
 
+/* 发布 MotionTask 生成的最新运动命令；旧命令会被新命令覆盖。 */
+int PanView_MessageBus_PublishMotionCommand(const MotionCommand *command);
+
+/* StepperTask 非阻塞读取最新运动命令；没有新命令时返回 -1。 */
+int PanView_MessageBus_ReadMotionCommand(MotionCommand *command);
+
 #endif /* PANVIEW_MESSAGE_BUS_H */

@@ -14,8 +14,15 @@ void PanView_Motion_CalculateError(const VisionResult *vision,
                                    int16_t *error_y_px);
 
 /* T06-2 的固定参数：误差单位 px，速度单位 step/s。 */
-#define PANVIEW_MOTION_DEAD_ZONE_PX 40
-#define PANVIEW_MOTION_GAIN_STEPS_PER_PIXEL 2
+#define PANVIEW_MOTION_DEAD_ZONE_PX 30
+/* 两条轴分别调节 P，修改俯仰参数时不会影响已经调好的水平轴。 */
+#define PANVIEW_MOTION_PAN_GAIN_STEPS_PER_PIXEL 2.5f
+#define PANVIEW_MOTION_PITCH_GAIN_STEPS_PER_PIXEL 2.5f
+#define PANVIEW_MOTION_I_GAIN 0.0f
+#define PANVIEW_MOTION_D_GAIN 0.0f
+#define PANVIEW_MOTION_INTEGRAL_LIMIT 200.0f
+#define PANVIEW_MOTION_MAX_ACCELERATION 5000.0f
+#define PANVIEW_MOTION_MAX_VISION_CHANGE_PX 100.0f
 #define PANVIEW_MOTION_MAX_SPEED_STEPS_PER_SECOND 800
 
 /* 每个 10 ms 运动周期允许速度改变的最大值，单位 step/s。 */
@@ -29,6 +36,10 @@ void PanView_Motion_CalculateError(const VisionResult *vision,
 void PanView_Motion_CreateCommand(const VisionResult *vision,
                                  uint32_t generated_tick_ms,
                                  MotionCommand *command);
+
+/* 限制相邻新视觉帧的中心坐标变化，过滤偶发的大幅跳变。 */
+void PanView_Motion_LimitVisionChange(const VisionResult *input,
+                                      VisionResult *filtered);
 
 /*
  * 让输出速度逐步接近目标速度，避免速度突然跳变。

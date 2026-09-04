@@ -4,6 +4,15 @@
 
 #include "panview_motion.h"
 
+/* 调参时两条轴必须拥有独立的 P 参数，避免修改俯仰时影响水平轴。 */
+#ifndef PANVIEW_MOTION_PAN_GAIN_STEPS_PER_PIXEL
+#error "Missing independent pan P gain"
+#endif
+
+#ifndef PANVIEW_MOTION_PITCH_GAIN_STEPS_PER_PIXEL
+#error "Missing independent pitch P gain"
+#endif
+
 static VisionResult make_result(uint8_t present, float center_x, float center_y)
 {
   VisionResult result;
@@ -45,12 +54,13 @@ int main(void)
   MotionCommand command;
   PanView_Motion_CreateCommand(&vision, 1234U, &command);
   assert(command.valid == 1U);
-  assert(command.pan_speed_steps_per_second == -320);
-  assert(command.pitch_speed_steps_per_second == 320);
+  /* 当前 P=2.5，因此 160 px 误差对应 400 step/s。 */
+  assert(command.pan_speed_steps_per_second == -400);
+  assert(command.pitch_speed_steps_per_second == 400);
 
   vision = make_result(1U, 1010.0f, 540.0f);
   PanView_Motion_CreateCommand(&vision, 1235U, &command);
-  assert(command.pan_speed_steps_per_second == 100);
+  assert(command.pan_speed_steps_per_second == 125);
 
   vision = make_result(1U, 1920.0f, 540.0f);
   PanView_Motion_CreateCommand(&vision, 1236U, &command);

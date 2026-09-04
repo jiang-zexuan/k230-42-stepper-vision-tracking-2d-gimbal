@@ -35,6 +35,8 @@
 #include "panview_text_line.h"
 #include "panview_pv04_parser.h"
 #include "panview_motion.h"
+#include "panview_stepper.h"
+#include "tim.h"
 #include "usart.h"
 #include <stdio.h>
 #include <string.h>
@@ -380,27 +382,85 @@ void StartSafetyTask(void *argument)
 void StartStepperTask(void *argument)
 {
   /* USER CODE BEGIN StartStepperTask */
-  /* 本区域用途：编写步进执行任务的初始化动作和永久循环逻辑。 */
-  /* 当前任务没有使用传入参数，显式标记可以避免编译器警告。 */
   (void)argument;
 
-  /* 保存下一轮步进执行任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  uint32_t last_stepper_log_tick = 0U;
+  MotionCommand latest_command;
+  PanViewStepperStatus stepper_status;
+  GPIO_PinState previous_key_up_state = GPIO_PIN_RESET;
+  uint32_t last_key_up_tick = HAL_GetTick() - 200U;
 
-  /* Infinite loop */
+  (void)memset(&latest_command, 0, sizeof(latest_command));
+  PanView_Stepper_Init();
+
   for(;;)
   {
-    /* 执行一次步进执行任务的最小心跳动作。 */
-    PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_STEPPER,
-                                 HAL_GetTick());
+    GPIO_PinState key_up_state =
+        HAL_GPIO_ReadPin(BOARD_KEY_UP_GPIO_Port, BOARD_KEY_UP_Pin);
 
-    /* 计算下一轮的计划时刻，保持任务按固定节拍运行。 */
+    /*
+     * KEY_UP 只报告一次有效按下：第一次确认零点并开始，再按则暂停。
+     * 200 ms 防抖可避免一次机械按键抖动被误认为连续两次切换。
+     */
+    if ((key_up_state == GPIO_PIN_SET) &&
+        (previous_key_up_state == GPIO_PIN_RESET) &&
+        ((uint32_t)(HAL_GetTick() - last_key_up_tick) >= 200U))
+    {
+      PanView_Stepper_ToggleSystemRun();
+      last_key_up_tick = HAL_GetTick();
+    }
+    previous_key_up_state = key_up_state;
+
+    /* StepperTask 只传递命令，速度渐变和硬件执行由步进模块负责。 */
+    (void)PanView_MessageBus_ReadMotionCommand(&latest_command);
+    PanView_Stepper_Execute(&latest_command);
+    PanView_Stepper_GetStatus(&stepper_status);
+
+    if ((uint32_t)(HAL_GetTick() - last_stepper_log_tick) >= 500U)
+    {
+      char stepper_log[128];
+      int32_t pan_angle_deg =
+          (stepper_status.pan_position_steps * 90) / 800;
+      int32_t pitch_angle_deg =
+          (stepper_status.pitch_position_steps * 90) / 800;
+      int stepper_log_length = snprintf(
+          stepper_log, sizeof(stepper_log),
+          "T07 run=%u v=%u pt=%ld pa=%ld qt=%ld qa=%ld pr=%u qr=%u x=%ld y=%ld "
+          "pan_deg=%ld pitch_deg=%ld\r\n",
+          stepper_status.system_running,
+          latest_command.valid,
+          (long)latest_command.pan_speed_steps_per_second,
+          (long)stepper_status.pan_applied_speed_steps_per_second,
+          (long)latest_command.pitch_speed_steps_per_second,
+          (long)stepper_status.pitch_applied_speed_steps_per_second,
+          stepper_status.pan_running,
+          stepper_status.pitch_running,
+          (long)stepper_status.pan_position_steps,
+          (long)stepper_status.pitch_position_steps,
+          (long)pan_angle_deg,
+          (long)pitch_angle_deg);
+
+      last_stepper_log_tick = HAL_GetTick();
+      if ((stepper_log_length > 0) &&
+          (stepper_log_length < (int)sizeof(stepper_log)))
+      {
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)stepper_log,
+                                (uint16_t)stepper_log_length, 20U);
+      }
+    }
+
+    PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_STEPPER, HAL_GetTick());
     next_wake_tick += STEPPER_TASK_PERIOD_TICKS;
-
-    /* 暂时按固定周期运行，后续接入运动命令后再扩展执行逻辑。 */
     osDelayUntil(next_wake_tick);
   }
   /* USER CODE END StartStepperTask */
+}
+
+/* RTOS 层只转发定时器事件，位置计算由步进模块负责。 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  PanView_Stepper_OnTimerElapsed(htim);
 }
 
 /* USER CODE BEGIN Header_StartVisionRxTask */
@@ -508,78 +568,65 @@ void StartVisionRxTask(void *argument)
 void StartMotionTask(void *argument)
 {
   /* USER CODE BEGIN StartMotionTask */
-  /* 本区域用途：编写运动任务的初始化动作和永久循环逻辑。 */
-  /* 当前任务没有使用传入参数，显式标记可以避免编译器警告。 */
   (void)argument;
 
-  /* 保存下一轮运动任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
   VisionResult latest_vision;
-  MotionCommand target_command;
-  MotionCommand shadow_command;
+  MotionCommand motion_command;
   int16_t error_x_px;
   int16_t error_y_px;
-  uint8_t target_locked = 0U;
-  uint32_t last_shadow_log_tick = 0U;
+  /* 诊断文本较长，使用任务独占的静态缓冲区，避免额外占用任务栈。 */
+  static char vision_log[192];
 
   (void)memset(&latest_vision, 0, sizeof(latest_vision));
-  (void)memset(&target_command, 0, sizeof(target_command));
-  (void)memset(&shadow_command, 0, sizeof(shadow_command));
+  (void)memset(&motion_command, 0, sizeof(motion_command));
 
-  /* Infinite loop */
   for(;;)
   {
-    /* 如果队列中有新结果，就替换 latest_vision；没有则继续使用最新值。 */
-    (void)PanView_MessageBus_ReadVisionResult(&latest_vision);
-
+    /*
+     * 干净调参基线：
+     * 只读取最新视觉结果，再由运动模块生成纯 P 命令。
+     * 此处不再叠加坐标限幅、目标防抖、锁定滞回和二次速度斜率。
+     */
+    int vision_read_result =
+        PanView_MessageBus_ReadVisionResult(&latest_vision);
     PanView_Motion_CalculateError(&latest_vision, &error_x_px, &error_y_px);
-    target_locked = PanView_Motion_UpdateLock(
-        latest_vision.target_present, error_x_px, error_y_px, target_locked);
     PanView_Motion_CreateCommand(&latest_vision, HAL_GetTick(),
-                                 &target_command);
+                                 &motion_command);
+    (void)PanView_MessageBus_PublishMotionCommand(&motion_command);
 
-    /* 锁定表示目标已在中心附近，因此本轮目标速度设为零。 */
-    if (target_locked != 0U)
+    /*
+     * 只在真正读到一份新视觉结果时打印，避免重复打印旧数据。
+     * 同一行同时保留输入坐标、计算误差和输出命令，便于判断突变
+     * 最先发生在视觉输入、运动计算还是电机执行之前。
+     */
+    if (vision_read_result == 0)
     {
-      target_command.pan_speed_steps_per_second = 0;
-      target_command.pitch_speed_steps_per_second = 0;
-    }
+      int vision_log_length = snprintf(
+          vision_log, sizeof(vision_log),
+          "VISION_NEW src=%lu rx=%lu target=%u count=%u cx=%d cy=%d "
+          "err_x=%d err_y=%d pan=%ld pitch=%ld\r\n",
+          (unsigned long)latest_vision.source_timestamp_ms,
+          (unsigned long)latest_vision.received_tick_ms,
+          latest_vision.target_present,
+          latest_vision.target_count,
+          (int)latest_vision.center_x_px,
+          (int)latest_vision.center_y_px,
+          error_x_px,
+          error_y_px,
+          (long)motion_command.pan_speed_steps_per_second,
+          (long)motion_command.pitch_speed_steps_per_second);
 
-    /* 根据上一轮 shadow_command，限制本轮速度的最大变化量。 */
-    PanView_Motion_ApplySlewRate(&target_command, &shadow_command,
-                                 &shadow_command);
-
-    /* T06-4 验证期每 100 ms 打印一次，便于看见速度逐步接近目标。 */
-    if ((uint32_t)(HAL_GetTick() - last_shadow_log_tick) >= 100U)
-    {
-      char motion_log[128];
-      int motion_log_length = snprintf(
-          motion_log, sizeof(motion_log),
-          "T06_SHADOW target=%u locked=%u err_x=%d err_y=%d "
-          "target_pan=%ld pan=%ld "
-          "target_pitch=%ld pitch=%ld\r\n",
-          latest_vision.target_present, target_locked, error_x_px, error_y_px,
-          (long)target_command.pan_speed_steps_per_second,
-          (long)shadow_command.pan_speed_steps_per_second,
-          (long)target_command.pitch_speed_steps_per_second,
-          (long)shadow_command.pitch_speed_steps_per_second);
-      last_shadow_log_tick = HAL_GetTick();
-      if ((motion_log_length > 0) &&
-          (motion_log_length < (int)sizeof(motion_log)))
+      if ((vision_log_length > 0) &&
+          (vision_log_length < (int)sizeof(vision_log)))
       {
-        (void)HAL_UART_Transmit(&huart1, (uint8_t *)motion_log,
-                                (uint16_t)motion_log_length, 20U);
+        (void)HAL_UART_Transmit(&huart1, (uint8_t *)vision_log,
+                                (uint16_t)vision_log_length, 20U);
       }
     }
 
-    /* 执行一次运动任务的最小心跳动作。 */
-    PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_MOTION,
-                                 HAL_GetTick());
-
-    /* 计算下一轮的计划时刻，保持运动计算按固定节拍运行。 */
+    PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_MOTION, HAL_GetTick());
     next_wake_tick += MOTION_TASK_PERIOD_TICKS;
-
-    /* 暂时按固定周期运行，后续接入视觉数据后继续保持固定节拍。 */
     osDelayUntil(next_wake_tick);
   }
   /* USER CODE END StartMotionTask */

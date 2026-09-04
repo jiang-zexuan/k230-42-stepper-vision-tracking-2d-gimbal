@@ -1,5 +1,57 @@
 #include "panview_motion.h"
 
+static float limit_float_change(float current, float previous)
+{
+  float difference = current - previous;
+
+  if (difference > PANVIEW_MOTION_MAX_VISION_CHANGE_PX)
+  {
+    return previous + PANVIEW_MOTION_MAX_VISION_CHANGE_PX;
+  }
+  if (difference < -PANVIEW_MOTION_MAX_VISION_CHANGE_PX)
+  {
+    return previous - PANVIEW_MOTION_MAX_VISION_CHANGE_PX;
+  }
+  return current;
+}
+
+void PanView_Motion_LimitVisionChange(const VisionResult *input,
+                                      VisionResult *filtered)
+{
+  static float previous_x = 0.0f;
+  static float previous_y = 0.0f;
+  static uint32_t previous_tick = 0U;
+
+  if ((input == 0) || (filtered == 0))
+  {
+    return;
+  }
+
+  *filtered = *input;
+
+  if (input->target_present == 0U)
+  {
+    previous_x = input->center_x_px;
+    previous_y = input->center_y_px;
+    previous_tick = input->received_tick_ms;
+    return;
+  }
+
+  if (input->received_tick_ms != previous_tick)
+  {
+    filtered->center_x_px = limit_float_change(input->center_x_px, previous_x);
+    filtered->center_y_px = limit_float_change(input->center_y_px, previous_y);
+    previous_x = filtered->center_x_px;
+    previous_y = filtered->center_y_px;
+    previous_tick = input->received_tick_ms;
+  }
+  else
+  {
+    filtered->center_x_px = previous_x;
+    filtered->center_y_px = previous_y;
+  }
+}
+
 void PanView_Motion_CalculateError(const VisionResult *vision,
                                    int16_t *error_x_px,
                                    int16_t *error_y_px)
@@ -36,36 +88,22 @@ void PanView_Motion_CalculateError(const VisionResult *vision,
   *error_y_px = (int16_t)calculated_error_y;
 }
 
-static int32_t limit_speed(int32_t speed)
-{
-  if (speed > PANVIEW_MOTION_MAX_SPEED_STEPS_PER_SECOND)
-  {
-    return PANVIEW_MOTION_MAX_SPEED_STEPS_PER_SECOND;
-  }
-  if (speed < -PANVIEW_MOTION_MAX_SPEED_STEPS_PER_SECOND)
-  {
-    return -PANVIEW_MOTION_MAX_SPEED_STEPS_PER_SECOND;
-  }
-  return speed;
-}
-
-static int32_t error_to_speed(int16_t error_px)
-{
-  if ((error_px <= PANVIEW_MOTION_DEAD_ZONE_PX) &&
-      (error_px >= -PANVIEW_MOTION_DEAD_ZONE_PX))
-  {
-    return 0;
-  }
-  return limit_speed((int32_t)error_px *
-                     PANVIEW_MOTION_GAIN_STEPS_PER_PIXEL);
-}
-
 void PanView_Motion_CreateCommand(const VisionResult *vision,
                                   uint32_t generated_tick_ms,
                                   MotionCommand *command)
 {
   int16_t error_x;
   int16_t error_y;
+  static float integral_x = 0.0f;
+  static float integral_y = 0.0f;
+  static float derivative_x = 0.0f;
+  static float derivative_y = 0.0f;
+  static int16_t previous_error_x = 0;
+  static int16_t previous_error_y = 0;
+  static int32_t previous_output_x = 0;
+  static int32_t previous_output_y = 0;
+  static uint32_t previous_tick = 0U;
+  static uint8_t previous_valid = 0U;
 
   if (command == 0)
   {
@@ -79,12 +117,74 @@ void PanView_Motion_CreateCommand(const VisionResult *vision,
 
   if ((vision == 0) || (vision->target_present == 0U))
   {
+    integral_x = integral_y = 0.0f;
+    derivative_x = derivative_y = 0.0f;
+    previous_error_x = previous_error_y = 0;
+    previous_output_x = previous_output_y = 0;
+    previous_valid = 0U;
     return;
   }
 
   PanView_Motion_CalculateError(vision, &error_x, &error_y);
-  command->pan_speed_steps_per_second = error_to_speed(error_x);
-  command->pitch_speed_steps_per_second = error_to_speed(error_y);
+  {
+    float dt = previous_valid != 0U
+                   ? (float)(generated_tick_ms - previous_tick) / 1000.0f
+                   : 0.0f;
+    float raw_dx = (dt > 0.0f) ? ((float)error_x - previous_error_x) / dt : 0.0f;
+    float raw_dy = (dt > 0.0f) ? ((float)error_y - previous_error_y) / dt : 0.0f;
+    float output_x;
+    float output_y;
+
+    if ((error_x <= PANVIEW_MOTION_DEAD_ZONE_PX) &&
+        (error_x >= -PANVIEW_MOTION_DEAD_ZONE_PX))
+    {
+      integral_x = 0.0f;
+      derivative_x = 0.0f;
+      output_x = 0.0f;
+    }
+    else
+    {
+      derivative_x = 0.35f * raw_dx + 0.65f * derivative_x;
+      integral_x += (dt > 0.0f) ? (float)error_x * dt : 0.0f;
+      if (integral_x > PANVIEW_MOTION_INTEGRAL_LIMIT) integral_x = PANVIEW_MOTION_INTEGRAL_LIMIT;
+      if (integral_x < -PANVIEW_MOTION_INTEGRAL_LIMIT) integral_x = -PANVIEW_MOTION_INTEGRAL_LIMIT;
+      output_x = PANVIEW_MOTION_PAN_GAIN_STEPS_PER_PIXEL * error_x +
+                 PANVIEW_MOTION_I_GAIN * integral_x + PANVIEW_MOTION_D_GAIN * derivative_x;
+    }
+
+    if ((error_y <= PANVIEW_MOTION_DEAD_ZONE_PX) &&
+        (error_y >= -PANVIEW_MOTION_DEAD_ZONE_PX))
+    {
+      integral_y = 0.0f;
+      derivative_y = 0.0f;
+      output_y = 0.0f;
+    }
+    else
+    {
+      derivative_y = 0.35f * raw_dy + 0.65f * derivative_y;
+      integral_y += (dt > 0.0f) ? (float)error_y * dt : 0.0f;
+      if (integral_y > PANVIEW_MOTION_INTEGRAL_LIMIT) integral_y = PANVIEW_MOTION_INTEGRAL_LIMIT;
+      if (integral_y < -PANVIEW_MOTION_INTEGRAL_LIMIT) integral_y = -PANVIEW_MOTION_INTEGRAL_LIMIT;
+      output_y = PANVIEW_MOTION_PITCH_GAIN_STEPS_PER_PIXEL * error_y +
+                 PANVIEW_MOTION_I_GAIN * integral_y + PANVIEW_MOTION_D_GAIN * derivative_y;
+    }
+
+    if (output_x > 800.0f) output_x = 800.0f;
+    if (output_x < -800.0f) output_x = -800.0f;
+    if (output_y > 800.0f) output_y = 800.0f;
+    if (output_y < -800.0f) output_y = -800.0f;
+
+    command->pan_speed_steps_per_second = (int32_t)output_x;
+    command->pitch_speed_steps_per_second = (int32_t)output_y;
+  }
+  previous_error_x = error_x;
+  previous_error_y = error_y;
+  previous_tick = generated_tick_ms;
+  previous_output_x = command->pan_speed_steps_per_second;
+  previous_output_y = command->pitch_speed_steps_per_second;
+  (void)previous_output_x;
+  (void)previous_output_y;
+  previous_valid = 1U;
   command->valid = 1U;
 }
 

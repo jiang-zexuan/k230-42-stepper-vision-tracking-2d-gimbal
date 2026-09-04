@@ -51,6 +51,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/panview_text_line.c
     App/Src/panview_pv04_parser.c
     App/Src/panview_motion.c
+    App/Src/panview_speed_ramp.c
+    App/Src/panview_stepper.c
 )
 
 # Add include paths
