@@ -36,7 +36,10 @@
 #include "panview_pv04_parser.h"
 #include "panview_motion.h"
 #include "panview_stepper.h"
+#include "panview_safety.h"
+#include "panview_safety_test.h"
 #include "tim.h"
+#include "iwdg.h"
 #include "usart.h"
 #include <stdio.h>
 #include <string.h>
@@ -70,6 +73,7 @@ volatile const char *panview_stack_overflow_task_name = 0;
 
 /* 运动任务的骨架运行周期，单位：RTOS tick。 */
 #define MOTION_TASK_PERIOD_TICKS (10U)
+#define CONTROL_TASK_TIMEOUT_MS (200U)
 
 /* 步进执行任务的骨架运行周期，单位：RTOS tick。 */
 #define STEPPER_TASK_PERIOD_TICKS (10U)
@@ -140,7 +144,6 @@ const osThreadAttr_t StepperTask_attributes = {
 osThreadId_t VisionRxTaskHandle;
 const osThreadAttr_t VisionRxTask_attributes = {
   .name = "VisionRxTask",
-  /* 完整 PV04 解析路径需要更大的临时调用栈，先保证任务稳定运行。 */
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
@@ -290,28 +293,6 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE END RTOS_EVENTS */
 
-  /* 将任务句柄交给心跳模块，后续由心跳模块统一采集资源信息。 */
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_ARCHITECTURE,
-                                     ArchitectureHeaHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_SAFETY,
-                                     SafetyTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_STEPPER,
-                                     StepperTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_VISION_RX,
-                                     VisionRxTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_MOTION,
-                                     MotionTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_INPUT,
-                                     InputTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_APP_CONTROL,
-                                     AppControlTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_UI,
-                                     UiTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_AUDIO,
-                                     AudioTaskHandle);
-  PanView_TaskHeartbeat_RegisterTask(PANVIEW_HEARTBEAT_TELEMETRY,
-                                     TelemetryTaskHandle);
-
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -355,10 +336,54 @@ void StartSafetyTask(void *argument)
 
   /* 保存下一轮安全任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  PanViewSafetyStatus safety_status;
+  const volatile PanViewHeartbeatRecord *motion_heartbeat;
+  PanViewStepperStatus safety_stepper_status;
+  PanView_Safety_Init();
 
   /* Infinite loop */
   for(;;)
   {
+#if 1
+    motion_heartbeat = PanView_TaskHeartbeat_Get(PANVIEW_HEARTBEAT_MOTION);
+    if ((motion_heartbeat != 0) && (motion_heartbeat->count > 0U) &&
+        ((uint32_t)(HAL_GetTick() - motion_heartbeat->last_tick) >
+         CONTROL_TASK_TIMEOUT_MS))
+    {
+      PanView_Safety_RaiseFault(PANVIEW_SAFETY_CONTROL_TASK_STALE,
+                                HAL_GetTick());
+    }
+
+#endif
+
+#if 1
+    PanView_Stepper_GetStatus(&safety_stepper_status);
+    if (((safety_stepper_status.pan_position_steps >= 800) &&
+         (safety_stepper_status.pan_applied_speed_steps_per_second > 0)) ||
+        ((safety_stepper_status.pan_position_steps <= -800) &&
+         (safety_stepper_status.pan_applied_speed_steps_per_second < 0)) ||
+        ((safety_stepper_status.pitch_position_steps >= 800) &&
+         (safety_stepper_status.pitch_applied_speed_steps_per_second > 0)) ||
+        ((safety_stepper_status.pitch_position_steps <= -800) &&
+         (safety_stepper_status.pitch_applied_speed_steps_per_second < 0)))
+    {
+      PanView_Safety_RaiseFault(PANVIEW_SAFETY_SOFTWARE_LIMIT,
+                                HAL_GetTick());
+    }
+#endif
+
+    /* 统一安全停机路径：发生锁存故障时立即停止步进执行。 */
+#if 1
+    PanView_Safety_GetStatus(&safety_status);
+    if (safety_status.latched != 0U)
+    {
+      PanView_Stepper_SafetyStop();
+    }
+#endif
+
+    /* SafetyTask 正常运行时周期性喂狗；若任务失活，IWDG 将复位芯片。 */
+    (void)HAL_IWDG_Refresh(&hiwdg);
+
     /* 执行一次安全任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_SAFETY,
                                  HAL_GetTick());
@@ -376,7 +401,7 @@ void StartSafetyTask(void *argument)
 /**
 * @brief Function implementing the StepperTask thread.
 * @param argument: Not used
-* @retval None
+* @retval None吗，
 */
 /* USER CODE END Header_StartStepperTask */
 void StartStepperTask(void *argument)
@@ -455,12 +480,6 @@ void StartStepperTask(void *argument)
     osDelayUntil(next_wake_tick);
   }
   /* USER CODE END StartStepperTask */
-}
-
-/* RTOS 层只转发定时器事件，位置计算由步进模块负责。 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  PanView_Stepper_OnTimerElapsed(htim);
 }
 
 /* USER CODE BEGIN Header_StartVisionRxTask */
@@ -648,10 +667,21 @@ void StartInputTask(void *argument)
 
   /* 保存下一轮输入任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  GPIO_PinState previous_key0_state = GPIO_PIN_SET;
 
   /* Infinite loop */
   for(;;)
   {
+    /* KEY0 使用上拉输入，按下时为低电平；下降沿注入一次软件急停。 */
+    GPIO_PinState key0_state =
+        HAL_GPIO_ReadPin(BOARD_KEY0_GPIO_Port, BOARD_KEY0_Pin);
+    if ((key0_state == GPIO_PIN_RESET) &&
+        (previous_key0_state == GPIO_PIN_SET))
+    {
+      PanView_SafetyTest_InjectEmergencyStop(HAL_GetTick());
+    }
+    previous_key0_state = key0_state;
+
     /* 执行一次输入任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_INPUT,
                                  HAL_GetTick());

@@ -253,6 +253,18 @@ void PanView_Stepper_ToggleSystemRun(void)
   HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_SET);
 }
 
+void PanView_Stepper_SafetyStop(void)
+{
+  /* 安全停机不等待速度斜坡，直接禁止后续运动并释放双轴使能。 */
+  system_running = 0U;
+  pan_applied_speed = 0;
+  pitch_applied_speed = 0;
+  stop_pan();
+  stop_pitch();
+  HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PITCH_EN_GPIO_Port, PITCH_EN_Pin, GPIO_PIN_RESET);
+}
+
 void PanView_Stepper_Execute(const MotionCommand *command)
 {
   int32_t pan_target_speed = 0;

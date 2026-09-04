@@ -19,9 +19,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-#include "panview_uart_rx.h"
-#include "cmsis_os.h"
 
+/* 用户层 UART 接收、RTOS 任务通知和安全状态接口。 */
+#include "cmsis_os.h"
+#include "panview_uart_rx.h"
+#include "panview_safety.h"
+
+/* VisionRxTask 由 freertos.c 创建，这里只引用任务句柄。 */
 extern osThreadId_t VisionRxTaskHandle;
 
 /* USER CODE BEGIN 0 */
@@ -341,6 +345,10 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
   if (huart == &huart2)
   {
     PanView_UartRx_OnError(huart->ErrorCode);
+    /* UART 错误升级为锁存安全故障，由 SafetyTask 统一停机。 */
+#if 1
+    PanView_Safety_RaiseFault(PANVIEW_SAFETY_UART_ERROR, HAL_GetTick());
+#endif
     (void)PanView_UartRx_Start();
   }
 }

@@ -25,6 +25,9 @@ void PanView_Stepper_Init(void);
 /* KEY_UP 动作：开始时确认双轴零点，运行中再次调用则暂停并失能。 */
 void PanView_Stepper_ToggleSystemRun(void);
 
+/* 安全任务专用：立即停止双轴脉冲并释放 EN，保持系统暂停。 */
+void PanView_Stepper_SafetyStop(void);
+
 /* 执行一份运动命令；模块内部负责限位、PWM、方向和使能。 */
 void PanView_Stepper_Execute(const MotionCommand *command);
 

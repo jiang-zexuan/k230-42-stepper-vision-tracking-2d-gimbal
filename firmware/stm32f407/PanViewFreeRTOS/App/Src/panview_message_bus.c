@@ -59,9 +59,12 @@ int PanView_MessageBus_PublishVisionResult(const VisionResult *result)
 
   /* 队列容量为 1：新结果到来时先丢弃旧结果，只保留最新值。 */
   (void)osMessageQueueReset(vision_result_queue);
-  return (osMessageQueuePut(vision_result_queue, result, 0U, 0U) == osOK)
-             ? 0
-             : -1;
+  if (osMessageQueuePut(vision_result_queue, result, 0U, 0U) != osOK)
+  {
+    return -1;
+  }
+
+  return 0;
 }
 
 int PanView_MessageBus_ReadVisionResult(VisionResult *result)
