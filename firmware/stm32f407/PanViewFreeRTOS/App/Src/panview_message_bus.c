@@ -9,10 +9,14 @@ enum
 
   /* 运动执行同样只关心最新命令，不累计已经过时的速度。 */
   PANVIEW_MOTION_COMMAND_QUEUE_CAPACITY = 1U
+  ,PANVIEW_INPUT_EVENT_QUEUE_CAPACITY = 4U
+  ,PANVIEW_INDICATOR_EVENT_QUEUE_CAPACITY = 4U
 };
 
 static osMessageQueueId_t vision_result_queue;
 static osMessageQueueId_t motion_command_queue;
+static osMessageQueueId_t input_event_queue;
+static osMessageQueueId_t indicator_event_queue;
 
 static const osMessageQueueAttr_t vision_result_queue_attributes = {
   .name = "VisionResultQueue"
@@ -21,6 +25,10 @@ static const osMessageQueueAttr_t vision_result_queue_attributes = {
 static const osMessageQueueAttr_t motion_command_queue_attributes = {
   .name = "MotionCommandQueue"
 };
+static const osMessageQueueAttr_t input_event_queue_attributes = {
+  .name = "InputEventQueue"
+};
+static const osMessageQueueAttr_t indicator_event_queue_attributes = { .name = "IndicatorEventQueue" };
 
 int PanView_MessageBus_Init(void)
 {
@@ -40,7 +48,19 @@ int PanView_MessageBus_Init(void)
         &motion_command_queue_attributes);
   }
 
-  return ((vision_result_queue != NULL) && (motion_command_queue != NULL))
+  if (input_event_queue == NULL)
+  {
+    input_event_queue = osMessageQueueNew(
+        PANVIEW_INPUT_EVENT_QUEUE_CAPACITY,
+        sizeof(InputEvent),
+        &input_event_queue_attributes);
+  }
+  if (indicator_event_queue == NULL)
+    indicator_event_queue = osMessageQueueNew(PANVIEW_INDICATOR_EVENT_QUEUE_CAPACITY,
+                                               sizeof(IndicatorEvent), &indicator_event_queue_attributes);
+
+  return ((vision_result_queue != NULL) && (motion_command_queue != NULL) &&
+          (input_event_queue != NULL) && (indicator_event_queue != NULL))
              ? 0
              : -1;
 }
@@ -103,4 +123,41 @@ int PanView_MessageBus_ReadMotionCommand(MotionCommand *command)
   return (osMessageQueueGet(motion_command_queue, command, NULL, 0U) == osOK)
              ? 0
              : -1;
+}
+
+int PanView_MessageBus_PublishInputEvent(const InputEvent *event)
+{
+  if ((input_event_queue == NULL) || (event == NULL))
+  {
+    return -1;
+  }
+
+  /* 输入事件按发生顺序处理；队列满时返回失败，调用方可观察该情况。 */
+  return (osMessageQueuePut(input_event_queue, event, 0U, 0U) == osOK)
+             ? 0
+             : -1;
+}
+
+int PanView_MessageBus_ReadInputEvent(InputEvent *event)
+{
+  if ((input_event_queue == NULL) || (event == NULL))
+  {
+    return -1;
+  }
+
+  return (osMessageQueueGet(input_event_queue, event, NULL, 0U) == osOK)
+             ? 0
+             : -1;
+}
+
+int PanView_MessageBus_PublishIndicatorEvent(const IndicatorEvent *event)
+{
+  if ((indicator_event_queue == NULL) || (event == NULL)) return -1;
+  return osMessageQueuePut(indicator_event_queue, event, 0U, 0U) == osOK ? 0 : -1;
+}
+
+int PanView_MessageBus_ReadIndicatorEvent(IndicatorEvent *event)
+{
+  if ((indicator_event_queue == NULL) || (event == NULL)) return -1;
+  return osMessageQueueGet(indicator_event_queue, event, NULL, 0U) == osOK ? 0 : -1;
 }

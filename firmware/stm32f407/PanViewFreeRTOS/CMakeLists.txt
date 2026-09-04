@@ -55,6 +55,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/Src/panview_stepper.c
     App/Src/panview_safety.c
     App/Src/panview_safety_test.c
+    App/Src/ili9341.c
+    App/Src/panview_font_16.c
+    App/Src/panview_ui.c
+    App/Src/ft6336g.c
+    App/Src/audio_player.c
+    App/Src/es8388.c
+    App/Src/hit.c
     Core/Src/iwdg.c
 )
 

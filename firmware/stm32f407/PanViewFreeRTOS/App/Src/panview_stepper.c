@@ -326,6 +326,10 @@ void PanView_Stepper_GetStatus(PanViewStepperStatus *status)
   status->pan_running = pan_running;
   status->pitch_running = pitch_running;
   status->system_running = system_running;
+  status->pan_limit_active = (pan_position_steps <= PAN_POSITION_MIN_STEPS) ||
+                             (pan_position_steps >= PAN_POSITION_MAX_STEPS);
+  status->pitch_limit_active = (pitch_position_steps <= PITCH_POSITION_MIN_STEPS) ||
+                               (pitch_position_steps >= PITCH_POSITION_MAX_STEPS);
 }
 
 void PanView_Stepper_OnTimerElapsed(TIM_HandleTypeDef *htim)

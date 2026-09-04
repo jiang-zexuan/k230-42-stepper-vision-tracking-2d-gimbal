@@ -27,4 +27,12 @@ int PanView_MessageBus_PublishMotionCommand(const MotionCommand *command);
 /* StepperTask 非阻塞读取最新运动命令；没有新命令时返回 -1。 */
 int PanView_MessageBus_ReadMotionCommand(MotionCommand *command);
 
+/* 发布一次输入事件；返回 0 表示成功。 */
+int PanView_MessageBus_PublishInputEvent(const InputEvent *event);
+
+/* 非阻塞读取输入事件；没有事件时返回 -1。 */
+int PanView_MessageBus_ReadInputEvent(InputEvent *event);
+int PanView_MessageBus_PublishIndicatorEvent(const IndicatorEvent *event);
+int PanView_MessageBus_ReadIndicatorEvent(IndicatorEvent *event);
+
 #endif /* PANVIEW_MESSAGE_BUS_H */

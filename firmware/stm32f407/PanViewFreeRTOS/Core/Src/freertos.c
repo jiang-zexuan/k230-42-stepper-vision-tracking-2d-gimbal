@@ -38,6 +38,10 @@
 #include "panview_stepper.h"
 #include "panview_safety.h"
 #include "panview_safety_test.h"
+#include "ili9341.h"
+#include "panview_ui.h"
+#include "ft6336g.h"
+#include "audio_player.h"
 #include "tim.h"
 #include "iwdg.h"
 #include "usart.h"
@@ -47,6 +51,11 @@
 /* 栈溢出时由 FreeRTOS 钩子写入，调试器可直接查看。 */
 volatile uint32_t panview_stack_overflow_marker = 0U;
 volatile const char *panview_stack_overflow_task_name = 0;
+
+/* MotionTask 写入、UiTask 读取的最新视觉显示数据。 */
+static volatile uint8_t panview_ui_target_present = 0U;
+static volatile int16_t panview_ui_error_x_px = 0;
+static volatile int16_t panview_ui_error_y_px = 0;
 
 /* USER CODE END Includes */
 
@@ -612,6 +621,9 @@ void StartMotionTask(void *argument)
     PanView_Motion_CalculateError(&latest_vision, &error_x_px, &error_y_px);
     PanView_Motion_CreateCommand(&latest_vision, HAL_GetTick(),
                                  &motion_command);
+    panview_ui_target_present = latest_vision.target_present;
+    panview_ui_error_x_px = error_x_px;
+    panview_ui_error_y_px = error_y_px;
     (void)PanView_MessageBus_PublishMotionCommand(&motion_command);
 
     /*
@@ -668,6 +680,9 @@ void StartInputTask(void *argument)
   /* 保存下一轮输入任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
   GPIO_PinState previous_key0_state = GPIO_PIN_SET;
+  Ft6336gPoint previous_touch = {0};
+  /* 触摸芯片只在任务启动时初始化一次。 */
+  const bool touch_polling_enabled = FT6336G_Init();
 
   /* Infinite loop */
   for(;;)
@@ -681,6 +696,39 @@ void StartInputTask(void *argument)
       PanView_SafetyTest_InjectEmergencyStop(HAL_GetTick());
     }
     previous_key0_state = key0_state;
+
+    /* 触摸屏只在“未按下 -> 按下”时发布一次 START/STOP 事件。 */
+    Ft6336gPoint touch_point;
+    if (touch_polling_enabled && FT6336G_ReadPoint(&touch_point))
+    {
+      const bool touch_pressed = (touch_point.touch_count > 0U);
+      const bool was_pressed = (previous_touch.touch_count > 0U);
+      if (touch_pressed && !was_pressed)
+      {
+        /* 旧工程显示旋转 180 度，FT6336G 原始坐标也要反向映射到 240x320。 */
+        const uint16_t screen_x = (touch_point.x <= 239U)
+                                      ? (uint16_t)(239U - touch_point.x)
+                                      : 0U;
+        const uint16_t screen_y = (touch_point.y <= 319U)
+                                      ? (uint16_t)(319U - touch_point.y)
+                                      : 0U;
+        const UiEvent ui_event = PanViewUi_HandleTouch(
+            screen_x, screen_y, true);
+        InputEvent input_event;
+        input_event.occurred_tick_ms = HAL_GetTick();
+        if (ui_event == UI_EVENT_START)
+        {
+          input_event.type = PANVIEW_INPUT_EVENT_START_REQUEST;
+          (void)PanView_MessageBus_PublishInputEvent(&input_event);
+        }
+        else if (ui_event == UI_EVENT_STOP)
+        {
+          input_event.type = PANVIEW_INPUT_EVENT_STOP_REQUEST;
+          (void)PanView_MessageBus_PublishInputEvent(&input_event);
+        }
+      }
+      previous_touch = touch_point;
+    }
 
     /* 执行一次输入任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_INPUT,
@@ -744,10 +792,61 @@ void StartUiTask(void *argument)
 
   /* 保存下一轮 UI 任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  PanViewUiData ui_data;
+  PanViewVisualState previous_visual_state = PANVIEW_VISUAL_STATE_SEARCH;
+  (void)memset(&ui_data, 0, sizeof(ui_data));
+  ui_data.state = UI_STATE_SEARCH;
+  ui_data.tft_ready = true;
+  PanViewUi_Init(UI_LANGUAGE_EN);
 
   /* Infinite loop */
   for(;;)
   {
+    /* 应用控制任务统一决定系统是否启动或停止。 */
+    InputEvent input_event;
+    while (PanView_MessageBus_ReadInputEvent(&input_event) == 0)
+    {
+      if (input_event.type == PANVIEW_INPUT_EVENT_START_REQUEST)
+      {
+        PanView_Stepper_ToggleSystemRun();
+      }
+      else if (input_event.type == PANVIEW_INPUT_EVENT_STOP_REQUEST)
+      {
+        PanView_Stepper_SafetyStop();
+      }
+    }
+
+    /* T10-5：读取步进模块只读状态，更新 UI 的运行状态和位置数据。 */
+    PanViewStepperStatus ui_stepper_status;
+    PanView_Stepper_GetStatus(&ui_stepper_status);
+    ui_data.running = (ui_stepper_status.system_running != 0U);
+    ui_data.target_present = (panview_ui_target_present != 0U);
+    ui_data.error_x = panview_ui_error_x_px;
+    ui_data.error_y = panview_ui_error_y_px;
+    const bool limit_fault = (ui_stepper_status.pan_limit_active != 0U) ||
+                             (ui_stepper_status.pitch_limit_active != 0U);
+    const bool target_hit = ui_data.target_present &&
+                            (ui_data.error_x <= PANVIEW_MOTION_LOCK_ENTER_PX) &&
+                            (ui_data.error_x >= -PANVIEW_MOTION_LOCK_ENTER_PX) &&
+                            (ui_data.error_y <= PANVIEW_MOTION_LOCK_ENTER_PX) &&
+                            (ui_data.error_y >= -PANVIEW_MOTION_LOCK_ENTER_PX);
+    ui_data.state = limit_fault ? UI_STATE_FAULT :
+                    (target_hit ? UI_STATE_LOCKED :
+                     (ui_data.target_present ? UI_STATE_TRACKING : UI_STATE_SEARCH));
+    if ((ui_data.state == UI_STATE_LOCKED) &&
+        (previous_visual_state != PANVIEW_VISUAL_STATE_LOCKED))
+    {
+      IndicatorEvent hit_event = { PANVIEW_INDICATOR_EVENT_TARGET_LOCKED, HAL_GetTick() };
+      (void)PanView_MessageBus_PublishIndicatorEvent(&hit_event);
+    }
+    previous_visual_state = (PanViewVisualState)ui_data.state;
+    ui_data.pan_position = ui_stepper_status.pan_position_steps;
+    ui_data.pitch_position = ui_stepper_status.pitch_position_steps;
+    ui_data.pan_speed = ui_stepper_status.pan_applied_speed_steps_per_second;
+    ui_data.pitch_speed = ui_stepper_status.pitch_applied_speed_steps_per_second;
+    /* 由 UI 模块按 500 ms 周期只刷新运行页的动态区域。 */
+    PanViewUi_Refresh(&ui_data, HAL_GetTick());
+
     /* 执行一次 UI 任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_UI,
                                  HAL_GetTick());
@@ -777,10 +876,32 @@ void StartAudioTask(void *argument)
 
   /* 保存下一轮音频指示任务计划开始运行的 RTOS tick。 */
   uint32_t next_wake_tick = osKernelGetTickCount();
+  AudioPlayer_Init();
+  HAL_GPIO_WritePin(HIT_INDICATOR_GPIO_Port, HIT_INDICATOR_Pin, GPIO_PIN_RESET);
 
   /* Infinite loop */
   for(;;)
   {
+    IndicatorEvent indicator_event;
+    while (PanView_MessageBus_ReadIndicatorEvent(&indicator_event) == 0)
+    {
+      if (indicator_event.type == PANVIEW_INDICATOR_EVENT_TARGET_LOCKED)
+      {
+        if (AudioPlayer_Play(PANVIEW_AUDIO_HIT))
+        {
+          /* 音频开始播放时点亮 PF10 命中指示灯。 */
+          HAL_GPIO_WritePin(HIT_INDICATOR_GPIO_Port, HIT_INDICATOR_Pin,
+                           GPIO_PIN_SET);
+        }
+      }
+    }
+
+    /* DMA 播放结束后，播放器会清除 busy 标志，此时同步熄灭指示灯。 */
+    if (!AudioPlayer_IsBusy())
+    {
+      HAL_GPIO_WritePin(HIT_INDICATOR_GPIO_Port, HIT_INDICATOR_Pin,
+                       GPIO_PIN_RESET);
+    }
     /* 执行一次音频指示任务的最小心跳动作。 */
     PanView_TaskHeartbeat_Update(PANVIEW_HEARTBEAT_AUDIO,
                                  HAL_GetTick());

@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "es8388.h"
+#include "audio_player.h"
 #include "cmsis_os.h"
 #include "dma.h"
 #include "i2c.h"
@@ -27,6 +29,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "ili9341.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -101,11 +104,21 @@ int main(void)
   MX_USART3_UART_Init();
   MX_I2C1_Init();
   MX_I2S2_Init();
+  /* 音频链路需要先初始化 ES8388，再由 AudioTask 播放采样数据。 */
+  AudioPlayer_Init();
+  (void)Es8388_Probe();
+  (void)Es8388_InitPlayback();
   MX_SPI1_Init();
   MX_TIM4_Init();
   MX_TIM3_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
+
+  /* T10-2 屏幕硬件冒烟测试：初始化 ILI9341 并填充蓝色背景。 */
+  if (ILI9341_Init())
+  {
+    ILI9341_FillColor(ILI9341_COLOR_BLUE);
+  }
 
   /* USER CODE END 2 */
 

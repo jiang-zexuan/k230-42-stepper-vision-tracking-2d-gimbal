@@ -17,6 +17,8 @@ typedef struct
   uint8_t pitch_running;
   /* 1 表示已经确认软件零点并开始跟踪，0 表示暂停且电机失能。 */
   uint8_t system_running;
+  uint8_t pan_limit_active;
+  uint8_t pitch_limit_active;
 } PanViewStepperStatus;
 
 /* 初始化步进执行模块的内部状态。 */
