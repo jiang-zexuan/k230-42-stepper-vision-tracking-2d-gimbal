@@ -1,0 +1,38 @@
+/*
+ * 文件用途：管理 PanView 任务之间共享的消息队列句柄。
+ *
+ * 本步只建立队列所有权和访问接口，不负责发送或读取消息。
+ */
+#ifndef PANVIEW_MESSAGE_BUS_H
+#define PANVIEW_MESSAGE_BUS_H
+
+#include "cmsis_os2.h"
+#include "panview_messages.h"
+
+/* 创建消息总线中的所有队列；成功返回 0，失败返回 -1。 */
+int PanView_MessageBus_Init(void);
+
+/* 获取视觉结果单槽队列句柄；未初始化时返回 NULL。 */
+osMessageQueueId_t PanView_MessageBus_GetVisionResultQueue(void);
+
+/* 发布最新视觉结果；旧结果会被丢弃，返回 0 表示成功。 */
+int PanView_MessageBus_PublishVisionResult(const VisionResult *result);
+
+/* 非阻塞读取最新视觉结果；当前没有新结果时返回 -1。 */
+int PanView_MessageBus_ReadVisionResult(VisionResult *result);
+
+/* 发布 MotionTask 生成的最新运动命令；旧命令会被新命令覆盖。 */
+int PanView_MessageBus_PublishMotionCommand(const MotionCommand *command);
+
+/* StepperTask 非阻塞读取最新运动命令；没有新命令时返回 -1。 */
+int PanView_MessageBus_ReadMotionCommand(MotionCommand *command);
+
+/* 发布一次输入事件；返回 0 表示成功。 */
+int PanView_MessageBus_PublishInputEvent(const InputEvent *event);
+
+/* 非阻塞读取输入事件；没有事件时返回 -1。 */
+int PanView_MessageBus_ReadInputEvent(InputEvent *event);
+int PanView_MessageBus_PublishIndicatorEvent(const IndicatorEvent *event);
+int PanView_MessageBus_ReadIndicatorEvent(IndicatorEvent *event);
+
+#endif /* PANVIEW_MESSAGE_BUS_H */
